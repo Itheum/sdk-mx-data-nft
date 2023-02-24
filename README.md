@@ -5,7 +5,7 @@ This SDK is currently focused on interacting with the Itheum's Data NFT technolo
 You should not be using this yet, if you **really really** want to use it, the come over to our discord at https://itheum.io/discord and speak to us for assistance. 
 
 ## Dev
-- requires `node@10.7X`
+- requires `node@19.7X`
 - `npm install`
 - work on typescript code in the `/src` folder
 
