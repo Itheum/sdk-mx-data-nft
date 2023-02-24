@@ -1,20 +1,20 @@
 # SDK MX - Data NFT
-This SDK is currently focused on interacting with the EVM contracts here: https://github.com/Itheum/datametaverse-evm
+This SDK is currently focused on interacting with the Itheum's Data NFT technology that's deployed to the MultiversX blockchain.
+
+## DO NOT USE -- IN ACTIVE DEV -- 
+You should not be using this yet, if you **really really** want to use it, the come over to our discord at https://itheum.io/discord and speak to us for assistance. 
 
 ## Dev
+- requires `node@10.7X`
 - `npm install`
 - work on typescript code in the `/src` folder
-- If you deploy new `identityFactory` (https://github.com/Itheum/datametaverse-evm/blob/main/contracts/identity/IdentityFactory.sol) or `identity` (https://github.com/Itheum/datametaverse-evm/blob/main/contracts/identity/Identity.sol) contracts then you need to update `constants.ts` with new ABI and code. This also applies if you deploy new a identityFactory SubGraph (i.e. https://github.com/Itheum/poc-identity-factory-subgraph)
 
-## UI Integration Dev
-- Download and run this POC app: (https://github.com/Itheum/poc-identity-subsystem-dapp-ui-tests)
-
-## Testing
-- Not Done yet
+## Dev Testing
+- Only simple dev testing added. First **Build** as below and then run `npm run devtest` and work on the test.mjs file for live reload
 
 ## Build
 - `npm run build`
 - New build is sent to `dist` folder
 
 ## NPM Deploy
-- The working POC is deployed here temporary - https://www.npmjs.com/package/poc-itheum-identity-sdk
+- Not yet
