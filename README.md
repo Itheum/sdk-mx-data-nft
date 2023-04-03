@@ -18,3 +18,32 @@ You should not be using this yet, if you **really really** want to use it, the c
 
 ## NPM Deploy
 - Not yet
+
+
+## How to use
+- 3rd party app installs this SDK 'npm i @itheum/sdk-mx-data-nft'
+- 3rd party app inits it..  `new dataNftSDK()`
+- 3rd party app runs commands like
+```
+const _dataNftSDK =  new dataNftSDK({
+  walletProvider? (myLoggedInMXIdentity),
+});
+
+// these methods dont need user to be logged in (public)
+_dataNftSDK.marketplace.getAllOffer();
+_dataNftSDK.marketplace.getPagedOffersOffers();
+_dataNftSDK.view.getDataNFTs();
+
+// these methods need user to be "logged into a MX wallet"
+_dataNftSDK.marketplace.getMyListedDataNFTs(myLoggedInIdentity);
+_dataNftSDK.wallet.getMyDataNFTs(myLoggedInMXIdentity); // mayve we dont need to login
+_dataNftSDK.marketplace.procure(dataNFTID, myLoggedInMXIdentity) -- return a TX object that's general purpose;
+--- callback? event?
+
+_dataNftSDK.wallet.viewData(dataNFTID, myLoggedInMXIdentity);
+-- SDK talks to data marshal (preAccess (promot for signature) + access (send sig))
+-- SDK get async response from data marshal with a stream of data
+
+
+
+```
