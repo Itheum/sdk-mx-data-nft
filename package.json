@@ -2,15 +2,17 @@
   "name": "@itheum/sdk-mx-data-nft",
   "version": "0.0.1",
   "description": "SDK for Itheum's Data NFT Technology on MultiversX Blockchain",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "scripts": {
-    "build": "tsc",
-    "devtest": "node --watch test.mjs"
+    "compile": "tsc -p tsconfig.json",
+    "lint": "tslint --project .",
+    "prepare": "npm run compile"
   },
   "author": "Itheum",
   "license": "GPLV3",
   "dependencies": {
-    "axios": "^0.27.2"
+    "axios": "^0.27.2",
+    "@multiversx/sdk-core": "^12.1.0"
   },
   "devDependencies": {
     "typescript": "^4.9.5"

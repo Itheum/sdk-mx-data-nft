@@ -1,0 +1,16 @@
+src
+
+.travis.yml
+.idea
+.eslintrc
+.eslintignore
+.prettierrc
+
+tsconfig.json
+tsconfig.test.json
+jest.config.ts
+babel.config.js
+esbuild.js
+jest.config.js
+
+
