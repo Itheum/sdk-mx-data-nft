@@ -15,6 +15,7 @@ dist
 .rpt2_cache
 .yalc
 .husky
+out
 
 # misc
 .DS_Store
@@ -30,3 +31,5 @@ yarn-debug.log*
 yarn-error.log*
 
 coverage
+
+tests

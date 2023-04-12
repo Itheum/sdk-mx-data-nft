@@ -1,41 +1,31 @@
 {
   "compilerOptions": {
-    "target": "ES2015",
-    "outDir": "./dist",
-    "jsx": "react",
-    "declaration": true,
-    "declarationMap": true,
+    "module": "CommonJS",
+    "target": "es2015",
+    "outDir": "out",
+    "lib": [
+      "ES2015",
+      "DOM"
+    ],
     "sourceMap": true,
-    "strict": true,
-    "lib": ["dom", "esnext"],
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "rootDir": "./src",
-    "baseUrl": "./src",
-    "moduleResolution": "node",
-    "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "emitDeclarationOnly": true,
-    "resolveJsonModule": true
+    "strict": true,
+    "strictPropertyInitialization": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "declaration": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*.ts",
+  ],
   "exclude": [
     "node_modules",
     "out",
-    "out-tests",
-    "out-browser",
-    "out-browser-tests",
-    "**/*.spec.ts",
-    "src/testutils",
-    "dist"
-  ],
-  "paths": {}
+    "tests",
+  ]
 }
