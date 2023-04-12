@@ -16,9 +16,8 @@ import {
   // U64Value
 } from '@multiversx/sdk-core/out';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
-import { Environment, getNetworkConfig, marketPlaceContractAddress } from './config';
+import { Environment, networkConfiguration, marketPlaceContractAddress } from './config';
 // import { MarketplaceRequirements } from 'types/MarketplaceRequirements';
-// import { Offer } from 'types/Offer';
 import dataMarketAbi from './abis/data_market.abi.json';
 import { Offer } from './interfaces';
 
@@ -27,15 +26,13 @@ export class DataNftMarket {
   readonly chainID: string;
   readonly networkProvider: ProxyNetworkProvider;
 
-
-
   /**
    * Creates a new instance of the DataNftMarket 
    * @param env Environment.DEVNET or Environment.MAINNET
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: Environment, timeout: number = 10000) {
-    const networkConfig = getNetworkConfig(env);
+    const networkConfig = networkConfiguration[env];
     this.chainID = networkConfig.chainID;
     this.networkProvider = new ProxyNetworkProvider(networkConfig.networkProvider, { timeout: timeout });
     const contractAddress = marketPlaceContractAddress[env];

@@ -17,8 +17,7 @@
   "license": "GPLV3",
   "dependencies": {
     "@multiversx/sdk-core": "^12.1.1",
-    "@multiversx/sdk-network-providers": "^1.3.0",
-    "axios": "^1.3.5"
+    "@multiversx/sdk-network-providers": "^1.3.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

@@ -3,7 +3,7 @@ export enum Environment {
     MAINNET
 }
 
-interface Config {
+export interface Config {
     chainID: string;
     networkProvider: string;
 }
@@ -30,13 +30,8 @@ export const minterContractAddress: { [key in Environment]: string } = {
     [Environment.MAINNET]: '',
 }
 
-export const getNetworkConfig = (env: Environment): Config => {
-    switch (env) {
-        case Environment.DEVNET:
-            return devnetNetworkConfig;
-        case Environment.MAINNET:
-            return mainnetNetworkConfig;
-        default:
-            throw new Error(`Invalid environment: ${env}`);
-    }
+
+export const networkConfiguration: { [key in Environment]: Config } = {
+    [Environment.DEVNET]: devnetNetworkConfig,
+    [Environment.MAINNET]: mainnetNetworkConfig,
 };
