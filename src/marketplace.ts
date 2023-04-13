@@ -4,20 +4,15 @@ import {
   AddressValue,
   BigUIntValue,
   ResultsParser,
-  // BooleanValue,
-  // ContractCallPayloadBuilder,
-  // ContractFunction,
-  // IAddress,
   SmartContract,
-  U64Value,
-  U8Value,
-  VariadicValue,
-  // Transaction,
-  // U64Value
+  VariadicValue
 } from '@multiversx/sdk-core/out';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
-import { Environment, networkConfiguration, marketPlaceContractAddress } from './config';
-// import { MarketplaceRequirements } from 'types/MarketplaceRequirements';
+import {
+  Environment,
+  networkConfiguration,
+  marketPlaceContractAddress
+} from './config';
 import dataMarketAbi from './abis/data_market.abi.json';
 import { Offer } from './interfaces';
 
@@ -27,29 +22,33 @@ export class DataNftMarket {
   readonly networkProvider: ProxyNetworkProvider;
 
   /**
-   * Creates a new instance of the DataNftMarket 
+   * Creates a new instance of the DataNftMarket which can be used to interact with the DataNFT-FTs inside the marketplace
    * @param env Environment.DEVNET or Environment.MAINNET
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: Environment, timeout: number = 10000) {
     const networkConfig = networkConfiguration[env];
     this.chainID = networkConfig.chainID;
-    this.networkProvider = new ProxyNetworkProvider(networkConfig.networkProvider, { timeout: timeout });
+    this.networkProvider = new ProxyNetworkProvider(
+      networkConfig.networkProvider,
+      { timeout: timeout }
+    );
     const contractAddress = marketPlaceContractAddress[env];
 
     this.contract = new SmartContract({
       address: new Address(contractAddress),
-      abi: AbiRegistry.create(dataMarketAbi),
+      abi: AbiRegistry.create(dataMarketAbi)
     });
-
   }
 
   /**
-     * Returns a list of offers for a given address
-     * @param address Address to query
-     */
+   * Returns a list of offers for a given address
+   * @param address Address to query
+   */
   async viewAddressListedOffers(address: string): Promise<Offer[]> {
-    const interaction = this.contract.methodsExplicit.viewUserListedOffers([new AddressValue(new Address(address))]);
+    const interaction = this.contract.methodsExplicit.viewUserListedOffers([
+      new AddressValue(new Address(address))
+    ]);
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
     const endpointDefinition = interaction.getEndpoint();
@@ -60,16 +59,16 @@ export class DataNftMarket {
     if (returnCode.isSuccess()) {
       const firstValueAsVariadic = firstValue as VariadicValue;
       const returnValue = firstValueAsVariadic?.valueOf();
-      const offers: Offer[] = (returnValue ?? []).map((offer: any) => ({
-        index: offer["offer_id"],
-        owner: offer["owner"].bech32(),
-        offeredTokenIdentifier: offer["offered_token_identifier"].toString(),
-        offeredTokenNonce: offer["offered_token_nonce"].toString(),
-        offeredTokenAmount: offer["offered_token_amount"] as number,
-        wantedTokenIdentifier: offer["wanted_token_identifier"].toString(),
-        wantedTokenNonce: offer["wanted_token_nonce"].toString(),
-        wantedTokenAmount: offer["wanted_token_amount"] as number,
-        quantity: offer.quantity as number,
+      const offers: Offer[] = returnValue.map((offer: any) => ({
+        index: offer['offer_id'],
+        owner: offer['owner'].bech32(),
+        offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
+        offeredTokenNonce: offer['offered_token_nonce'].toString(),
+        offeredTokenAmount: offer['offered_token_amount'] as number,
+        wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
+        wantedTokenNonce: offer['wanted_token_nonce'].toString(),
+        wantedTokenAmount: offer['wanted_token_amount'] as number,
+        quantity: offer.quantity as number
       }));
       return offers;
     } else {
@@ -78,11 +77,13 @@ export class DataNftMarket {
   }
 
   /**
-     * Returns the total number of offers for a given address
-     * @param address Address to query
-     */
+   * Returns the total number of offers for a given address
+   * @param address Address to query
+   */
   async viewAddressTotalOffers(address: string): Promise<BigUIntValue> {
-    const interaction = this.contract.methodsExplicit.viewUserTotalOffers([new AddressValue(new Address(address))]);
+    const interaction = this.contract.methodsExplicit.viewUserTotalOffers([
+      new AddressValue(new Address(address))
+    ]);
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
     const endpointDefinition = interaction.getEndpoint();
@@ -96,13 +97,9 @@ export class DataNftMarket {
     } else {
       return new BigUIntValue(0);
     }
-
   }
 
-
   // async viewOffersPaged(from: number, size: number): Promise<Offer[]> {
-
-
 
   // }
 
