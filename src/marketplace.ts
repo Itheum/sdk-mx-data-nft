@@ -3,8 +3,11 @@ import {
   Address,
   AddressValue,
   BigUIntValue,
+  BooleanValue,
+  IAddress,
   ResultsParser,
   SmartContract,
+  U64Value,
   VariadicValue
 } from '@multiversx/sdk-core/out';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
@@ -14,7 +17,7 @@ import {
   marketPlaceContractAddress
 } from './config';
 import dataMarketAbi from './abis/data_market.abi.json';
-import { Offer } from './interfaces';
+import { MarketplaceRequirements, Offer } from './interfaces';
 
 export class DataNftMarket {
   readonly contract: SmartContract;
@@ -42,12 +45,12 @@ export class DataNftMarket {
   }
 
   /**
-   * Returns a list of offers for a given address
+   * Retrieves all `Offer` objects listed on the marketplace for a given address
    * @param address Address to query
    */
-  async viewAddressListedOffers(address: string): Promise<Offer[]> {
+  async viewAddressListedOffers(address: IAddress): Promise<Offer[]> {
     const interaction = this.contract.methodsExplicit.viewUserListedOffers([
-      new AddressValue(new Address(address))
+      new AddressValue(address)
     ]);
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
@@ -77,12 +80,55 @@ export class DataNftMarket {
   }
 
   /**
-   * Returns the total number of offers for a given address
+   * Retrieves an array of `Offer` objects listed on the marketplace for a given address within a specified range.
+   * @param from The starting index of the desired range of offers.
+   * @param to The ending index of the desired range of offers.
+   * @param address The address to query.
+   */
+  async viewAddressPagedOffers(
+    from: number,
+    to: number,
+    address: IAddress
+  ): Promise<Offer[]> {
+    const interaction = this.contract.methodsExplicit.viewUserPagedOffers([
+      new U64Value(from),
+      new U64Value(to),
+      new AddressValue(address)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const firstValueAsVariadic = firstValue as VariadicValue;
+      const returnValue = firstValueAsVariadic?.valueOf();
+      const offers: Offer[] = returnValue.map((offer: any) => ({
+        index: offer['offer_id'],
+        owner: offer['owner'].bech32(),
+        offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
+        offeredTokenNonce: offer['offered_token_nonce'].toString(),
+        offeredTokenAmount: offer['offered_token_amount'] as number,
+        wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
+        wantedTokenNonce: offer['wanted_token_nonce'].toString(),
+        wantedTokenAmount: offer['wanted_token_amount'] as number,
+        quantity: offer.quantity as number
+      }));
+      return offers;
+    } else {
+      return [];
+    }
+  }
+
+  /**
+   * Returns the total number of offers listed for a given address
    * @param address Address to query
    */
-  async viewAddressTotalOffers(address: string): Promise<BigUIntValue> {
+  async viewAddressTotalOffers(address: IAddress): Promise<BigUIntValue> {
     const interaction = this.contract.methodsExplicit.viewUserTotalOffers([
-      new AddressValue(new Address(address))
+      new AddressValue(address)
     ]);
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
@@ -99,21 +145,147 @@ export class DataNftMarket {
     }
   }
 
-  // async viewOffersPaged(from: number, size: number): Promise<Offer[]> {
+  /**
+   * Retrieves all cancelled `Offer` objects for a given address which opted to not withdraw the funds
+   * @param address Address to query
+   */
+  async viewAddressCancelledOffers(address: IAddress): Promise<Offer[]> {
+    const interaction = this.contract.methodsExplicit.viewCancelledOffers([
+      new AddressValue(address)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const offers: Offer[] = returnValue.map((offer: any) => ({
+        index: offer['offer_id'],
+        owner: offer['owner'].bech32(),
+        offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
+        offeredTokenNonce: offer['offered_token_nonce'].toString(),
+        offeredTokenAmount: offer['offered_token_amount'] as number,
+        wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
+        wantedTokenNonce: offer['wanted_token_nonce'].toString(),
+        wantedTokenAmount: offer['wanted_token_amount'] as number,
+        quantity: offer.quantity as number
+      }));
+      return offers;
+    } else {
+      return [];
+    }
+  }
 
-  // }
+  /**
+   * Retrieves an array of `Offer` objects in an arbitrary order.
+   * @param from first index
+   * @param to last index
+   */
+  async viewPagedOffers(from: number, to: number): Promise<Offer[]> {
+    const interaction = this.contract.methodsExplicit.viewPagedOffers([
+      new U64Value(from),
+      new U64Value(to)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const offers: Offer[] = returnValue.map((offer: any) => ({
+        index: offer['offer_id'],
+        owner: offer['owner'].bech32(),
+        offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
+        offeredTokenNonce: offer['offered_token_nonce'].toString(),
+        offeredTokenAmount: offer['offered_token_amount'] as number,
+        wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
+        wantedTokenNonce: offer['wanted_token_nonce'].toString(),
+        wantedTokenAmount: offer['wanted_token_amount'] as number,
+        quantity: offer.quantity as number
+      }));
+      return offers;
+    } else {
+      return [];
+    }
+  }
 
-  // async viewAddressNumberOfOffers(address: IAddress): Promise<number> { }
+  /**
+   * Returns the smart contract requirements for the marketplace
+   */
+  async viewRequirements(): Promise<MarketplaceRequirements> {
+    const interaction = this.contract.methodsExplicit.viewRequirements();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const requirements: MarketplaceRequirements = {
+        acceptedTokens: returnValue['accepted_tokens'] as string[],
+        acceptedPayments: returnValue['accepted_payments'] as string[],
+        maximumPaymentFees: returnValue['maximum_payment_fees'] as number[],
+        buyerTaxPercentageDiscount: returnValue[
+          'discount_fee_percentage_buyer'
+        ] as number,
+        sellerTaxPercentageDiscount: returnValue[
+          'discount_fee_percentage_seller'
+        ] as number,
+        buyerTaxPercentage: returnValue['percentage_cut_from_buyer'] as number,
+        sellerTaxPercentage: returnValue['percentage_cut_from_seller'] as number
+      };
+      return requirements;
+    } else {
+      throw new Error('Error while retrieving the marketplace requirements');
+    }
+  }
 
-  // async viewAddressOffers(
-  //   from: number,
-  //   size: number,
-  //   address: IAddress
-  // ): Promise<Offer[]> { }
+  /**
+   * Retrieves the last valid offer id in the storage
+   */
+  async viewLastValidOfferId(): Promise<number> {
+    const interaction = this.contract.methodsExplicit.getLastValidOfferId();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      return new U64Value(returnValue).valueOf().toNumber();
+    }
+    throw new Error('Error while retrieving the last valid offer id');
+  }
 
-  // async viewRequirements(): Promise<MarketplaceRequirementsType> { }
-
-  // async viewLastValidOfferId(): Promise<number> { }
+  /**
+   * Retrieves if the smart contract is paused or not
+   */
+  async viewContractPauseState(): Promise<boolean> {
+    const interaction = this.contract.methodsExplicit.getIsPaused();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      return new BooleanValue(returnValue).valueOf();
+    } else {
+      throw new Error('Error while retrieving the contract pause state');
+    }
+  }
 
   // createAcceptOfferTransaction(
   //   offerId: number,

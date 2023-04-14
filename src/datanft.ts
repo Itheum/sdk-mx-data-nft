@@ -85,12 +85,12 @@ export class DataNft {
   }
 
   /**
-   * Creates a DataNft from a payload (API response).
+   * Creates a DataNft from a API response containing the NFT details.
    *
    * Useful for creating an array of DataNft.
    * @param payload NFT details API response
    */
-  static async fromPayload(payload: any): Promise<DataNft> {
+  static async fromApiResponse(payload: any): Promise<DataNft> {
     const dataNft = new DataNft({
       tokenIdentifier: payload['identifier'],
       nftImgUrl: payload['url'] ? payload['url'] : '',
@@ -161,10 +161,12 @@ export class DataNft {
    * Method to get the data from the data marshal.
    * @param signedMessage Signed message from the data marshal
    * @param signableMessage Signable message from the wallet
+   * @param stream If the data should be streamed or not
    */
   async viewData(
     signedMessage: string,
-    signableMessage: SignableMessage
+    signableMessage: SignableMessage,
+    stream?: boolean
   ): Promise<any> {
     const signResult = {
       signature: '',
@@ -194,7 +196,9 @@ export class DataNft {
         DataNft.networkConfiguration.chainID == 'D'
           ? 'ED'
           : DataNft.networkConfiguration.chainID
-      }&accessRequesterAddr=${signResult.addrInHex}`
+      }&accessRequesterAddr=${signResult.addrInHex}&${
+        stream ? 'streamInLine=1' : ''
+      }`
     );
 
     const data = await response.json();
