@@ -4,9 +4,15 @@ import {
   AddressValue,
   BigUIntValue,
   BooleanValue,
+  ContractCallPayloadBuilder,
+  ContractFunction,
   IAddress,
+  INetworkConfig,
   ResultsParser,
   SmartContract,
+  StringValue,
+  TokenIdentifierValue,
+  Transaction,
   U64Value,
   VariadicValue
 } from '@multiversx/sdk-core/out';
@@ -26,17 +32,19 @@ export class DataNftMarket {
 
   /**
    * Creates a new instance of the DataNftMarket which can be used to interact with the DataNFT-FTs inside the marketplace
-   * @param env Environment.DEVNET or Environment.MAINNET
+   * @param env 'DEVNET' | 'MAINNET'
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
-  constructor(env: Environment, timeout: number = 10000) {
-    const networkConfig = networkConfiguration[env];
+  constructor(env: string, timeout: number = 10000) {
+    const networkConfig = networkConfiguration[env as Environment];
     this.chainID = networkConfig.chainID;
     this.networkProvider = new ProxyNetworkProvider(
       networkConfig.networkProvider,
-      { timeout: timeout }
+      {
+        timeout: timeout
+      }
     );
-    const contractAddress = marketPlaceContractAddress[env];
+    const contractAddress = marketPlaceContractAddress[env as Environment];
 
     this.contract = new SmartContract({
       address: new Address(contractAddress),
@@ -287,50 +295,160 @@ export class DataNftMarket {
     }
   }
 
-  // createAcceptOfferTransaction(
-  //   offerId: number,
-  //   price: number,
-  //   amount: number,
-  //   senderAddress: string
-  // ): Transaction { }
+  /**
+   * Creates a `addOffer` transaction
+   * @param senderAddress the address of the sender
+   * @param dataNftIdentifier the identifier of the DATA-NFT
+   * @param dataNftNonce the nonce of the DATA-NFT
+   * @param dataNftAmount the amount of the DATA-NFT
+   * @param paymentTokenIdentifier the identifier of the payment token `sender` wants to receive
+   * @param paymentTokenNonce the nonce of the payment token
+   * @param paymentTokenAmount the amount of the payment token
+   * @param minimumPaymentTokenAmount the minimum amount of which the `sender` is willing to receive (useful in case where an offer was added and the smart contract fee was changed afterwards)
+   */
+  addOffer(
+    senderAddress: IAddress,
+    dataNftIdentifier: string,
+    dataNftNonce: number,
+    dataNftAmount: number,
+    paymentTokenIdentifier: string,
+    paymentTokenNonce: number,
+    paymentTokenAmount: number,
+    minimumPaymentTokenAmount = 0
+  ): Transaction {
+    const addOfferTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('ESDTNFTTransfer'))
+        .addArg(new TokenIdentifierValue(dataNftIdentifier))
+        .addArg(new U64Value(dataNftNonce))
+        .addArg(new BigUIntValue(dataNftAmount))
+        .addArg(new AddressValue(this.contract.getAddress()))
+        .addArg(new StringValue('addOffer'))
+        .addArg(new TokenIdentifierValue(paymentTokenIdentifier))
+        .addArg(new U64Value(paymentTokenNonce))
+        .addArg(new U64Value(paymentTokenAmount))
+        .addArg(new U64Value(minimumPaymentTokenAmount))
+        .addArg(new BigUIntValue(dataNftAmount))
+        .build(),
+      receiver: senderAddress,
+      sender: senderAddress,
+      gasLimit: 12000000,
+      chainID: this.chainID
+    });
 
-  // createCancelOffer(
-  //   offerId: number,
-  //   senderAddress: string,
-  //   sendFundsBackToOwner = true
-  // ): Transaction {
-  //   const cancelTx = new Transaction({
-  //     value: 0,
-  //     data: new ContractCallPayloadBuilder()
-  //       .setFunction(new ContractFunction('cancelOffer'))
-  //       .addArg(new U64Value(index))
-  //       .addArg(new BooleanValue(true))
-  //       .build(),
-  //     receiver: this.contract.getAddress(),
-  //     gasLimit: 12000000,
-  //     sender: new Address(senderAddress),
-  //     chainID: this.chainID
-  //   });
+    return addOfferTx;
+  }
 
-  //   return cancelTx;
-  // }
+  /**
+   * Creates a `acceptOffer` transaction
+   * @param senderAddress the address of the sender
+   * @param offerId the id of the offer to be accepted
+   * @param price the price of the offer (must include the buyer fee)
+   * @param amount the amount of tokens to be bought
+   */
+  acceptOffer(
+    senderAddress: IAddress,
+    offerId: number,
+    price: number,
+    amount: number
+  ): Transaction {
+    const acceptTx = new Transaction({
+      value: price,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('acceptOffer'))
+        .addArg(new U64Value(offerId))
+        .addArg(new U64Value(amount))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 12000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
 
-  // createAddToMarketTransaction(
-  //   dataNftNonce: number,
-  //   dataNftQuantity: number,
-  //   pricePerDataNft: number,
-  //   senderAddress: string
-  // ): Transaction { }
+    return acceptTx;
+  }
 
-  // createRemoveFromMarketTransaction(
-  //   offerId: number,
-  //   amountToRemove: number,
-  //   senderAddress: string
-  // ): Transaction { }
+  /**
+   * Creates a `cancelOffer` transaction
+   * @param senderAddress the address of the sender
+   * @param offerId the id of the offer to be cancelled
+   * @param sendFundsBackToOwner default `true`, if `false` the offer will be cancelled, but the funds will be kept in the contract until withdrawal
+   */
+  cancelOffer(
+    senderAddress: IAddress,
+    offerId: number,
+    sendFundsBackToOwner = true
+  ): Transaction {
+    const cancelTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('cancelOffer'))
+        .addArg(new U64Value(offerId))
+        .addArg(new BooleanValue(sendFundsBackToOwner))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
 
-  // createUpdatePriceTransaction(
-  //   offerId: number,
-  //   newPrice: number,
-  //   senderAddress: string
-  // ): Transaction { }
+    return cancelTx;
+  }
+
+  /**
+   * Creates a `changeOfferPrice` transaction
+   * @param senderAddress the address of the sender
+   * @param offerId the id of the offer to be changed
+   * @param newPrice the new price of the offer
+   * @param newMinimumPaymentTokenAmount the new minimum amount of which the `sender` is willing to receive (useful in case where an offer was added and the smart contract fee was changed afterwards)
+   */
+  changeOfferPrice(
+    senderAddress: IAddress,
+    offerId: number,
+    newPrice: number,
+    newMinimumPaymentTokenAmount = 0
+  ): Transaction {
+    const changePriceTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('changeOfferPrice'))
+        .addArg(new U64Value(offerId))
+        .addArg(new U64Value(newPrice))
+        .addArg(new U64Value(newMinimumPaymentTokenAmount))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return changePriceTx;
+  }
+
+  /**
+   * Creates a `withdrawCancelledOffer` transaction
+   * @param senderAddress the address of the sender
+   * @param offerId the id of the offer from which the funds should be withdrawn
+   *
+   * `offerId` must be firstly cancelled. {@link cancelOffer}
+   */
+  withdrawCancelledOffer(
+    senderAddress: IAddress,
+    offerId: number
+  ): Transaction {
+    const withdrawTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('withdrawCancelledOffer'))
+        .addArg(new U64Value(offerId))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 12000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return withdrawTx;
+  }
 }

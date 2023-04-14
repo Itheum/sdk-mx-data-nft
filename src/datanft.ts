@@ -1,10 +1,7 @@
 import {
   AbiRegistry,
   BinaryCodec,
-  BytesValue,
-  Err,
-  SignableMessage,
-  StringValue
+  SignableMessage
 } from '@multiversx/sdk-core/out';
 import {
   Config,
@@ -44,11 +41,11 @@ export class DataNft {
 
   /**
    * Sets the network configuration for the DataNft class.
-   * @param env Environment.DEVNET or Environment.MAINNET
+   * @param env 'DEVNET' | 'MAINNET'
    */
-  static setNetworkConfig(env: Environment) {
-    this.networkConfiguration = networkConfiguration[env];
-    this.apiConfiguration = apiConfiguration[env];
+  static setNetworkConfig(env: string) {
+    this.networkConfiguration = networkConfiguration[env as Environment];
+    this.apiConfiguration = apiConfiguration[env as Environment];
   }
 
   /**
