@@ -14,7 +14,7 @@ import minterAbi from './abis/datanftmint.abi.json';
 
 export class DataNft {
   readonly tokenIdentifier: string = '';
-  readonly nftImgUrl?: string = '';
+  readonly nftImgUrl: string = '';
   readonly dataPreview: string = '';
   readonly dataStream: string = '';
   readonly dataMarshal: string = '';
@@ -55,7 +55,7 @@ export class DataNft {
    * @param tokenIdentifier Token identifier
    * @param nonce Token nonce
    */
-  static async fromApi(
+  static async createFromApi(
     tokenIdentifier: string,
     nonce: number
   ): Promise<DataNft> {
@@ -87,7 +87,7 @@ export class DataNft {
    * Useful for creating an array of DataNft.
    * @param payload NFT details API response
    */
-  static async fromApiResponse(payload: any): Promise<DataNft> {
+  static async createFromApiResponse(payload: any): Promise<DataNft> {
     const dataNft = new DataNft({
       tokenIdentifier: payload['identifier'],
       nftImgUrl: payload['url'] ? payload['url'] : '',

@@ -5,3 +5,4 @@ export * from './datanft';
 export * from './utils';
 export * from './datanft';
 export * from './utils';
+export * from './minter';

@@ -53,6 +53,13 @@ export class DataNftMarket {
   }
 
   /**
+   * Retrives the address of the marketplace smart contract based on the environment
+   */
+  getContractAddress(): IAddress {
+    return this.contract.getAddress();
+  }
+
+  /**
    * Retrieves all `Offer` objects listed on the marketplace for a given address
    * @param address Address to query
    */
@@ -224,7 +231,7 @@ export class DataNftMarket {
   }
 
   /**
-   * Returns the smart contract requirements for the marketplace
+   * Retrieves the smart contract requirements for the marketplace
    */
   async viewRequirements(): Promise<MarketplaceRequirements> {
     const interaction = this.contract.methodsExplicit.viewRequirements();

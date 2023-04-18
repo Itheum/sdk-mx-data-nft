@@ -15,6 +15,16 @@ const mainnetNetworkConfig: Config = {
   networkProvider: 'https://gateway.multiversx.com'
 };
 
+export const itheumTokenIdentifier: { [key in Environment]: string } = {
+  DEVNET: 'ITHEUM-a61317',
+  MAINNET: 'ITHEUM-df6f26'
+};
+
+export const dataNftTokenIdentifier: { [key in Environment]: string } = {
+  DEVNET: 'DATANFTFT3-d0978e',
+  MAINNET: ''
+};
+
 export const marketPlaceContractAddress: { [key in Environment]: string } = {
   DEVNET: 'erd1qqqqqqqqqqqqqpgqw29wx58pzm7zau2zcprfk93a60hw8vnvfsxs25rqjm',
   MAINNET: ''

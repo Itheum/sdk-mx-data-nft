@@ -17,7 +17,9 @@
   "license": "GPLV3",
   "dependencies": {
     "@multiversx/sdk-core": "^12.1.1",
-    "@multiversx/sdk-network-providers": "^1.3.0"
+    "@multiversx/sdk-network-providers": "^1.3.0",
+    "dotenv": "^16.0.3",
+    "nft.storage": "^7.0.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
