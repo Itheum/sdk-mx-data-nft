@@ -7,10 +7,12 @@ import {
   Config,
   Environment,
   apiConfiguration,
+  dataNftTokenIdentifier,
   networkConfiguration
 } from './config';
 import { numberToPaddedHex } from './utils';
 import minterAbi from './abis/datanftmint.abi.json';
+import { NftType } from './interfaces';
 
 export class DataNft {
   readonly tokenIdentifier: string = '';
@@ -30,6 +32,7 @@ export class DataNft {
 
   static networkConfiguration: Config;
   static apiConfiguration: string;
+  static env: string;
 
   /**
    * Creates an instance of DataNft. Can be partially initialized.
@@ -44,6 +47,7 @@ export class DataNft {
    * @param env 'DEVNET' | 'MAINNET'
    */
   static setNetworkConfig(env: string) {
+    this.env = env;
     this.networkConfiguration = networkConfiguration[env as Environment];
     this.apiConfiguration = apiConfiguration[env as Environment];
   }
@@ -52,12 +56,12 @@ export class DataNft {
    * Creates a DataNft calling the API and also decoding the attributes.
    *
    * Not useful for creating an array of DataNft, because it calls the API every single time.
-   * @param tokenIdentifier Token identifier
    * @param nonce Token nonce
+   * @param tokenIdentifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link Environment})
    */
   static async createFromApi(
-    tokenIdentifier: string,
-    nonce: number
+    nonce: number,
+    tokenIdentifier = dataNftTokenIdentifier[this.env as Environment]
   ): Promise<DataNft> {
     const identifier = `${tokenIdentifier}-${numberToPaddedHex(nonce)}`;
     const nftQuery = await fetch(`${this.apiConfiguration}/nfts/${identifier}`);
@@ -82,17 +86,17 @@ export class DataNft {
   }
 
   /**
-   * Creates a DataNft from a API response containing the NFT details.
+   * Creates a DataNft from a API response containing
    *
    * Useful for creating an array of DataNft.
    * @param payload NFT details API response
    */
-  static async createFromApiResponse(payload: any): Promise<DataNft> {
+  static createFromApiResponse(payload: NftType): DataNft {
     const dataNft = new DataNft({
       tokenIdentifier: payload['identifier'],
       nftImgUrl: payload['url'] ? payload['url'] : '',
       tokenName: payload['name'],
-      supply: payload['supply'] as number,
+      supply: Number(payload['supply']),
       royalties: (payload['royalties'] / 100) as number,
       nonce: payload['nonce'] as number,
       collection: payload['collection'] as string,
@@ -130,6 +134,26 @@ export class DataNft {
     } catch {
       throw new Error('Could not decode attributes');
     }
+  }
+
+  /**
+   *  Returns an array of `DataNft` owned by the address
+   * @param address the address to query
+   * @param identifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link Environment})
+   */
+  static async ownedByAddress(
+    address: string,
+    identifier = dataNftTokenIdentifier[this.env as Environment]
+  ): Promise<DataNft[]> {
+    const res = await fetch(
+      `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifier}&withSupply=true`
+    );
+    const data = await res.json();
+    const dataNfts: DataNft[] = [];
+    data.forEach((nft: NftType) => {
+      dataNfts.push(this.createFromApiResponse(nft));
+    });
+    return dataNfts;
   }
 
   /**

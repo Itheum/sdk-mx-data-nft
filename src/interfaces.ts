@@ -1,20 +1,54 @@
-// export interface DataNft {
-//     nftImgUrl?: string;
-//     dataPreview: string;
-//     dataStream: string;
-//     dataMarshal: string;
-//     tokenName: string;
-//     creator: string;
-//     creationTime: Date;
-//     supply: number;
-//     balance: number;
-//     description: string;
-//     title: string;
-//     royalties: number;
-//     nonce: number;
-//     collection: string;
-// }
+export interface NftType {
+  identifier: string;
+  collection: string;
+  ticker?: string;
+  timestamp: number;
+  attributes: string;
+  nonce: number;
+  type: NftEnumType;
+  name: string;
+  creator: string;
+  royalties: number;
+  balance: string;
+  uris?: string[];
+  url?: string;
+  thumbnailUrl?: string;
+  tags?: string[];
+  decimals?: number;
+  owner?: string;
+  supply?: string;
+  isWhitelistedStorage?: boolean;
+  owners?: {
+    address: string;
+    balance: string;
+  }[];
+  assets?: {
+    website?: string;
+    description?: string;
+    status?: string;
+    pngUrl?: string;
+    svgUrl?: string;
+  };
+  metadata?: {
+    description?: string;
+    fileType?: string;
+    fileUri?: string;
+    fileName?: string;
+  };
+  media?: {
+    url: string;
+    originalUrl: string;
+    thumbnailUrl: string;
+    fileType: string;
+    fileSize: number;
+  }[];
+}
 
+export declare enum NftEnumType {
+  NonFungibleESDT = 'NonFungibleESDT',
+  SemiFungibleESDT = 'SemiFungibleESDT',
+  MetaESDT = 'MetaESDT'
+}
 export interface MarketplaceRequirements {
   acceptedTokens: string[];
   acceptedPayments: string[];
