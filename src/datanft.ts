@@ -5,7 +5,7 @@ import {
 } from '@multiversx/sdk-core/out';
 import {
   Config,
-  Environment,
+  EnvironmentsEnum,
   apiConfiguration,
   dataNftTokenIdentifier,
   networkConfiguration
@@ -44,12 +44,12 @@ export class DataNft {
 
   /**
    * Sets the network configuration for the DataNft class.
-   * @param env 'DEVNET' | 'MAINNET'
+   * @param env 'devent' | 'mainnet' | 'testnet'
    */
   static setNetworkConfig(env: string) {
     this.env = env;
-    this.networkConfiguration = networkConfiguration[env as Environment];
-    this.apiConfiguration = apiConfiguration[env as Environment];
+    this.networkConfiguration = networkConfiguration[env as EnvironmentsEnum];
+    this.apiConfiguration = apiConfiguration[env as EnvironmentsEnum];
   }
 
   /**
@@ -57,11 +57,11 @@ export class DataNft {
    *
    * Not useful for creating an array of DataNft, because it calls the API every single time.
    * @param nonce Token nonce
-   * @param tokenIdentifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link Environment})
+   * @param tokenIdentifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link EnvironmentsEnum})
    */
   static async createFromApi(
     nonce: number,
-    tokenIdentifier = dataNftTokenIdentifier[this.env as Environment]
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft> {
     const identifier = `${tokenIdentifier}-${numberToPaddedHex(nonce)}`;
     const nftQuery = await fetch(`${this.apiConfiguration}/nfts/${identifier}`);
@@ -139,11 +139,11 @@ export class DataNft {
   /**
    *  Returns an array of `DataNft` owned by the address
    * @param address the address to query
-   * @param identifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link Environment})
+   * @param identifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link EnvironmentsEnum})
    */
   static async ownedByAddress(
     address: string,
-    identifier = dataNftTokenIdentifier[this.env as Environment]
+    identifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft[]> {
     const res = await fetch(
       `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifier}&withSupply=true`

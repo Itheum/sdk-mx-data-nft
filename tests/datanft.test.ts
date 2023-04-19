@@ -2,7 +2,7 @@ import { DataNft } from '../src';
 
 describe('Data NFT test', () => {
   test('#getMessageToSign', async () => {
-    DataNft.setNetworkConfig('DEVNET');
+    DataNft.setNetworkConfig('devnet');
     const dataNft = new DataNft({
       dataMarshal:
         'https://d37x5igq4vw5mq.cloudfront.net/datamarshalapi/achilles/v1'
@@ -18,7 +18,7 @@ describe('Data NFT test', () => {
   });
 
   test('#getOwnedByAddress', async () => {
-    DataNft.setNetworkConfig('DEVNET');
+    DataNft.setNetworkConfig('devnet');
     const dataNfts = await DataNft.ownedByAddress(
       'erd1w6ffeexmumd5qzme78grrvp33qngcgqk2prjyuuyawpc955gvcxqqrsrtw'
     );

@@ -3,12 +3,12 @@ import { DataNftMarket, MarketplaceRequirements, Offer } from '../src';
 
 describe('Marketplace Sdk test', () => {
   test('#getAddress', async () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
     expect(dataNftMarket.getContractAddress()).toBeInstanceOf(Address);
   });
 
   test('#viewAddressListedOffers', async () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = await dataNftMarket.viewAddressListedOffers(new Address(''));
 
@@ -19,7 +19,7 @@ describe('Marketplace Sdk test', () => {
   }, 10000);
 
   test('#viewAddressTotalOffers', async () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = await dataNftMarket.viewAddressTotalOffers(new Address(''));
 
@@ -27,7 +27,7 @@ describe('Marketplace Sdk test', () => {
   });
 
   test('#viewRequirements', async () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = await dataNftMarket.viewRequirements();
 
@@ -35,7 +35,7 @@ describe('Marketplace Sdk test', () => {
   });
 
   test('#viewLastValidOfferId', async () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = await dataNftMarket.viewLastValidOfferId();
 
@@ -43,7 +43,7 @@ describe('Marketplace Sdk test', () => {
   });
 
   test('#getPauseState', async () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = await dataNftMarket.viewContractPauseState();
 
@@ -51,7 +51,7 @@ describe('Marketplace Sdk test', () => {
   });
 
   test('#addOffer', () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = dataNftMarket.addOffer(
       new Address(''),
@@ -68,7 +68,7 @@ describe('Marketplace Sdk test', () => {
   });
 
   test('#acceptOffer', () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = dataNftMarket.acceptOffer(new Address(''), 0, 0, 0);
 
@@ -76,7 +76,7 @@ describe('Marketplace Sdk test', () => {
   });
 
   test('#cancelOffer', () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = dataNftMarket.cancelOffer(new Address(''), 0);
 
@@ -87,7 +87,7 @@ describe('Marketplace Sdk test', () => {
   });
 
   test('#changeOfferPrice', () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = dataNftMarket.changeOfferPrice(new Address(''), 0, 0);
 
@@ -95,7 +95,7 @@ describe('Marketplace Sdk test', () => {
   });
 
   test('#withdrawCancelledOffer', () => {
-    const dataNftMarket = new DataNftMarket('DEVNET');
+    const dataNftMarket = new DataNftMarket('devnet');
 
     const result = dataNftMarket.withdrawCancelledOffer(new Address(''), 0);
 

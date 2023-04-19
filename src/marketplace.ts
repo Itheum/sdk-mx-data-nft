@@ -7,7 +7,6 @@ import {
   ContractCallPayloadBuilder,
   ContractFunction,
   IAddress,
-  INetworkConfig,
   ResultsParser,
   SmartContract,
   StringValue,
@@ -18,7 +17,7 @@ import {
 } from '@multiversx/sdk-core/out';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
-  Environment,
+  EnvironmentsEnum,
   networkConfiguration,
   marketPlaceContractAddress
 } from './config';
@@ -32,11 +31,11 @@ export class DataNftMarket {
 
   /**
    * Creates a new instance of the DataNftMarket which can be used to interact with the DataNFT-FTs inside the marketplace
-   * @param env 'DEVNET' | 'MAINNET'
+   * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: string, timeout: number = 10000) {
-    const networkConfig = networkConfiguration[env as Environment];
+    const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.chainID = networkConfig.chainID;
     this.networkProvider = new ProxyNetworkProvider(
       networkConfig.networkProvider,
@@ -44,7 +43,7 @@ export class DataNftMarket {
         timeout: timeout
       }
     );
-    const contractAddress = marketPlaceContractAddress[env as Environment];
+    const contractAddress = marketPlaceContractAddress[env as EnvironmentsEnum];
 
     this.contract = new SmartContract({
       address: new Address(contractAddress),

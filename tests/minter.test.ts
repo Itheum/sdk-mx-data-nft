@@ -5,7 +5,7 @@ dotenv.config();
 
 describe('Data Nft Minter Test', () => {
   test('#getAddress', async () => {
-    const dataNftMarket = new DataNftMinter('DEVNET');
+    const dataNftMarket = new DataNftMinter('devnet');
     expect(dataNftMarket.getContractAddress()).toBeInstanceOf(Address);
     expect(dataNftMarket.getContractAddress().bech32()).toStrictEqual(
       'erd1qqqqqqqqqqqqqpgqthgd3esmd5eufhh9xcjjlf6aqxts4p5dfsxsrr0u3y'
@@ -13,7 +13,7 @@ describe('Data Nft Minter Test', () => {
   });
 
   test('#viewMinterRequirements', async () => {
-    const dataNftMarket = new DataNftMinter('DEVNET');
+    const dataNftMarket = new DataNftMinter('devnet');
 
     const result = await dataNftMarket.viewMinterRequirements(
       new Address(
@@ -24,7 +24,7 @@ describe('Data Nft Minter Test', () => {
   });
 
   test('#burn', async () => {
-    const dataNftMarket = new DataNftMinter('DEVNET');
+    const dataNftMarket = new DataNftMinter('devnet');
 
     const result = await dataNftMarket.burn(
       new Address(
@@ -37,7 +37,7 @@ describe('Data Nft Minter Test', () => {
   });
 
   // test('#mint', async () => {
-  //   const dataNftMarket = new DataNftMinter('DEVNET');
+  //   const dataNftMarket = new DataNftMinter('devnet');
 
   //   const result = await dataNftMarket.mint(
   //     new Address(

@@ -15,7 +15,7 @@ import {
 } from '@multiversx/sdk-core/out';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
-  Environment,
+  EnvironmentsEnum,
   dataNftTokenIdentifier,
   itheumTokenIdentifier,
   minterContractAddress,
@@ -39,7 +39,7 @@ export class DataNftMinter {
    */
   constructor(env: string, timeout: number = 10000) {
     this.env = env;
-    const networkConfig = networkConfiguration[env as Environment];
+    const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.chainID = networkConfig.chainID;
     this.networkProvider = new ProxyNetworkProvider(
       networkConfig.networkProvider,
@@ -47,7 +47,7 @@ export class DataNftMinter {
         timeout: timeout
       }
     );
-    const contractAddress = minterContractAddress[env as Environment];
+    const contractAddress = minterContractAddress[env as EnvironmentsEnum];
     this.contract = new SmartContract({
       address: new Address(contractAddress),
       abi: AbiRegistry.create(dataNftMintAbi)
@@ -64,11 +64,11 @@ export class DataNftMinter {
   /**
    * Retrieves the minter smart contract requirements for the given user
    * @param address the address of the user
-   * @param taxToken the tax token to be used for the minting (default = `ITHEUM` token identifier based on the  {@link Environment})
+   * @param taxToken the tax token to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
    */
   async viewMinterRequirements(
     address: IAddress,
-    taxToken = itheumTokenIdentifier[this.env as Environment]
+    taxToken = itheumTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<MinterRequirements> {
     const interaction = this.contract.methodsExplicit.getUserDataOut([
       new AddressValue(address),
@@ -109,13 +109,13 @@ export class DataNftMinter {
    * @param senderAddress the address of the user
    * @param dataNftNonce the nonce of the DataNFT-FT
    * @param quantityToBurn the quantity to burn
-   * @param dataNftIdentifier the DataNFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link Environment})
+   * @param dataNftIdentifier the DataNFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link EnvironmentsEnum})
    */
   burn(
     senderAddress: IAddress,
     dataNftNonce: number,
     quantityToBurn: number,
-    dataNftIdentifier = dataNftTokenIdentifier[this.env as Environment]
+    dataNftIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Transaction {
     const burnTx = new Transaction({
       value: 0,
@@ -150,7 +150,7 @@ export class DataNftMinter {
    * @param datasetTitle the title of the dataset
    * @param datasetDescription the description of the dataset
    * @param antiSpamTax the anti spam tax to be set for the DataNFT-FT
-   * @param antiSpamTokenIdentifier the anti spam token identifier to be used for the minting (default = `ITHEUM` token identifier based on the  {@link Environment})
+   * @param antiSpamTokenIdentifier the anti spam token identifier to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
    */
   async mint(
     senderAddress: IAddress,
@@ -163,7 +163,9 @@ export class DataNftMinter {
     datasetTitle: string,
     datasetDescription: string,
     antiSpamTax: number,
-    antiSpamTokenIdentifier = itheumTokenIdentifier[this.env as Environment]
+    antiSpamTokenIdentifier = itheumTokenIdentifier[
+      this.env as EnvironmentsEnum
+    ]
   ): Promise<Transaction> {
     const { dataNftHash, dataNftStreamUrlEncrypted } =
       await this.dataNFTDataStreamAdvertise(dataStreamUrl);
