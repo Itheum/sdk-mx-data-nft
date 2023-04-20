@@ -15,7 +15,7 @@ describe('Data NFT test', () => {
     const nft = await DataNft.createFromApi(62, 'DATANFTFT3-d0978e');
 
     expect(nft).toBeInstanceOf(DataNft);
-  });
+  }, 10000);
 
   test('#getOwnedByAddress', async () => {
     DataNft.setNetworkConfig('devnet');

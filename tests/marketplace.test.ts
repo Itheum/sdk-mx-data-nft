@@ -23,7 +23,7 @@ describe('Marketplace Sdk test', () => {
 
     const result = await dataNftMarket.viewAddressTotalOffers(new Address(''));
 
-    expect(result).toBeInstanceOf(BigUIntValue);
+    expect(typeof result).toBe('number');
   });
 
   test('#viewRequirements', async () => {
@@ -101,4 +101,15 @@ describe('Marketplace Sdk test', () => {
 
     expect(result).toBeInstanceOf(Transaction);
   });
+
+  test('#viewOffers', async () => {
+    const dataNftMarket = new DataNftMarket('devnet');
+
+    const result = await dataNftMarket.viewOffers();
+
+    expect(result).toBeInstanceOf(Array);
+    for (const item of result) {
+      expect(item).toBeInstanceOf(Object as unknown as Offer);
+    }
+  }, 10000);
 });

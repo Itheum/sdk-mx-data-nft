@@ -140,7 +140,7 @@ export class DataNftMarket {
    * Returns the total number of offers listed for a given address
    * @param address Address to query
    */
-  async viewAddressTotalOffers(address: IAddress): Promise<BigUIntValue> {
+  async viewAddressTotalOffers(address: IAddress): Promise<number> {
     const interaction = this.contract.methodsExplicit.viewUserTotalOffers([
       new AddressValue(address)
     ]);
@@ -153,9 +153,9 @@ export class DataNftMarket {
     );
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      return new BigUIntValue(returnValue);
+      return returnValue as number;
     } else {
-      return new BigUIntValue(0);
+      return 0;
     }
   }
 
@@ -223,6 +223,55 @@ export class DataNftMarket {
         wantedTokenAmount: offer['wanted_token_amount'] as number,
         quantity: offer.quantity as number
       }));
+      return offers;
+    } else {
+      return [];
+    }
+  }
+
+  /**
+   * Retrives an array of `Offer` objects.
+   */
+  async viewOffers(): Promise<Offer[]> {
+    const interaction = this.contract.methodsExplicit.getOffers();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const offers: Offer[] = returnValue.map(
+        ([
+          index,
+          {
+            owner,
+            offered_token: {
+              token_identifier: offeredTokenIdentifier,
+              token_nonce: offeredTokenNonce,
+              amount: offeredTokenAmount
+            },
+            wanted_token: {
+              token_identifier: wantedTokenIdentifier,
+              token_nonce: wantedTokenNonce,
+              amount: wantedTokenAmount
+            },
+            quantity
+          }
+        ]: any) => ({
+          index,
+          owner: owner.bech32(),
+          offeredTokenIdentifier: offeredTokenIdentifier.toString(),
+          offeredTokenNonce: offeredTokenNonce.toString(),
+          offeredTokenAmount,
+          wantedTokenIdentifier: wantedTokenIdentifier.toString(),
+          wantedTokenNonce: wantedTokenNonce.toString(),
+          wantedTokenAmount,
+          quantity
+        })
+      );
       return offers;
     } else {
       return [];
