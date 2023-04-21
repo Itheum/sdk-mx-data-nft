@@ -77,7 +77,7 @@ export class DataNftMarket {
       const firstValueAsVariadic = firstValue as VariadicValue;
       const returnValue = firstValueAsVariadic?.valueOf();
       const offers: Offer[] = returnValue.map((offer: any) => ({
-        index: offer['offer_id'],
+        index: offer['offer_id'].toNumber(),
         owner: offer['owner'].bech32(),
         offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
         offeredTokenNonce: offer['offered_token_nonce'].toString(),
@@ -85,7 +85,7 @@ export class DataNftMarket {
         wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
         wantedTokenNonce: offer['wanted_token_nonce'].toString(),
         wantedTokenAmount: offer['wanted_token_amount'] as number,
-        quantity: offer.quantity as number
+        quantity: offer.quantity.toNumber()
       }));
       return offers;
     } else {
@@ -120,7 +120,7 @@ export class DataNftMarket {
       const firstValueAsVariadic = firstValue as VariadicValue;
       const returnValue = firstValueAsVariadic?.valueOf();
       const offers: Offer[] = returnValue.map((offer: any) => ({
-        index: offer['offer_id'],
+        index: offer['offer_id'].toNumber(),
         owner: offer['owner'].bech32(),
         offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
         offeredTokenNonce: offer['offered_token_nonce'].toString(),
@@ -128,7 +128,7 @@ export class DataNftMarket {
         wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
         wantedTokenNonce: offer['wanted_token_nonce'].toString(),
         wantedTokenAmount: offer['wanted_token_amount'] as number,
-        quantity: offer.quantity as number
+        quantity: offer.quantity.toNumber()
       }));
       return offers;
     } else {
@@ -153,7 +153,7 @@ export class DataNftMarket {
     );
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      return returnValue as number;
+      return returnValue.toNumber();
     } else {
       return 0;
     }
@@ -177,7 +177,7 @@ export class DataNftMarket {
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
       const offers: Offer[] = returnValue.map((offer: any) => ({
-        index: offer['offer_id'],
+        index: offer['offer_id'].toNumber(),
         owner: offer['owner'].bech32(),
         offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
         offeredTokenNonce: offer['offered_token_nonce'].toString(),
@@ -185,7 +185,7 @@ export class DataNftMarket {
         wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
         wantedTokenNonce: offer['wanted_token_nonce'].toString(),
         wantedTokenAmount: offer['wanted_token_amount'] as number,
-        quantity: offer.quantity as number
+        quantity: offer.quantity.toNumber()
       }));
       return offers;
     } else {
@@ -213,7 +213,7 @@ export class DataNftMarket {
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
       const offers: Offer[] = returnValue.map((offer: any) => ({
-        index: offer['offer_id'],
+        index: offer['offer_id'].toNumber(),
         owner: offer['owner'].bech32(),
         offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
         offeredTokenNonce: offer['offered_token_nonce'].toString(),
@@ -221,7 +221,7 @@ export class DataNftMarket {
         wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
         wantedTokenNonce: offer['wanted_token_nonce'].toString(),
         wantedTokenAmount: offer['wanted_token_amount'] as number,
-        quantity: offer.quantity as number
+        quantity: offer.quantity.toNumber()
       }));
       return offers;
     } else {
@@ -261,7 +261,7 @@ export class DataNftMarket {
             quantity
           }
         ]: any) => ({
-          index,
+          index: index.toNumber(),
           owner: owner.bech32(),
           offeredTokenIdentifier: offeredTokenIdentifier.toString(),
           offeredTokenNonce: offeredTokenNonce.toString(),
@@ -269,7 +269,7 @@ export class DataNftMarket {
           wantedTokenIdentifier: wantedTokenIdentifier.toString(),
           wantedTokenNonce: wantedTokenNonce.toString(),
           wantedTokenAmount,
-          quantity
+          quantity: quantity.toNumber()
         })
       );
       return offers;
@@ -302,8 +302,9 @@ export class DataNftMarket {
         sellerTaxPercentageDiscount: returnValue[
           'discount_fee_percentage_seller'
         ] as number,
-        buyerTaxPercentage: returnValue['percentage_cut_from_buyer'] as number,
-        sellerTaxPercentage: returnValue['percentage_cut_from_seller'] as number
+        buyerTaxPercentage: returnValue['percentage_cut_from_buyer'].toNumber(),
+        sellerTaxPercentage:
+          returnValue['percentage_cut_from_seller'].toNumber()
       };
       return requirements;
     } else {
