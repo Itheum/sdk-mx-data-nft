@@ -197,7 +197,14 @@ export class DataNft {
     };
     try {
       if (signableMessage?.signature && signableMessage?.address) {
-        signResult.signature = signableMessage.signature.toString('hex');
+        if (signableMessage.signature instanceof Buffer) {
+          signResult.signature = signableMessage.signature.toString('hex');
+        } else if (
+          typeof (signableMessage.signature as any).hex === 'function'
+        ) {
+          signResult.signature = (signableMessage.signature as any).hex();
+        }
+
         signResult.addrInHex = signableMessage.address.hex();
         signResult.success = true;
       } else {
