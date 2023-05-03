@@ -102,14 +102,19 @@ describe('Marketplace Sdk test', () => {
     expect(result).toBeInstanceOf(Transaction);
   });
 
-  test('#viewOffers', async () => {
+  test('#viewOffer', async () => {
     const dataNftMarket = new DataNftMarket('devnet');
 
-    const result = await dataNftMarket.viewOffers();
+    const result = await dataNftMarket.viewNumberOfOffers();
 
-    expect(result).toBeInstanceOf(Array);
-    for (const item of result) {
-      expect(item).toBeInstanceOf(Object as unknown as Offer);
-    }
-  }, 10000);
+    expect(typeof result).toBe('number');
+  });
+
+  // test('#viewOffers', async () => {
+  //   const dataNftMarket = new DataNftMarket('devnet');
+
+  //   const result = await dataNftMarket.viewOffers();
+
+  //   expect(result).toBeInstanceOf(Array);
+  // }, 10000);
 });

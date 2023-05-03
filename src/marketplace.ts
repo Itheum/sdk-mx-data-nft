@@ -13,6 +13,7 @@ import {
   TokenIdentifierValue,
   Transaction,
   U64Value,
+  U8Value,
   VariadicValue
 } from '@multiversx/sdk-core/out';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
@@ -310,6 +311,25 @@ export class DataNftMarket {
     } else {
       throw new Error('Error while retrieving the marketplace requirements');
     }
+  }
+
+  /**
+   * Retrieves the smart contract number of offers
+   */
+  async viewNumberOfOffers(): Promise<number> {
+    const interaction = this.contract.methodsExplicit.viewNumberOfOffers();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      return new U8Value(returnValue).valueOf().toNumber();
+    }
+    throw new Error('Error while retrieving the number of offers');
   }
 
   /**
