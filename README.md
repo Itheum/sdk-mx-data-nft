@@ -65,7 +65,7 @@ dataNfts = await DataNft.ownedByAddress(address);
 // Retrives the DataNft message from marshal to sign
 
 const dataNft= DataNft.createFromApi(nonce);
-const message = dataNft.messageToSign();
+const message = await dataNft.messageToSign();
 
 // Sign the message with a wallet
 const signature = 'signature';
