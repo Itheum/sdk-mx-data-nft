@@ -11,7 +11,8 @@ import {
   ContractFunction,
   U64Value,
   BigUIntValue,
-  StringValue
+  StringValue,
+  BooleanValue
 } from '@multiversx/sdk-core/out';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
@@ -101,6 +102,26 @@ export class DataNftMinter {
       return requirements;
     } else {
       throw new Error('Could not retrieve requirements');
+    }
+  }
+
+  /**
+   * Retrieves if the smart contract is paused or not
+   */
+  async viewContractPauseState(): Promise<boolean> {
+    const interaction = this.contract.methodsExplicit.getIsPaused();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      return new BooleanValue(returnValue).valueOf();
+    } else {
+      throw new Error('Error while retrieving the contract pause state');
     }
   }
 

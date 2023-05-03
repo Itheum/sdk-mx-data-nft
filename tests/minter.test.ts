@@ -36,6 +36,13 @@ describe('Data Nft Minter Test', () => {
     expect(result).toBeInstanceOf(Transaction);
   });
 
+  test('#viewContractpauseState', async () => {
+    const dataNftMarket = new DataNftMinter('devnet');
+
+    const result = await dataNftMarket.viewContractPauseState();
+    expect(typeof result).toBe('boolean');
+  });
+
   // test('#mint', async () => {
   //   const dataNftMarket = new DataNftMinter('devnet');
 
