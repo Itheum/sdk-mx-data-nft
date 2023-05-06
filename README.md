@@ -32,55 +32,51 @@ You should not be using this yet, if you **really really** want to use it, the c
 
 ## DataNft
 
-```
-
+```typescript
 import { DataNft } from '@itheum/sdk-mx-data-nft';
 
-DataNft.setNetworkConfig('devnet'|'testnet'|'mainnet');
+DataNft.setNetworkConfig('devnet' | 'testnet' | 'mainnet');
 
 // Can build a new DataNft object partially
 const dataNft = new DataNft({
-    tokenIdentifier: 'tokenIdentifier',
-    tokenName: 'tokenName',
-  });
+  tokenIdentifier: 'tokenIdentifier',
+  tokenName: 'tokenName'
+});
 
 // Create a new DataNft object from API
 const nonce = 1;
 const nft = await DataNft.createFromApi(nonce);
 
 // Create a new DataNft object from API Response
-const response = await fetch ('https://devnet-api.multiversx.com/address/nfts');
+const response = await fetch('https://devnet-api.multiversx.com/address/nfts');
 const dataNfts = [];
-  response.forEach((nft) => {
-    dataNfts = await DataNft.createFromApiResponse(nft);
-  });
-
+response.forEach((nft) => {
+  dataNfts = await DataNft.createFromApiResponse(nft);
+});
 
 // Retrives the DataNfts owned by a address
 const address = 'address';
-const dataNfts=[];
+const dataNfts = [];
 dataNfts = await DataNft.ownedByAddress(address);
-
 
 // Retrives the DataNft message from marshal to sign
 
-const dataNft= DataNft.createFromApi(nonce);
+const dataNft = DataNft.createFromApi(nonce);
 const message = await dataNft.messageToSign();
 
 // Sign the message with a wallet
 const signature = 'signature';
 
 // Unlock the data inside the dataNft
-dataNft.viewData(message,signature);
-
+dataNft.viewData(message, signature);
 ```
 
 ## Minter smart contract
 
-```
+```typescript
 import { DataNftMinter } from '@itheum/sdk-mx-data-nft';
 
-const dataNftMinter = new DataNftMinter('devnet'|'testnet'|'mainnet');
+const dataNftMinter = new DataNftMinter('devnet' | 'testnet' | 'mainnet');
 
 // View minter smart contract rewquirements
 const requirements = await dataNftMinter.viewMinterRequirements('address');
@@ -88,41 +84,34 @@ const requirements = await dataNftMinter.viewMinterRequirements('address');
 // View contract pause state
 const result = await dataNftMarket.viewContractPauseState();
 
-
 // Create a mint transaction
 const transaction = await dataNftMarket.mint(
-     new Address(
-       'erd1'
-     ),
-     'TEST-TOKEN',
-     'https://marshal.com',
-     'https://streamdata.com',
-     'https://previewdata',
-     15,
-     1000,
-     'Test Title',
-     'Test Description',
-     10
-   );
-
+  new Address('erd1'),
+  'TEST-TOKEN',
+  'https://marshal.com',
+  'https://streamdata.com',
+  'https://previewdata',
+  15,
+  1000,
+  'Test Title',
+  'Test Description',
+  10
+);
 
 // Create a burn transaction
 const transaction = await dataNftMarket.burn(
-      new Address(
-        'erd1'
-      ),
-      dataNftNonce,
-      quantityToBurn,
-    );
-
+  new Address('erd1'),
+  dataNftNonce,
+  quantityToBurn
+);
 ```
 
 ## Marketplace smart contract
 
-```
+```typescript
 import { DataNftMarket } from '@itheum/sdk-mx-data-nft';
 
-const dataNftMarket = new DataNftMarket('devnet'|'testnet'|'mainnet');
+const dataNftMarket = new DataNftMarket('devnet' | 'testnet' | 'mainnet');
 
 // View requirements
 const result = await dataNftMarket.viewRequirements();
@@ -131,13 +120,17 @@ const result = await dataNftMarket.viewRequirements();
 const result = await dataNftMarket.viewAddressListedOffers(new Address(''));
 
 // View address paged offers
-const result = await dataNftMarket.viewAddressPagedOffers(1, 10,new Address(''));
+const result = await dataNftMarket.viewAddressPagedOffers(
+  1,
+  10,
+  new Address('')
+);
 
 // View address total offers
 const result = await dataNftMarket.viewAddressTotalOffers(new Address(''));
 
 // View address cancelled offers
-const result =  await dataNftMarket.viewAddressCancelledOffers(new Address(''));
+const result = await dataNftMarket.viewAddressCancelledOffers(new Address(''));
 
 // View offers paged
 const result = await dataNftMarket.viewPagedOffers(1, 10);
@@ -155,16 +148,7 @@ const result = await dataNftMarket.viewContractPauseState();
 const result = await dataNftMarket.viewLastValidOfferId();
 
 // Create addOffer transaction
-const result = dataNftMarket.addOffer(
-      new Address(''),
-      '',
-      0,
-      0,
-      '',
-      0,
-      0,
-      0
-    );
+const result = dataNftMarket.addOffer(new Address(''), '', 0, 0, '', 0, 0, 0);
 
 // Create acceptOffer transaction
 const result = dataNftMarket.acceptOffer(new Address(''), 0, 0, 0);
@@ -176,7 +160,7 @@ const result = dataNftMarket.cancelOffer(new Address(''), 0);
 const result = dataNftMarket.cancelOffer(new Address(''), 0, false);
 
 // Create withdrawFromCancelledOffer transaction
-  const result = dataNftMarket.withdrawCancelledOffer(new Address(''), 0);
+const result = dataNftMarket.withdrawCancelledOffer(new Address(''), 0);
 
 // Create changeOfferPrice transaction
 const result = dataNftMarket.changeOfferPrice(new Address(''), 0, 0);
