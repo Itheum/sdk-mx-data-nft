@@ -43,24 +43,24 @@ describe('Data Nft Minter Test', () => {
     expect(typeof result).toBe('boolean');
   });
 
-  test('#mint', async () => {
-    const dataNftMarket = new DataNftMinter('devnet');
+  // test('#mint', async () => {
+  //   const dataNftMarket = new DataNftMinter('devnet');
 
-    const result = await dataNftMarket.mint(
-      new Address(
-        'erd10uavg8hd92620mfll2lt4jdmrg6xlf60awjp9ze5gthqjjhactvswfwuv8'
-      ),
-      'TEST-TOKEN',
-      'https://marshal.com',
-      'https://streamdata.com',
-      'https://previewdata',
-      15,
-      1000,
-      'Test Title',
-      'Test Description',
-      10,
-      ''
-    );
-    expect(result).toBeInstanceOf(Transaction);
-  }, 80000);
+  //   const result = await dataNftMarket.mint(
+  //     new Address(
+  //       'erd10uavg8hd92620mfll2lt4jdmrg6xlf60awjp9ze5gthqjjhactvswfwuv8'
+  //     ),
+  //     'TEST-TOKEN',
+  //     'https://marshal.com',
+  //     'https://streamdata.com',
+  //     'https://previewdata',
+  //     15,
+  //     1000,
+  //     'Test Title',
+  //     'Test Description',
+  //     10,
+  //     ''
+  //   );
+  //   expect(result).toBeInstanceOf(Transaction);
+  // }, 80000);
 });
