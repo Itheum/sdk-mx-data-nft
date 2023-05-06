@@ -106,7 +106,7 @@ export class DataNftMinter {
   }
 
   /**
-   * Retrieves if the smart contract is paused or not
+   * Retrieves the smart contract pause state
    */
   async viewContractPauseState(): Promise<boolean> {
     const interaction = this.contract.methodsExplicit.getIsPaused();
@@ -171,6 +171,7 @@ export class DataNftMinter {
    * @param datasetTitle the title of the dataset
    * @param datasetDescription the description of the dataset
    * @param antiSpamTax the anti spam tax to be set for the DataNFT-FT
+   * @param imageUrl the url of the image to be used for the DataNFT-FT (default = '', a random image will be generated)
    * @param antiSpamTokenIdentifier the anti spam token identifier to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
    */
   async mint(
@@ -184,6 +185,7 @@ export class DataNftMinter {
     datasetTitle: string,
     datasetDescription: string,
     antiSpamTax: number,
+    imageUrl = '',
     antiSpamTokenIdentifier = itheumTokenIdentifier[
       this.env as EnvironmentsEnum
     ]
@@ -191,7 +193,12 @@ export class DataNftMinter {
     const { dataNftHash, dataNftStreamUrlEncrypted } =
       await this.dataNFTDataStreamAdvertise(dataStreamUrl);
 
-    const newNFTImg = `${process.env.REACT_APP_ENV_DATADEX_API}/v1/generateNFTArt?hash=${dataNftHash}`;
+    let newNFTImg: string = '';
+    if (!imageUrl) {
+      newNFTImg = `${process.env.REACT_APP_ENV_DATADEX_API}/v1/generateNFTArt?hash=${dataNftHash}`;
+    } else {
+      newNFTImg = imageUrl;
+    }
 
     const { image, traits } = await this.createFileFromUrl(
       newNFTImg,
