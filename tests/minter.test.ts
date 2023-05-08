@@ -43,10 +43,12 @@ describe('Data Nft Minter Test', () => {
     expect(typeof result).toBe('boolean');
   });
 
-  // test('#mint', async () => {
+  // test('mint throws an error when an invalid image URL is provided', async () => {
   //   const dataNftMarket = new DataNftMinter('devnet');
 
-  //   const result = await dataNftMarket.mint(
+  //   const invalidImageUrl = 'invalid_url';
+
+  //   const mintPromise = dataNftMarket.mint(
   //     new Address(
   //       'erd10uavg8hd92620mfll2lt4jdmrg6xlf60awjp9ze5gthqjjhactvswfwuv8'
   //     ),
@@ -59,8 +61,12 @@ describe('Data Nft Minter Test', () => {
   //     'Test Title',
   //     'Test Description',
   //     10,
-  //     ''
+  //     {
+  //       imageUrl: invalidImageUrl,
+  //       imageDescription: 'Test Image Description'
+  //     }
   //   );
-  //   expect(result).toBeInstanceOf(Transaction);
-  // }, 80000);
+
+  //   await expect(mintPromise).rejects.toThrowError('Invalid image url');
+  // }, 100000);
 });
