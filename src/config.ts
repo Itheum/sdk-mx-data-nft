@@ -31,20 +31,20 @@ export const itheumTokenIdentifier: { [key in EnvironmentsEnum]: string } = {
 };
 
 export const dataNftTokenIdentifier: { [key in EnvironmentsEnum]: string } = {
-  devnet: 'DATANFTFT3-d0978e',
+  devnet: 'DATANFTFT4-3ba099',
   mainnet: '',
   testnet: ''
 };
 
 export const marketPlaceContractAddress: { [key in EnvironmentsEnum]: string } =
   {
-    devnet: 'erd1qqqqqqqqqqqqqpgqw29wx58pzm7zau2zcprfk93a60hw8vnvfsxs25rqjm',
+    devnet: 'erd1qqqqqqqqqqqqqpgqrwtl03qdxjv2e52ta5ry4rg0z7l95neqfsxsp4y4xh',
     mainnet: '',
     testnet: ''
   };
 
 export const minterContractAddress: { [key in EnvironmentsEnum]: string } = {
-  devnet: 'erd1qqqqqqqqqqqqqpgqthgd3esmd5eufhh9xcjjlf6aqxts4p5dfsxsrr0u3y',
+  devnet: 'erd1qqqqqqqqqqqqqpgqpd9qxrq5a03jrneafmlmckmlj5zgdj55fsxsqa7jsm',
   mainnet: '',
   testnet: ''
 };

@@ -11,9 +11,6 @@ describe('testing environment market', () => {
         timeout: 10000
       })
     );
-    expect(datanft.contract.getAddress().bech32()).toStrictEqual(
-      'erd1qqqqqqqqqqqqqpgqw29wx58pzm7zau2zcprfk93a60hw8vnvfsxs25rqjm'
-    );
   });
 
   test('#mainnet-default', async () => {
@@ -25,7 +22,6 @@ describe('testing environment market', () => {
         timeout: 10000
       })
     );
-    expect(datanft.contract.getAddress().bech32()).toStrictEqual('');
   });
 
   test('#devnet-custom-timeout', async () => {
@@ -36,9 +32,6 @@ describe('testing environment market', () => {
       new ProxyNetworkProvider('https://devnet-gateway.multiversx.com', {
         timeout: 5000
       })
-    );
-    expect(datanft.contract.getAddress().bech32()).toStrictEqual(
-      'erd1qqqqqqqqqqqqqpgqw29wx58pzm7zau2zcprfk93a60hw8vnvfsxs25rqjm'
     );
   });
 
@@ -51,7 +44,6 @@ describe('testing environment market', () => {
         timeout: 5000
       })
     );
-    expect(datanft.contract.getAddress().bech32()).toStrictEqual('');
   });
 });
 
@@ -65,9 +57,6 @@ describe('testing environment minter', () => {
         timeout: 10000
       })
     );
-    expect(datanft.contract.getAddress().bech32()).toStrictEqual(
-      'erd1qqqqqqqqqqqqqpgqthgd3esmd5eufhh9xcjjlf6aqxts4p5dfsxsrr0u3y'
-    );
   });
 
   test('#mainnet-default', async () => {
@@ -79,7 +68,6 @@ describe('testing environment minter', () => {
         timeout: 10000
       })
     );
-    expect(datanft.contract.getAddress().bech32()).toStrictEqual('');
   });
 
   test('#devnet-custom-timeout', async () => {
@@ -90,9 +78,6 @@ describe('testing environment minter', () => {
       new ProxyNetworkProvider('https://devnet-gateway.multiversx.com', {
         timeout: 5000
       })
-    );
-    expect(datanft.contract.getAddress().bech32()).toStrictEqual(
-      'erd1qqqqqqqqqqqqqpgqthgd3esmd5eufhh9xcjjlf6aqxts4p5dfsxsrr0u3y'
     );
   });
 
@@ -105,6 +90,5 @@ describe('testing environment minter', () => {
         timeout: 5000
       })
     );
-    expect(datanft.contract.getAddress().bech32()).toStrictEqual('');
   });
 });

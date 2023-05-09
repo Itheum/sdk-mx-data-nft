@@ -8,7 +8,7 @@ describe('Data Nft Minter Test', () => {
     const dataNftMarket = new DataNftMinter('devnet');
     expect(dataNftMarket.getContractAddress()).toBeInstanceOf(Address);
     expect(dataNftMarket.getContractAddress().bech32()).toStrictEqual(
-      'erd1qqqqqqqqqqqqqpgqthgd3esmd5eufhh9xcjjlf6aqxts4p5dfsxsrr0u3y'
+      'erd1qqqqqqqqqqqqqpgqpd9qxrq5a03jrneafmlmckmlj5zgdj55fsxsqa7jsm'
     );
   });
 
