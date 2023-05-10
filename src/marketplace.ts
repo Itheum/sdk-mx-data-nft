@@ -20,7 +20,8 @@ import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   networkConfiguration,
-  marketPlaceContractAddress
+  marketPlaceContractAddress,
+  itheumTokenIdentifier
 } from './config';
 import dataMarketAbi from './abis/data_market.abi.json';
 import { MarketplaceRequirements, Offer } from './interfaces';
@@ -29,6 +30,7 @@ export class DataNftMarket {
   readonly contract: SmartContract;
   readonly chainID: string;
   readonly networkProvider: ProxyNetworkProvider;
+  readonly env: string;
 
   /**
    * Creates a new instance of the DataNftMarket which can be used to interact with the DataNFT-FTs inside the marketplace
@@ -36,6 +38,7 @@ export class DataNftMarket {
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: string, timeout: number = 10000) {
+    this.env = env;
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.chainID = networkConfig.chainID;
     this.networkProvider = new ProxyNetworkProvider(
@@ -389,7 +392,7 @@ export class DataNftMarket {
     dataNftAmount: number,
     paymentTokenIdentifier: string,
     paymentTokenNonce: number,
-    paymentTokenAmount: number,
+    paymentTokenAmount: string,
     minimumPaymentTokenAmount = 0
   ): Transaction {
     const addOfferTx = new Transaction({
@@ -416,26 +419,99 @@ export class DataNftMarket {
     return addOfferTx;
   }
 
+  //  data = new ContractCallPayloadBuilder()
+  //         .setFunction(new ContractFunction('acceptOffer'))
+  //         .addArg(new U64Value(offerId))
+  //         .addArg(new U64Value(amount))
+  //         .build();
+
   /**
-   * Creates a `acceptOffer` transaction
+   * Creates a `acceptOffer` transaction with ESDT tokens
    * @param senderAddress the address of the sender
    * @param offerId the id of the offer to be accepted
-   * @param price the price of the offer (must include the buyer fee)
    * @param amount the amount of tokens to be bought
+   * @param price the price of the offer (must include the buyer fee)
+   * @param paymentTokenIdentifier the identifier of the payment token (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum}))
    */
-  acceptOffer(
+  acceptOfferWithESDT(
     senderAddress: IAddress,
     offerId: number,
-    price: number,
-    amount: number
+    amount: number,
+    price: string,
+    paymentTokenIdentifier = itheumTokenIdentifier[this.env as EnvironmentsEnum]
   ): Transaction {
+    const data = new ContractCallPayloadBuilder()
+      .setFunction(new ContractFunction('ESDTTransfer'))
+      .addArg(new TokenIdentifierValue(paymentTokenIdentifier))
+      .addArg(new BigUIntValue(price))
+      .addArg(new StringValue('acceptOffer'))
+      .addArg(new U64Value(offerId))
+      .addArg(new BigUIntValue(amount))
+      .build();
+
+    const acceptTx = new Transaction({
+      value: 0,
+      data: data,
+      receiver: this.contract.getAddress(),
+      gasLimit: 12000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return acceptTx;
+  }
+
+  /**
+   * Creates a `acceptOffer` transaction with EGLD
+   * @param senderAddress the address of the sender
+   * @param offerId the id of the offer to be accepted
+   * @param amount the amount of tokens to be bought
+   * @param price the price of the offer (must include the buyer fee)
+   */
+  acceptOfferWithEGLD(
+    senderAddress: IAddress,
+    offerId: number,
+    amount: number,
+    price: string
+  ): Transaction {
+    const data = new ContractCallPayloadBuilder()
+      .setFunction(new ContractFunction('acceptOffer'))
+      .addArg(new U64Value(offerId))
+      .addArg(new BigUIntValue(amount))
+      .build();
+
     const acceptTx = new Transaction({
       value: price,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('acceptOffer'))
-        .addArg(new U64Value(offerId))
-        .addArg(new U64Value(amount))
-        .build(),
+      data: data,
+      receiver: this.contract.getAddress(),
+      gasLimit: 12000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return acceptTx;
+  }
+
+  /**
+   * Creates a `acceptOffer` without payment token (Free)
+   * @param senderAddress the address of the sender
+   * @param offerId the id of the offer to be accepted
+   * @param amount the amount of tokens to be bought
+   */
+  acceptOfferWithNoPayment(
+    senderAddress: IAddress,
+    offerId: number,
+    amount: number
+  ): Transaction {
+    const data = new ContractCallPayloadBuilder()
+      .setFunction(new ContractFunction('acceptOffer'))
+      .addArg(new U64Value(offerId))
+      .addArg(new BigUIntValue(amount))
+      .build();
+
+    const acceptTx = new Transaction({
+      value: 0,
+      data: data,
       receiver: this.contract.getAddress(),
       gasLimit: 12000000,
       sender: senderAddress,
