@@ -392,7 +392,7 @@ export class DataNftMarket {
     dataNftAmount: number,
     paymentTokenIdentifier: string,
     paymentTokenNonce: number,
-    paymentTokenAmount: string,
+    paymentTokenAmount: number,
     minimumPaymentTokenAmount = 0
   ): Transaction {
     const addOfferTx = new Transaction({

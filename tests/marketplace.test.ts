@@ -70,9 +70,28 @@ describe('Marketplace Sdk test', () => {
   test('#acceptOffer', () => {
     const dataNftMarket = new DataNftMarket('devnet');
 
-    const result = dataNftMarket.acceptOffer(new Address(''), 0, 0, 0);
+    const result = dataNftMarket.acceptOfferWithEGLD(
+      new Address(''),
+      0,
+      0,
+      '100'
+    );
+    const result2 = dataNftMarket.acceptOfferWithESDT(
+      new Address(''),
+      0,
+      0,
+      '1000'
+    );
+
+    const result3 = dataNftMarket.acceptOfferWithNoPayment(
+      new Address(''),
+      0,
+      0
+    );
 
     expect(result).toBeInstanceOf(Transaction);
+    expect(result2).toBeInstanceOf(Transaction);
+    expect(result3).toBeInstanceOf(Transaction);
   });
 
   test('#cancelOffer', () => {

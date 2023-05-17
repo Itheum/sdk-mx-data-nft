@@ -32,20 +32,20 @@ export const itheumTokenIdentifier: { [key in EnvironmentsEnum]: string } = {
 
 export const dataNftTokenIdentifier: { [key in EnvironmentsEnum]: string } = {
   devnet: 'DATANFTFT4-3ba099',
-  mainnet: '',
+  mainnet: 'DATANFTFT-e6fb09',
   testnet: ''
 };
 
 export const marketPlaceContractAddress: { [key in EnvironmentsEnum]: string } =
   {
     devnet: 'erd1qqqqqqqqqqqqqpgqrwtl03qdxjv2e52ta5ry4rg0z7l95neqfsxsp4y4xh',
-    mainnet: '',
+    mainnet: 'erd1qqqqqqqqqqqqqpgqxytuyt0p2c67nucvahk5y5s2ry3mjdrmc77q6ew3xc',
     testnet: ''
   };
 
 export const minterContractAddress: { [key in EnvironmentsEnum]: string } = {
   devnet: 'erd1qqqqqqqqqqqqqpgqpd9qxrq5a03jrneafmlmckmlj5zgdj55fsxsqa7jsm',
-  mainnet: '',
+  mainnet: 'erd1qqqqqqqqqqqqqpgq44muq3nqezx0ma9vu82rs6x3sycwjzrcc77qze5uju',
   testnet: ''
 };
 
