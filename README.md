@@ -2,9 +2,9 @@
 
 This SDK is currently focused on interacting with the Itheum's Data NFT technology that's deployed to the MultiversX blockchain.
 
-## DO NOT USE -- IN ACTIVE DEV --
+## -- CAUTION: IN ACTIVE DEV --
 
-You should not be using this yet, if you **really really** want to use it, the come over to our discord at https://itheum.io/discord and speak to us for assistance.
+This SDK is in active development and probably has many bugs. If you **really really** want to use it, the come over to our discord at https://itheum.io/discord and speak to us for assistance.
 
 ## Dev
 
@@ -20,10 +20,6 @@ You should not be using this yet, if you **really really** want to use it, the c
 
 - `npm run build`
 - New build is sent to `dist` folder
-
-## NPM Deploy
-
-- Not yet
 
 ## How to use
 
