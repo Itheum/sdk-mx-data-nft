@@ -13,8 +13,8 @@
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build"
   },
-  "author": "Itheum",
-  "license": "GPLV3",
+  "author": "Itheum Protocol",
+  "license": "GPL-3.0-only",
   "dependencies": {
     "@multiversx/sdk-core": "^12.1.1",
     "@multiversx/sdk-network-providers": "^1.4.0",
