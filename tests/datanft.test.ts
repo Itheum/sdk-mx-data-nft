@@ -5,7 +5,7 @@ describe('Data NFT test', () => {
     DataNft.setNetworkConfig('devnet');
     const dataNft = new DataNft({
       dataMarshal:
-        'https://d37x5igq4vw5mq.cloudfront.net/datamarshalapi/achilles/v1'
+        'https://api.itheumcloud-stg.com/datamarshalapi/achilles/v1'
     });
 
     const nonceToSign = await dataNft.getMessageToSign();

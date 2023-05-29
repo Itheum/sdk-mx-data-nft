@@ -23,10 +23,10 @@ This SDK is in active development and probably has many bugs. If you **really re
 
 ## How to use
 
-- 3rd party app installs this SDK 'npm i @itheum/sdk-mx-data-nft'
-- 3rd party app runs commands like
+- 3rd party app installs this SDK `npm i @itheum/sdk-mx-data-nft`
+- 3rd party app runs commands like:
 
-## DataNft
+## DataNFT
 
 ```typescript
 import { DataNft } from '@itheum/sdk-mx-data-nft';
