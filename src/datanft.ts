@@ -107,6 +107,20 @@ export class DataNft {
   }
 
   /**
+   * Creates an array of DataNft from an array of NFT details API response.
+   *
+   * @param payload NFT details API response
+   */
+  static createFromApiResponseBulk(payload: NftType[]): DataNft[] {
+    const dataNfts: DataNft[] = [];
+    payload.forEach((nft: NftType) => {
+      dataNfts.push(this.createFromApiResponse(nft));
+    });
+
+    return dataNfts;
+  }
+
+  /**
    * Static method to decode the attributes of a DataNft
    * @param attributes Attributes of the DataNft
    */
