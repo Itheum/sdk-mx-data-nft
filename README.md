@@ -46,8 +46,10 @@ const nft = await DataNft.createFromApi(nonce);
 // Create a new DataNft object from API Response
 const response = await fetch('https://devnet-api.multiversx.com/address/nfts');
 const dataNfts = [];
-response.forEach((nft) => {
-  dataNfts = await DataNft.createFromApiResponse(nft);
+
+response.forEach(async (nft) => {
+  const data = await DataNft.createFromApiResponse(nft);
+  dataNfts.push(data);
 });
 
 // Retrives the DataNfts owned by a address

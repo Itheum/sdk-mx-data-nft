@@ -86,7 +86,7 @@ export class DataNft {
   }
 
   /**
-   * Creates a DataNft from a API response containing
+   * Creates a DataNft from a API response containing the NFT details.
    *
    * Useful for creating an array of DataNft.
    * @param payload NFT details API response
