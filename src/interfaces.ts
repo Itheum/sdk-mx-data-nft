@@ -52,7 +52,7 @@ export declare enum NftEnumType {
 export interface MarketplaceRequirements {
   acceptedTokens: string[];
   acceptedPayments: string[];
-  maximumPaymentFees: number[];
+  maximumPaymentFees: string[];
   buyerTaxPercentageDiscount: number;
   sellerTaxPercentageDiscount: number;
   buyerTaxPercentage: number;

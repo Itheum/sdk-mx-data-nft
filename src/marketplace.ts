@@ -260,7 +260,7 @@ export class DataNftMarket {
       const requirements: MarketplaceRequirements = {
         acceptedTokens: returnValue.accepted_tokens as string[],
         acceptedPayments: returnValue.accepted_payments as string[],
-        maximumPaymentFees: returnValue.maximum_payment_fees.map((v: any) => v.toNumber()),
+        maximumPaymentFees: returnValue.maximum_payment_fees.map((v: any) => v.toFixed(0)),
         buyerTaxPercentageDiscount: returnValue.discount_fee_percentage_buyer.toNumber(),
         sellerTaxPercentageDiscount: returnValue.discount_fee_percentage_seller.toNumber(),
         buyerTaxPercentage: returnValue.percentage_cut_from_buyer.toNumber(),
