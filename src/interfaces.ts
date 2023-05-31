@@ -80,9 +80,9 @@ export interface Offer {
   owner: string;
   offeredTokenIdentifier: string;
   offeredTokenNonce: number;
-  offeredTokenAmount: number;
+  offeredTokenAmount: string;
   wantedTokenIdentifier: string;
   wantedTokenNonce: number;
-  wantedTokenAmount: number;
+  wantedTokenAmount: string;
   quantity: number;
 }
