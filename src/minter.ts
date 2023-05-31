@@ -85,19 +85,19 @@ export class DataNftMinter {
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
       const requirements: MinterRequirements = {
-        antiSpamTaxValue: returnValue['anti_spam_tax_value'] as number,
-        contractPaused: returnValue['is_paused'] as boolean,
-        maxRoyalties: returnValue['max_royalties'] as number,
-        minRoyalties: returnValue['min_royalties'] as number,
-        maxSupply: returnValue['max_supply'] as number,
-        mintTimeLimit: returnValue['mint_time_limit'] as number,
-        lastUserMintTime: returnValue['last_mint_time'] as number,
-        userWhitelistedForMint: returnValue['is_whitelisted'] as boolean,
-        contractWhitelistEnabled: returnValue['whitelist_enabled'] as boolean,
-        numberOfMintsForUser: returnValue['minted_per_user'] as number,
-        totalNumberOfMints: returnValue['total_minted'] as number,
-        addressFrozen: returnValue['frozen'] as boolean,
-        frozenNonces: returnValue['frozen_nonces'] as number[]
+        antiSpamTaxValue: returnValue.anti_spam_tax_value.toNumber(),
+        contractPaused: returnValue.is_paused,
+        maxRoyalties: returnValue.max_royalties.toNumber(),
+        minRoyalties: returnValue.min_royalties.toNumber(),
+        maxSupply: returnValue.max_supply.toNumber(),
+        mintTimeLimit: returnValue.mint_time_limit.toNumber(),
+        lastUserMintTime: returnValue.last_mint_time,
+        userWhitelistedForMint: returnValue.is_whitelisted,
+        contractWhitelistEnabled: returnValue.whitelist_enabled,
+        numberOfMintsForUser: returnValue.minted_per_user.toNumber(),
+        totalNumberOfMints: returnValue.total_minted.toNumber(),
+        addressFrozen: returnValue.frozen,
+        frozenNonces: returnValue.frozen_nonces.map((v: any) => v.toNumber()),
       };
       return requirements;
     } else {

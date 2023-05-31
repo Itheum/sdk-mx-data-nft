@@ -25,6 +25,7 @@ import {
 } from './config';
 import dataMarketAbi from './abis/data_market.abi.json';
 import { MarketplaceRequirements, Offer } from './interfaces';
+import { parseOffer } from './utils';
 
 export class DataNftMarket {
   readonly contract: SmartContract;
@@ -80,17 +81,7 @@ export class DataNftMarket {
     if (returnCode.isSuccess()) {
       const firstValueAsVariadic = firstValue as VariadicValue;
       const returnValue = firstValueAsVariadic?.valueOf();
-      const offers: Offer[] = returnValue.map((offer: any) => ({
-        index: offer['offer_id'].toNumber(),
-        owner: offer['owner'].bech32(),
-        offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
-        offeredTokenNonce: offer['offered_token_nonce'].toString(),
-        offeredTokenAmount: offer['offered_token_amount'] as number,
-        wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
-        wantedTokenNonce: offer['wanted_token_nonce'].toString(),
-        wantedTokenAmount: offer['wanted_token_amount'] as number,
-        quantity: offer.quantity.toNumber()
-      }));
+      const offers: Offer[] = returnValue.map((offer: any) => parseOffer(offer));
       return offers;
     } else {
       return [];
@@ -123,17 +114,7 @@ export class DataNftMarket {
     if (returnCode.isSuccess()) {
       const firstValueAsVariadic = firstValue as VariadicValue;
       const returnValue = firstValueAsVariadic?.valueOf();
-      const offers: Offer[] = returnValue.map((offer: any) => ({
-        index: offer['offer_id'].toNumber(),
-        owner: offer['owner'].bech32(),
-        offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
-        offeredTokenNonce: offer['offered_token_nonce'].toString(),
-        offeredTokenAmount: offer['offered_token_amount'] as number,
-        wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
-        wantedTokenNonce: offer['wanted_token_nonce'].toString(),
-        wantedTokenAmount: offer['wanted_token_amount'] as number,
-        quantity: offer.quantity.toNumber()
-      }));
+      const offers: Offer[] = returnValue.map((offer: any) => parseOffer(offer));
       return offers;
     } else {
       return [];
@@ -180,17 +161,7 @@ export class DataNftMarket {
     );
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      const offers: Offer[] = returnValue.map((offer: any) => ({
-        index: offer['offer_id'].toNumber(),
-        owner: offer['owner'].bech32(),
-        offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
-        offeredTokenNonce: offer['offered_token_nonce'].toString(),
-        offeredTokenAmount: offer['offered_token_amount'] as number,
-        wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
-        wantedTokenNonce: offer['wanted_token_nonce'].toString(),
-        wantedTokenAmount: offer['wanted_token_amount'] as number,
-        quantity: offer.quantity.toNumber()
-      }));
+      const offers: Offer[] = returnValue.map((offer: any) => parseOffer(offer));
       return offers;
     } else {
       return [];
@@ -216,17 +187,7 @@ export class DataNftMarket {
     );
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      const offers: Offer[] = returnValue.map((offer: any) => ({
-        index: offer['offer_id'].toNumber(),
-        owner: offer['owner'].bech32(),
-        offeredTokenIdentifier: offer['offered_token_identifier'].toString(),
-        offeredTokenNonce: offer['offered_token_nonce'].toString(),
-        offeredTokenAmount: offer['offered_token_amount'] as number,
-        wantedTokenIdentifier: offer['wanted_token_identifier'].toString(),
-        wantedTokenNonce: offer['wanted_token_nonce'].toString(),
-        wantedTokenAmount: offer['wanted_token_amount'] as number,
-        quantity: offer.quantity.toNumber()
-      }));
+      const offers: Offer[] = returnValue.map((offer: any) => parseOffer(offer));
       return offers;
     } else {
       return [];
@@ -297,18 +258,13 @@ export class DataNftMarket {
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
       const requirements: MarketplaceRequirements = {
-        acceptedTokens: returnValue['accepted_tokens'] as string[],
-        acceptedPayments: returnValue['accepted_payments'] as string[],
-        maximumPaymentFees: returnValue['maximum_payment_fees'] as number[],
-        buyerTaxPercentageDiscount: returnValue[
-          'discount_fee_percentage_buyer'
-        ] as number,
-        sellerTaxPercentageDiscount: returnValue[
-          'discount_fee_percentage_seller'
-        ] as number,
-        buyerTaxPercentage: returnValue['percentage_cut_from_buyer'].toNumber(),
-        sellerTaxPercentage:
-          returnValue['percentage_cut_from_seller'].toNumber()
+        acceptedTokens: returnValue.accepted_tokens as string[],
+        acceptedPayments: returnValue.accepted_payments as string[],
+        maximumPaymentFees: returnValue.maximum_payment_fees.map((v: any) => v.toFixed(0)),
+        buyerTaxPercentageDiscount: returnValue.discount_fee_percentage_buyer.toNumber(),
+        sellerTaxPercentageDiscount: returnValue.discount_fee_percentage_seller.toNumber(),
+        buyerTaxPercentage: returnValue.percentage_cut_from_buyer.toNumber(),
+        sellerTaxPercentage: returnValue.percentage_cut_from_seller.toNumber()
       };
       return requirements;
     } else {

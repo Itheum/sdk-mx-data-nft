@@ -70,12 +70,12 @@ export class DataNft {
     try {
       const dataNft = new DataNft({
         tokenIdentifier: dataNftOnNetwork['identifier'],
-        nftImgUrl: dataNftOnNetwork['url'] ? dataNftOnNetwork['url'] : '',
+        nftImgUrl: dataNftOnNetwork['url'] ?? '',
         tokenName: dataNftOnNetwork['name'],
-        supply: dataNftOnNetwork['supply'] as number,
-        royalties: (dataNftOnNetwork['royalties'] / 100) as number,
-        nonce: dataNftOnNetwork['nonce'] as number,
-        collection: dataNftOnNetwork['collection'] as string,
+        supply: Number(dataNftOnNetwork['supply']),
+        royalties: dataNftOnNetwork['royalties'] / 100,
+        nonce: dataNftOnNetwork['nonce'],
+        collection: dataNftOnNetwork['collection'],
         ...DataNft.decodeAttributes(dataNftOnNetwork['attributes'])
       });
 
@@ -93,14 +93,14 @@ export class DataNft {
    */
   static createFromApiResponse(payload: NftType): DataNft {
     const dataNft = new DataNft({
-      tokenIdentifier: payload['identifier'],
-      nftImgUrl: payload['url'] ? payload['url'] : '',
-      tokenName: payload['name'],
-      supply: Number(payload['supply']),
-      royalties: (payload['royalties'] / 100) as number,
-      nonce: payload['nonce'] as number,
-      collection: payload['collection'] as string,
-      ...DataNft.decodeAttributes(payload['attributes'])
+      tokenIdentifier: payload.identifier,
+      nftImgUrl: payload.url ?? '',
+      tokenName: payload.name,
+      supply: payload.supply ? Number(payload.supply) : 0,
+      royalties: payload.royalties / 100,
+      nonce: payload.nonce,
+      collection: payload.collection,
+      ...DataNft.decodeAttributes(payload.attributes)
     });
 
     return dataNft;
