@@ -46,7 +46,7 @@ export function parseDataNft(value: NftType): DataNft {
     tokenIdentifier: value.identifier,
     nftImgUrl: value.url ?? '',
     tokenName: value.name,
-    supply: Number(value.supply),
+    supply: value.supply ? Number(value.supply) : 0,
     royalties: value.royalties / 100,
     nonce: value.nonce,
     collection: value.collection,

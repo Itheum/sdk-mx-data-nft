@@ -65,7 +65,7 @@ export class DataNft {
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft> {
     const identifier = createNftIdentifier(tokenIdentifier, nonce);
-    const { data } = await axios.get<NftType[]>(`${this.apiConfiguration}/nfts/${identifier}`);
+    const { data } = await axios.get<NftType>(`${this.apiConfiguration}/nfts/${identifier}`);
 
     try {
       const dataNft = parseDataNft(data);
