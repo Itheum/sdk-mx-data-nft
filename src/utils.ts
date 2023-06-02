@@ -1,9 +1,14 @@
 import BigNumber from "bignumber.js";
-import { Offer } from "./interfaces";
+import { DataNft } from "./datanft";
+import { NftType, Offer } from "./interfaces";
 
 export function numberToPaddedHex(value: BigNumber.Value) {
   let hex = new BigNumber(value).toString(16);
   return zeroPadStringIfOddLength(hex);
+}
+
+export function createNftIdentifier(collection: string, nonce: number) {
+  return `${collection}-${numberToPaddedHex(nonce)}`;
 }
 
 export function isPaddedHex(input: string) {
@@ -34,4 +39,17 @@ export function parseOffer(value: any): Offer {
     wantedTokenAmount: value.wanted_token_amount.toFixed(0),
     quantity: value.quantity.toNumber(),
   };
+}
+
+export function parseDataNft(value: NftType): DataNft {
+  return new DataNft({
+    tokenIdentifier: value.identifier,
+    nftImgUrl: value.url ?? '',
+    tokenName: value.name,
+    supply: value.supply ? Number(value.supply) : 0,
+    royalties: value.royalties / 100,
+    nonce: value.nonce,
+    collection: value.collection,
+    ...DataNft.decodeAttributes(value.attributes),
+  });
 }
