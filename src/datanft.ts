@@ -3,6 +3,7 @@ import {
   BinaryCodec,
   SignableMessage
 } from '@multiversx/sdk-core/out';
+import axios from 'axios';
 import {
   Config,
   EnvironmentsEnum,
@@ -10,7 +11,7 @@ import {
   dataNftTokenIdentifier,
   networkConfiguration
 } from './config';
-import { numberToPaddedHex } from './utils';
+import { createNftIdentifier, numberToPaddedHex, parseDataNft } from './utils';
 import minterAbi from './abis/datanftmint.abi.json';
 import { NftType } from './interfaces';
 import axios from 'axios';
@@ -63,23 +64,35 @@ export class DataNft {
     nonce: number,
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft> {
-    const identifier = `${tokenIdentifier}-${numberToPaddedHex(nonce)}`;
-    const nftQuery = await fetch(`${this.apiConfiguration}/nfts/${identifier}`);
-    const dataNftOnNetwork = await nftQuery.json();
+    const identifier = createNftIdentifier(tokenIdentifier, nonce);
+    const { data } = await axios.get<NftType>(`${this.apiConfiguration}/nfts/${identifier}`);
 
     try {
-      const dataNft = new DataNft({
-        tokenIdentifier: dataNftOnNetwork['identifier'],
-        nftImgUrl: dataNftOnNetwork['url'] ?? '',
-        tokenName: dataNftOnNetwork['name'],
-        supply: Number(dataNftOnNetwork['supply']),
-        royalties: dataNftOnNetwork['royalties'] / 100,
-        nonce: dataNftOnNetwork['nonce'],
-        collection: dataNftOnNetwork['collection'],
-        ...DataNft.decodeAttributes(dataNftOnNetwork['attributes'])
-      });
+      const dataNft = parseDataNft(data);
 
       return dataNft;
+    } catch {
+      throw new Error('Could not create DataNft from Api');
+    }
+  }
+
+  /**
+   * Creates DataNfts calling the API and also decoding the attributes.
+   *
+   * @param nonces an array of Token nonces
+   * @param tokenIdentifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link EnvironmentsEnum})
+   */
+   static async createManyFromApi(
+    nonces: number[],
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Promise<DataNft[]> {
+    const identifiers = nonces.map((nonce) => createNftIdentifier(tokenIdentifier, nonce));
+    const { data } = await axios.get<NftType[]>(`${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}`);
+
+    try {
+      const dataNfts = data.map((value) => parseDataNft(value));
+
+      return dataNfts;
     } catch {
       throw new Error('Could not create DataNft from Api');
     }
@@ -92,16 +105,7 @@ export class DataNft {
    * @param payload NFT details API response
    */
   static createFromApiResponse(payload: NftType): DataNft {
-    const dataNft = new DataNft({
-      tokenIdentifier: payload.identifier,
-      nftImgUrl: payload.url ?? '',
-      tokenName: payload.name,
-      supply: payload.supply ? Number(payload.supply) : 0,
-      royalties: payload.royalties / 100,
-      nonce: payload.nonce,
-      collection: payload.collection,
-      ...DataNft.decodeAttributes(payload.attributes)
-    });
+    const dataNft = parseDataNft(payload);
 
     return dataNft;
   }

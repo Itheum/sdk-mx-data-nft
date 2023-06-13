@@ -2,31 +2,29 @@
 
 This SDK is currently focused on interacting with the Itheum's Data NFT technology that's deployed to the MultiversX blockchain.
 
-## -- CAUTION: IN ACTIVE DEV --
-
-This SDK is in active development and probably has many bugs. If you **really really** want to use it, the come over to our discord at https://itheum.io/discord and speak to us for assistance.
-
-## Dev
+## Contributing
 
 - requires `node@19.7X`
 - `npm install`
 - work on typescript code in the `/src` folder
 
-## Dev Testing
+### Dev Testing
 
 - Only simple dev testing added. First **Build** as below and then run `npm run devtest` and work on the test.mjs file for live reload
 
-## Build
+### Build
 
 - `npm run build`
 - New build is sent to `dist` folder
 
-## How to use
+## Usage in 3rd party dApps
 
-- 3rd party app installs this SDK `npm i @itheum/sdk-mx-data-nft`
-- 3rd party app runs commands like:
+- install this SDK via `npm i @itheum/sdk-mx-data-nft`
+- Methods supported are given below is `SDK Docs`
 
-## DataNFT
+## SDK DOCS
+
+### 1. Interacting with Data NFTs
 
 ```typescript
 import { DataNft } from '@itheum/sdk-mx-data-nft';
@@ -69,7 +67,7 @@ const signature = 'signature';
 dataNft.viewData(message, signature);
 ```
 
-## Minter smart contract
+### 2. Interacting with Data NFT Minter
 
 ```typescript
 import { DataNftMinter } from '@itheum/sdk-mx-data-nft';
@@ -104,7 +102,7 @@ const transaction = await dataNftMarket.burn(
 );
 ```
 
-## Marketplace smart contract
+### 3. Interacting with Data NFT Marketplace
 
 ```typescript
 import { DataNftMarket } from '@itheum/sdk-mx-data-nft';
