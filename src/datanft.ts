@@ -13,7 +13,7 @@ import {
 import { numberToPaddedHex } from './utils';
 import minterAbi from './abis/datanftmint.abi.json';
 import { NftType } from './interfaces';
-
+import axios from 'axios';
 export class DataNft {
   readonly tokenIdentifier: string = '';
   readonly nftImgUrl: string = '';
@@ -229,7 +229,7 @@ export class DataNft {
       signResult.exception = e.toString();
     }
 
-    const response = await fetch(
+    const response = await axios.get(
       `${this.dataMarshal}/access?nonce=${signedMessage}&NFTId=${
         this.collection
       }-${numberToPaddedHex(this.nonce)}&signature=${
@@ -243,7 +243,7 @@ export class DataNft {
       }`
     );
 
-    const data = await response.json();
+    const data = await response.data;
 
     return data;
   }
