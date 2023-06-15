@@ -65,7 +65,9 @@ export class DataNft {
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft> {
     const identifier = createNftIdentifier(tokenIdentifier, nonce);
-    const { data } = await axios.get<NftType>(`${this.apiConfiguration}/nfts/${identifier}`);
+    const { data } = await axios.get<NftType>(
+      `${this.apiConfiguration}/nfts/${identifier}`
+    );
 
     try {
       const dataNft = parseDataNft(data);
@@ -82,12 +84,16 @@ export class DataNft {
    * @param nonces an array of Token nonces
    * @param tokenIdentifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link EnvironmentsEnum})
    */
-   static async createManyFromApi(
+  static async createManyFromApi(
     nonces: number[],
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft[]> {
-    const identifiers = nonces.map((nonce) => createNftIdentifier(tokenIdentifier, nonce));
-    const { data } = await axios.get<NftType[]>(`${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}`);
+    const identifiers = nonces.map((nonce) =>
+      createNftIdentifier(tokenIdentifier, nonce)
+    );
+    const { data } = await axios.get<NftType[]>(
+      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}`
+    );
 
     try {
       const dataNfts = data.map((value) => parseDataNft(value));
@@ -233,7 +239,7 @@ export class DataNft {
       signResult.exception = e.toString();
     }
 
-    const response = await fetch(
+    const response = await axios.get(
       `${this.dataMarshal}/access?nonce=${signedMessage}&NFTId=${
         this.collection
       }-${numberToPaddedHex(this.nonce)}&signature=${
@@ -247,7 +253,7 @@ export class DataNft {
       }`
     );
 
-    const data = await response.json();
+    const data = await response.data;
 
     return data;
   }
