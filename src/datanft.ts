@@ -13,7 +13,7 @@ import {
 } from './config';
 import { createNftIdentifier, numberToPaddedHex, parseDataNft } from './utils';
 import minterAbi from './abis/datanftmint.abi.json';
-import { NftType } from './interfaces';
+import { NftType, ViewDataReturnType } from './interfaces';
 
 export class DataNft {
   readonly tokenIdentifier: string = '';
@@ -212,7 +212,7 @@ export class DataNft {
     signedMessage: string,
     signableMessage: SignableMessage,
     stream?: boolean
-  ): Promise<any> {
+  ): Promise<ViewDataReturnType> {
     const signResult = {
       signature: '',
       addrInHex: '',
@@ -239,8 +239,8 @@ export class DataNft {
       signResult.exception = e.toString();
     }
 
-    const response = await axios.get(
-      `${this.dataMarshal}/access?nonce=${signedMessage}&NFTId=${
+    try {
+      const url = `${this.dataMarshal}/access?nonce=${signedMessage}&NFTId=${
         this.collection
       }-${numberToPaddedHex(this.nonce)}&signature=${
         signResult.signature
@@ -250,11 +250,19 @@ export class DataNft {
           : DataNft.networkConfiguration.chainID
       }&accessRequesterAddr=${signResult.addrInHex}&${
         stream ? 'streamInLine=1' : ''
-      }`
-    );
-
-    const data = await response.data;
-
-    return data;
+      }`;
+      const response = await axios.get(url, { responseType: 'blob' });
+  
+      return {
+        data: response.data,
+        contentType: response.headers['content-type'],
+      };
+    } catch (err) {
+      return {
+        data: undefined,
+        contentType: '',
+        error: (err as Error).message,
+      };
+    }
   }
 }

@@ -16,7 +16,7 @@
   "author": "Itheum Protocol",
   "license": "GPL-3.0-only",
   "dependencies": {
-    "@multiversx/sdk-core": "^12.1.1",
+    "@multiversx/sdk-core": "12.2.1",
     "@multiversx/sdk-network-providers": "^1.4.0",
     "bignumber.js": "^9.1.1",
     "dotenv": "^16.0.3",

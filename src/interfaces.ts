@@ -86,3 +86,9 @@ export interface Offer {
   wantedTokenAmount: string;
   quantity: number;
 }
+
+export interface ViewDataReturnType {
+  data: any;
+  contentType: string;
+  error?: string;
+}
