@@ -3,7 +3,6 @@ import {
   BinaryCodec,
   SignableMessage
 } from '@multiversx/sdk-core/out';
-import axios from 'axios';
 import {
   Config,
   EnvironmentsEnum,
@@ -65,9 +64,8 @@ export class DataNft {
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft> {
     const identifier = createNftIdentifier(tokenIdentifier, nonce);
-    const { data } = await axios.get<NftType>(
-      `${this.apiConfiguration}/nfts/${identifier}`
-    );
+    const response = await fetch(`${this.apiConfiguration}/nfts/${identifier}`);
+    const data: NftType = await response.json();
 
     try {
       const dataNft = parseDataNft(data);
@@ -91,9 +89,10 @@ export class DataNft {
     const identifiers = nonces.map((nonce) =>
       createNftIdentifier(tokenIdentifier, nonce)
     );
-    const { data } = await axios.get<NftType[]>(
+    const response = await fetch(
       `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}`
     );
+    const data: NftType[] = await response.json();
 
     try {
       const dataNfts = data.map((value) => parseDataNft(value));
@@ -251,17 +250,19 @@ export class DataNft {
       }&accessRequesterAddr=${signResult.addrInHex}&${
         stream ? 'streamInLine=1' : ''
       }`;
-      const response = await axios.get(url, { responseType: 'blob' });
-  
+      const response = await fetch(url);
+      const contentType = response.headers.get('content-type');
+      const data = await response.blob();
+
       return {
-        data: response.data,
-        contentType: response.headers['content-type'],
+        data: data,
+        contentType: contentType || ''
       };
     } catch (err) {
       return {
         data: undefined,
         contentType: '',
-        error: (err as Error).message,
+        error: (err as Error).message
       };
     }
   }
