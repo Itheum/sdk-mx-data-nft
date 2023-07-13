@@ -3,7 +3,6 @@ import {
   BinaryCodec,
   SignableMessage
 } from '@multiversx/sdk-core/out';
-import axios from 'axios';
 import {
   Config,
   EnvironmentsEnum,
@@ -13,7 +12,7 @@ import {
 } from './config';
 import { createNftIdentifier, numberToPaddedHex, parseDataNft } from './utils';
 import minterAbi from './abis/datanftmint.abi.json';
-import { NftType } from './interfaces';
+import { NftType, ViewDataReturnType } from './interfaces';
 
 export class DataNft {
   readonly tokenIdentifier: string = '';
@@ -65,9 +64,8 @@ export class DataNft {
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft> {
     const identifier = createNftIdentifier(tokenIdentifier, nonce);
-    const { data } = await axios.get<NftType>(
-      `${this.apiConfiguration}/nfts/${identifier}`
-    );
+    const response = await fetch(`${this.apiConfiguration}/nfts/${identifier}`);
+    const data: NftType = await response.json();
 
     try {
       const dataNft = parseDataNft(data);
@@ -91,9 +89,10 @@ export class DataNft {
     const identifiers = nonces.map((nonce) =>
       createNftIdentifier(tokenIdentifier, nonce)
     );
-    const { data } = await axios.get<NftType[]>(
+    const response = await fetch(
       `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}`
     );
+    const data: NftType[] = await response.json();
 
     try {
       const dataNfts = data.map((value) => parseDataNft(value));
@@ -212,7 +211,7 @@ export class DataNft {
     signedMessage: string,
     signableMessage: SignableMessage,
     stream?: boolean
-  ): Promise<any> {
+  ): Promise<ViewDataReturnType> {
     const signResult = {
       signature: '',
       addrInHex: '',
@@ -239,8 +238,8 @@ export class DataNft {
       signResult.exception = e.toString();
     }
 
-    const response = await axios.get(
-      `${this.dataMarshal}/access?nonce=${signedMessage}&NFTId=${
+    try {
+      const url = `${this.dataMarshal}/access?nonce=${signedMessage}&NFTId=${
         this.collection
       }-${numberToPaddedHex(this.nonce)}&signature=${
         signResult.signature
@@ -250,11 +249,21 @@ export class DataNft {
           : DataNft.networkConfiguration.chainID
       }&accessRequesterAddr=${signResult.addrInHex}&${
         stream ? 'streamInLine=1' : ''
-      }`
-    );
+      }`;
+      const response = await fetch(url);
+      const contentType = response.headers.get('content-type');
+      const data = await response.blob();
 
-    const data = await response.data;
-
-    return data;
+      return {
+        data: data,
+        contentType: contentType || ''
+      };
+    } catch (err) {
+      return {
+        data: undefined,
+        contentType: '',
+        error: (err as Error).message
+      };
+    }
   }
 }
