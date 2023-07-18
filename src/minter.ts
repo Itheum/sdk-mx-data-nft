@@ -14,7 +14,7 @@ import {
   StringValue,
   BooleanValue
 } from '@multiversx/sdk-core/out';
-import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
+import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   dataNftTokenIdentifier,
@@ -30,7 +30,7 @@ import { File } from '@web-std/file';
 export class DataNftMinter {
   readonly contract: SmartContract;
   readonly chainID: string;
-  readonly networkProvider: ProxyNetworkProvider;
+  readonly networkProvider: ApiNetworkProvider;
   readonly env: string;
 
   /**
@@ -42,7 +42,7 @@ export class DataNftMinter {
     this.env = env;
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.chainID = networkConfig.chainID;
-    this.networkProvider = new ProxyNetworkProvider(
+    this.networkProvider = new ApiNetworkProvider(
       networkConfig.networkProvider,
       {
         timeout: timeout
@@ -97,7 +97,7 @@ export class DataNftMinter {
         numberOfMintsForUser: returnValue.minted_per_user.toNumber(),
         totalNumberOfMints: returnValue.total_minted.toNumber(),
         addressFrozen: returnValue.frozen,
-        frozenNonces: returnValue.frozen_nonces.map((v: any) => v.toNumber()),
+        frozenNonces: returnValue.frozen_nonces.map((v: any) => v.toNumber())
       };
       return requirements;
     } else {

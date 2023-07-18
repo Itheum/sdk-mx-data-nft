@@ -16,7 +16,7 @@ import {
   U8Value,
   VariadicValue
 } from '@multiversx/sdk-core/out';
-import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
+import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   networkConfiguration,
@@ -30,7 +30,7 @@ import { parseOffer } from './utils';
 export class DataNftMarket {
   readonly contract: SmartContract;
   readonly chainID: string;
-  readonly networkProvider: ProxyNetworkProvider;
+  readonly networkProvider: ApiNetworkProvider;
   readonly env: string;
 
   /**
@@ -42,7 +42,7 @@ export class DataNftMarket {
     this.env = env;
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.chainID = networkConfig.chainID;
-    this.networkProvider = new ProxyNetworkProvider(
+    this.networkProvider = new ApiNetworkProvider(
       networkConfig.networkProvider,
       {
         timeout: timeout
@@ -81,7 +81,9 @@ export class DataNftMarket {
     if (returnCode.isSuccess()) {
       const firstValueAsVariadic = firstValue as VariadicValue;
       const returnValue = firstValueAsVariadic?.valueOf();
-      const offers: Offer[] = returnValue.map((offer: any) => parseOffer(offer));
+      const offers: Offer[] = returnValue.map((offer: any) =>
+        parseOffer(offer)
+      );
       return offers;
     } else {
       return [];
@@ -114,7 +116,9 @@ export class DataNftMarket {
     if (returnCode.isSuccess()) {
       const firstValueAsVariadic = firstValue as VariadicValue;
       const returnValue = firstValueAsVariadic?.valueOf();
-      const offers: Offer[] = returnValue.map((offer: any) => parseOffer(offer));
+      const offers: Offer[] = returnValue.map((offer: any) =>
+        parseOffer(offer)
+      );
       return offers;
     } else {
       return [];
@@ -161,7 +165,9 @@ export class DataNftMarket {
     );
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      const offers: Offer[] = returnValue.map((offer: any) => parseOffer(offer));
+      const offers: Offer[] = returnValue.map((offer: any) =>
+        parseOffer(offer)
+      );
       return offers;
     } else {
       return [];
@@ -187,7 +193,9 @@ export class DataNftMarket {
     );
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      const offers: Offer[] = returnValue.map((offer: any) => parseOffer(offer));
+      const offers: Offer[] = returnValue.map((offer: any) =>
+        parseOffer(offer)
+      );
       return offers;
     } else {
       return [];
@@ -260,9 +268,13 @@ export class DataNftMarket {
       const requirements: MarketplaceRequirements = {
         acceptedTokens: returnValue.accepted_tokens as string[],
         acceptedPayments: returnValue.accepted_payments as string[],
-        maximumPaymentFees: returnValue.maximum_payment_fees.map((v: any) => v.toFixed(0)),
-        buyerTaxPercentageDiscount: returnValue.discount_fee_percentage_buyer.toNumber(),
-        sellerTaxPercentageDiscount: returnValue.discount_fee_percentage_seller.toNumber(),
+        maximumPaymentFees: returnValue.maximum_payment_fees.map((v: any) =>
+          v.toFixed(0)
+        ),
+        buyerTaxPercentageDiscount:
+          returnValue.discount_fee_percentage_buyer.toNumber(),
+        sellerTaxPercentageDiscount:
+          returnValue.discount_fee_percentage_seller.toNumber(),
         buyerTaxPercentage: returnValue.percentage_cut_from_buyer.toNumber(),
         sellerTaxPercentage: returnValue.percentage_cut_from_seller.toNumber()
       };
