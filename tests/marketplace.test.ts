@@ -10,7 +10,11 @@ describe('Marketplace Sdk test', () => {
   test('#viewAddressListedOffers', async () => {
     const dataNftMarket = new DataNftMarket('devnet');
 
-    const result = await dataNftMarket.viewAddressListedOffers(new Address(''));
+    const result = await dataNftMarket.viewAddressListedOffers(
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      )
+    );
 
     expect(result).toBeInstanceOf(Array);
     for (const item of result) {
@@ -21,7 +25,11 @@ describe('Marketplace Sdk test', () => {
   test('#viewAddressTotalOffers', async () => {
     const dataNftMarket = new DataNftMarket('devnet');
 
-    const result = await dataNftMarket.viewAddressTotalOffers(new Address(''));
+    const result = await dataNftMarket.viewAddressTotalOffers(
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      )
+    );
 
     expect(typeof result).toBe('number');
   });
@@ -54,7 +62,9 @@ describe('Marketplace Sdk test', () => {
     const dataNftMarket = new DataNftMarket('devnet');
 
     const result = dataNftMarket.addOffer(
-      new Address(''),
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      ),
       '',
       0,
       0,
@@ -71,20 +81,26 @@ describe('Marketplace Sdk test', () => {
     const dataNftMarket = new DataNftMarket('devnet');
 
     const result = dataNftMarket.acceptOfferWithEGLD(
-      new Address(''),
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      ),
       0,
       0,
       '100'
     );
     const result2 = dataNftMarket.acceptOfferWithESDT(
-      new Address(''),
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      ),
       0,
       0,
       '1000'
     );
 
     const result3 = dataNftMarket.acceptOfferWithNoPayment(
-      new Address(''),
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      ),
       0,
       0
     );
@@ -97,9 +113,20 @@ describe('Marketplace Sdk test', () => {
   test('#cancelOffer', () => {
     const dataNftMarket = new DataNftMarket('devnet');
 
-    const result = dataNftMarket.cancelOffer(new Address(''), 0);
+    const result = dataNftMarket.cancelOffer(
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      ),
+      0
+    );
 
-    const result2 = dataNftMarket.cancelOffer(new Address(''), 0, false);
+    const result2 = dataNftMarket.cancelOffer(
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      ),
+      0,
+      false
+    );
 
     expect(result).toBeInstanceOf(Transaction);
     expect(result2).toBeInstanceOf(Transaction);
@@ -108,7 +135,13 @@ describe('Marketplace Sdk test', () => {
   test('#changeOfferPrice', () => {
     const dataNftMarket = new DataNftMarket('devnet');
 
-    const result = dataNftMarket.changeOfferPrice(new Address(''), 0, 0);
+    const result = dataNftMarket.changeOfferPrice(
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      ),
+      0,
+      0
+    );
 
     expect(result).toBeInstanceOf(Transaction);
   });
@@ -116,7 +149,12 @@ describe('Marketplace Sdk test', () => {
   test('#withdrawCancelledOffer', () => {
     const dataNftMarket = new DataNftMarket('devnet');
 
-    const result = dataNftMarket.withdrawCancelledOffer(new Address(''), 0);
+    const result = dataNftMarket.withdrawCancelledOffer(
+      new Address(
+        'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
+      ),
+      0
+    );
 
     expect(result).toBeInstanceOf(Transaction);
   });

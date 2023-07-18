@@ -1,4 +1,4 @@
-import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
+import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import { DataNftMarket, DataNftMinter } from '../src/index';
 
 describe('testing environment market', () => {
@@ -7,7 +7,7 @@ describe('testing environment market', () => {
 
     expect(datanft.chainID).toStrictEqual('D');
     expect(datanft.networkProvider).toStrictEqual(
-      new ProxyNetworkProvider('https://devnet-gateway.multiversx.com', {
+      new ApiNetworkProvider('https://devnet-api.multiversx.com', {
         timeout: 10000
       })
     );
@@ -18,7 +18,7 @@ describe('testing environment market', () => {
 
     expect(datanft.chainID).toStrictEqual('1');
     expect(datanft.networkProvider).toStrictEqual(
-      new ProxyNetworkProvider('https://gateway.multiversx.com', {
+      new ApiNetworkProvider('https://api.multiversx.com', {
         timeout: 10000
       })
     );
@@ -29,7 +29,7 @@ describe('testing environment market', () => {
 
     expect(datanft.chainID).toStrictEqual('D');
     expect(datanft.networkProvider).toStrictEqual(
-      new ProxyNetworkProvider('https://devnet-gateway.multiversx.com', {
+      new ApiNetworkProvider('https://devnet-api.multiversx.com', {
         timeout: 5000
       })
     );
@@ -40,7 +40,7 @@ describe('testing environment market', () => {
 
     expect(datanft.chainID).toStrictEqual('1');
     expect(datanft.networkProvider).toStrictEqual(
-      new ProxyNetworkProvider('https://gateway.multiversx.com', {
+      new ApiNetworkProvider('https://api.multiversx.com', {
         timeout: 5000
       })
     );
@@ -53,7 +53,7 @@ describe('testing environment minter', () => {
 
     expect(datanft.chainID).toStrictEqual('D');
     expect(datanft.networkProvider).toStrictEqual(
-      new ProxyNetworkProvider('https://devnet-gateway.multiversx.com', {
+      new ApiNetworkProvider('https://devnet-api.multiversx.com', {
         timeout: 10000
       })
     );
@@ -64,7 +64,7 @@ describe('testing environment minter', () => {
 
     expect(datanft.chainID).toStrictEqual('1');
     expect(datanft.networkProvider).toStrictEqual(
-      new ProxyNetworkProvider('https://gateway.multiversx.com', {
+      new ApiNetworkProvider('https://api.multiversx.com', {
         timeout: 10000
       })
     );
@@ -75,7 +75,7 @@ describe('testing environment minter', () => {
 
     expect(datanft.chainID).toStrictEqual('D');
     expect(datanft.networkProvider).toStrictEqual(
-      new ProxyNetworkProvider('https://devnet-gateway.multiversx.com', {
+      new ApiNetworkProvider('https://devnet-api.multiversx.com', {
         timeout: 5000
       })
     );
@@ -86,7 +86,7 @@ describe('testing environment minter', () => {
 
     expect(datanft.chainID).toStrictEqual('1');
     expect(datanft.networkProvider).toStrictEqual(
-      new ProxyNetworkProvider('https://gateway.multiversx.com', {
+      new ApiNetworkProvider('https://api.multiversx.com', {
         timeout: 5000
       })
     );
