@@ -11,17 +11,17 @@ export interface Config {
 
 const devnetNetworkConfig: Config = {
   chainID: 'D',
-  networkProvider: 'https://devnet-gateway.multiversx.com'
+  networkProvider: 'https://devnet-api.multiversx.com'
 };
 
 const mainnetNetworkConfig: Config = {
   chainID: '1',
-  networkProvider: 'https://gateway.multiversx.com'
+  networkProvider: 'https://api.multiversx.com'
 };
 
 const testnetNetworkConfig: Config = {
   chainID: 'T',
-  networkProvider: 'https://testnet-gateway.multiversx.com'
+  networkProvider: 'https://testnet-api.multiversx.com'
 };
 
 export const itheumTokenIdentifier: { [key in EnvironmentsEnum]: string } = {
