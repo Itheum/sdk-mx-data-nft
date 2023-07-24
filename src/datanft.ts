@@ -104,29 +104,25 @@ export class DataNft {
   }
 
   /**
-   * Creates a DataNft from a API response containing the NFT details.
+   * Creates a DataNft or an array of DataNft from either a single NFT details API response or an array of NFT details API response.
    *
-   * Useful for creating an array of DataNft.
-   * @param payload NFT details API response
+   * @param payload NFT details API response, can be a single item or an array of items
    */
-  static createFromApiResponse(payload: NftType): DataNft {
-    const dataNft = parseDataNft(payload);
-
-    return dataNft;
-  }
-
-  /**
-   * Creates an array of DataNft from an array of NFT details API response.
-   *
-   * @param payload NFT details API response
-   */
-  static createFromApiResponseBulk(payload: NftType[]): DataNft[] {
+  static createFromApiResponseOrBulk(payload: NftType | NftType[]): DataNft[] {
     const dataNfts: DataNft[] = [];
-    payload.forEach((nft: NftType) => {
-      dataNfts.push(this.createFromApiResponse(nft));
-    });
 
-    return dataNfts;
+    const parseNft = (nft: NftType) => {
+      const dataNft = parseDataNft(nft);
+      dataNfts.push(dataNft);
+    };
+
+    if (Array.isArray(payload)) {
+      payload.forEach(parseNft);
+      return dataNfts;
+    } else {
+      parseNft(payload as NftType);
+      return dataNfts;
+    }
   }
 
   /**
@@ -172,10 +168,8 @@ export class DataNft {
       `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifier}&withSupply=true`
     );
     const data = await res.json();
-    const dataNfts: DataNft[] = [];
-    data.forEach((nft: NftType) => {
-      dataNfts.push(this.createFromApiResponse(nft));
-    });
+    const dataNfts: DataNft[] = this.createFromApiResponseOrBulk(data);
+
     return dataNfts;
   }
 
