@@ -90,7 +90,7 @@ export class DataNft {
       createNftIdentifier(tokenIdentifier, nonce)
     );
     const response = await fetch(
-      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}`
+      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}&withSupply=true`
     );
     const data: NftType[] = await response.json();
 
