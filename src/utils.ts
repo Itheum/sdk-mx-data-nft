@@ -50,6 +50,7 @@ export function parseDataNft(value: NftType): DataNft {
     royalties: value.royalties / 100,
     nonce: value.nonce,
     collection: value.collection,
+    balance: value.balance ? Number(value.balance) : 0,
     ...DataNft.decodeAttributes(value.attributes),
   });
 }
