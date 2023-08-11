@@ -18,6 +18,7 @@ import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   dataNftTokenIdentifier,
+  imageService,
   itheumTokenIdentifier,
   minterContractAddress,
   networkConfiguration
@@ -32,15 +33,17 @@ export class DataNftMinter {
   readonly chainID: string;
   readonly networkProvider: ApiNetworkProvider;
   readonly env: string;
+  readonly imageServiceUrl: string;
 
   /**
-   * Creates a new instance of the `DataNftMinter` which can be used to interact with the DataNFT-FTs inside the marketplace
-   * @param env 'DEVNET' | 'MAINNET'
+   * Creates a new instance of the `DataNftMinter` which can be used to interact with the Data NFT-FT minter smart contract
+   * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: string, timeout: number = 10000) {
     this.env = env;
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
+    this.imageServiceUrl = imageService[env as EnvironmentsEnum];
     this.chainID = networkConfig.chainID;
     this.networkProvider = new ApiNetworkProvider(
       networkConfig.networkProvider,
@@ -170,7 +173,8 @@ export class DataNftMinter {
    * @param supply the supply of the Data NFT-FT
    * @param datasetTitle the title of the dataset
    * @param datasetDescription the description of the dataset
-   * @param antiSpamTax the anti spam tax to be set for the Data NFT-FT
+   * @param antiSpamTax the anti spam tax to be set for the Data NFT-FT with decimals
+   * @param storageToken the nft storage token to be used to upload the image and metadata to IPFS
    * @param options optional parameters
    *                 - imageUrl: the URL of the image for the Data NFT (optional, should be stored on `IPFS`)
    *                 - imageDescription: a description for the image (optional, should be passed if the `imageUrl` is passed)
@@ -187,6 +191,7 @@ export class DataNftMinter {
     datasetTitle: string,
     datasetDescription: string,
     antiSpamTax: number,
+    storageToken: string,
     options?: {
       imageUrl?: string;
       imageDescription?: string;
@@ -210,11 +215,11 @@ export class DataNftMinter {
     }
 
     const { dataNftHash, dataNftStreamUrlEncrypted } =
-      await this.dataNFTDataStreamAdvertise(dataStreamUrl);
+      await this.dataNFTDataStreamAdvertise(dataStreamUrl, dataMarshalUrl);
 
     const { image, traits } = await this.createFileFromUrl(
       imageUrl ||
-        `${process.env.REACT_APP_ENV_DATADEX_API}/v1/generateNFTArt?hash=${dataNftHash}`,
+        `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`,
       datasetTitle,
       datasetDescription,
       dataPreviewUrl,
@@ -224,6 +229,7 @@ export class DataNftMinter {
     );
 
     let { imageOnIpfsUrl, metadataOnIpfsUrl } = await this.storeToIpfs(
+      storageToken,
       traits,
       imageUrl ? undefined : image
     );
@@ -276,7 +282,8 @@ export class DataNftMinter {
   }
 
   private async dataNFTDataStreamAdvertise(
-    dataNFTStreamUrl: string
+    dataNFTStreamUrl: string,
+    dataMarshalUrl: string
   ): Promise<{ dataNftHash: string; dataNftStreamUrlEncrypted: string }> {
     /*
       1) Call the data marshal and get a encrypted data stream url and hash of url (s1)
@@ -296,10 +303,7 @@ export class DataNftMinter {
     };
 
     try {
-      const res = await fetch(
-        `${process.env.REACT_APP_ENV_DATAMARSHAL_API}/generate`,
-        requestOptions
-      );
+      const res = await fetch(`${dataMarshalUrl}/generate`, requestOptions);
       const data = await res.json();
 
       if (data && data.encryptedMessage && data.messageHash) {
@@ -316,15 +320,18 @@ export class DataNftMinter {
   }
 
   private async storeToIpfs(
+    storageToken: string,
     traits: File,
     image?: File
   ): Promise<{ imageOnIpfsUrl: string; metadataOnIpfsUrl: string }> {
     let res;
     try {
       const nftstorage = new NFTStorage({
-        token: process.env.REACT_APP_ENV_NFT_STORAGE_KEY || ''
+        token: storageToken
       });
-      res = await nftstorage.storeDirectory(image ? [image, traits] : [traits]);
+      const dir = image ? [image, traits] : [traits];
+      res = await nftstorage.storeDirectory(dir);
+      console.log(res);
     } catch {
       throw new Error('Error while uploading to IPFS');
     }

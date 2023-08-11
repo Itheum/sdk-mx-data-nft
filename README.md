@@ -91,7 +91,8 @@ const transaction = await dataNftMarket.mint(
   1000,
   'Test Title',
   'Test Description',
-  10
+  10000000000,
+  'Nft storage API token'
 );
 
 // Create a burn transaction
