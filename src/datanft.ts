@@ -29,6 +29,7 @@ export class DataNft {
   readonly royalties: number = 0;
   readonly nonce: number = 0;
   readonly collection: string = '';
+  readonly balance: number = 0;
 
   static networkConfiguration: Config;
   static apiConfiguration: string;
@@ -90,7 +91,7 @@ export class DataNft {
       createNftIdentifier(tokenIdentifier, nonce)
     );
     const response = await fetch(
-      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}`
+      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}&withSupply=true`
     );
     const data: NftType[] = await response.json();
 
