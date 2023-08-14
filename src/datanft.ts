@@ -91,7 +91,9 @@ export class DataNft {
       createNftIdentifier(tokenIdentifier, nonce)
     );
     const response = await fetch(
-      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(',')}&withSupply=true`
+      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(
+        ','
+      )}&withSupply=true`
     );
     const data: NftType[] = await response.json();
 
@@ -206,12 +208,16 @@ export class DataNft {
    * Method to get the data from the data marshal.
    * @param signedMessage Signed message from the data marshal
    * @param signableMessage Signable message from the wallet
-   * @param stream If the data should be streamed or not
+   * @param stream [optional] Instead of auto-downloading if possible, request if data should always be streamed or not. true=stream, false/undefined=default behavior
+   * @param fwdAllHeaders [optional] Forward all request headers to the Origin Data Stream server. true=stream, false/undefined=default behavior
+   * @param fwdHeaderKeys [optional] Forward only selected headers. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 15 items. e.g. cookie,accept,authorization
    */
   async viewData(
     signedMessage: string,
     signableMessage: SignableMessage,
-    stream?: boolean
+    stream?: boolean,
+    fwdAllHeaders?: boolean,
+    fwdHeaderKeys?: string
   ): Promise<ViewDataReturnType> {
     const signResult = {
       signature: '',
@@ -240,7 +246,7 @@ export class DataNft {
     }
 
     try {
-      const url = `${this.dataMarshal}/access?nonce=${signedMessage}&NFTId=${
+      let url = `${this.dataMarshal}/access?nonce=${signedMessage}&NFTId=${
         this.collection
       }-${numberToPaddedHex(this.nonce)}&signature=${
         signResult.signature
@@ -248,9 +254,22 @@ export class DataNft {
         DataNft.networkConfiguration.chainID == 'D'
           ? 'ED'
           : DataNft.networkConfiguration.chainID
-      }&accessRequesterAddr=${signResult.addrInHex}&${
-        stream ? 'streamInLine=1' : ''
-      }`;
+      }&accessRequesterAddr=${signResult.addrInHex}`;
+
+      // S: append optional params if found
+      if (typeof stream !== 'undefined') {
+        url += stream ? '&streamInLine=1' : '';
+      }
+
+      if (typeof fwdAllHeaders !== 'undefined') {
+        url += fwdAllHeaders ? '&fwdAllHeaders=1' : '';
+      }
+
+      if (typeof fwdHeaderKeys !== 'undefined') {
+        url += `&fwdHeaderKeys=${fwdHeaderKeys}`;
+      }
+      // E: append optional params...
+
       const response = await fetch(url);
       const contentType = response.headers.get('content-type');
       const data = await response.blob();
