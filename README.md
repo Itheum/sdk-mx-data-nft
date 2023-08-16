@@ -19,7 +19,7 @@ This SDK is currently focused on interacting with the Itheum's Data NFT technolo
 
 ## Usage in 3rd party dApps
 
-- install this SDK via `npm i @itheum/sdk-mx-data-nft`
+- Install this SDK via `npm i @itheum/sdk-mx-data-nft`
 - Methods supported are given below is `SDK Docs`
 
 ## SDK DOCS
@@ -50,13 +50,12 @@ response.forEach(async (nft) => {
   dataNfts.push(data);
 });
 
-// Retrives the DataNfts owned by a address
+// Retrieves the DataNfts owned by a address
 const address = 'address';
 const dataNfts = [];
 dataNfts = await DataNft.ownedByAddress(address);
 
-// Retrives the DataNft message from marshal to sign
-
+// Retrieves the DataNft message from marshal to sign
 const dataNft = DataNft.createFromApi(nonce);
 const message = await dataNft.messageToSign();
 
@@ -64,7 +63,7 @@ const message = await dataNft.messageToSign();
 const signature = 'signature';
 
 // Unlock the data inside the dataNft
-dataNft.viewData(message, signature);
+dataNft.viewData(message, signature); // optional params "stream" (stream out data instead of downloading file), "fwdAllHeaders"/"fwdHeaderKeys" can be used to pass headers like Authorization to origin servers
 ```
 
 ### 2. Interacting with Data NFT Minter
@@ -74,7 +73,7 @@ import { DataNftMinter } from '@itheum/sdk-mx-data-nft';
 
 const dataNftMinter = new DataNftMinter('devnet' | 'testnet' | 'mainnet');
 
-// View minter smart contract rewquirements
+// View minter smart contract requirements
 const requirements = await dataNftMinter.viewMinterRequirements('address');
 
 // View contract pause state
