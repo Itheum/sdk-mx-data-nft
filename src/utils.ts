@@ -1,6 +1,6 @@
-import BigNumber from "bignumber.js";
-import { DataNft } from "./datanft";
-import { NftType, Offer } from "./interfaces";
+import BigNumber from 'bignumber.js';
+import { DataNft } from './datanft';
+import { NftType, Offer } from './interfaces';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
   let hex = new BigNumber(value).toString(16);
@@ -12,18 +12,18 @@ export function createNftIdentifier(collection: string, nonce: number) {
 }
 
 export function isPaddedHex(input: string) {
-  input = input || "";
-  let decodedThenEncoded = Buffer.from(input, "hex").toString("hex");
+  input = input || '';
+  let decodedThenEncoded = Buffer.from(input, 'hex').toString('hex');
   return input.toUpperCase() == decodedThenEncoded.toUpperCase();
 }
 
 export function zeroPadStringIfOddLength(input: string): string {
-  input = input || "";
-  
+  input = input || '';
+
   if (input.length % 2 == 1) {
-    return "0" + input;
+    return '0' + input;
   }
-  
+
   return input;
 }
 
@@ -37,7 +37,7 @@ export function parseOffer(value: any): Offer {
     wantedTokenIdentifier: value.wanted_token_identifier.toString(),
     wantedTokenNonce: value.wanted_token_nonce.toString(),
     wantedTokenAmount: value.wanted_token_amount.toFixed(0),
-    quantity: value.quantity.toNumber(),
+    quantity: value.quantity.toNumber()
   };
 }
 
@@ -51,6 +51,39 @@ export function parseDataNft(value: NftType): DataNft {
     nonce: value.nonce,
     collection: value.collection,
     balance: value.balance ? Number(value.balance) : 0,
-    ...DataNft.decodeAttributes(value.attributes),
+    ...DataNft.decodeAttributes(value.attributes)
   });
+}
+
+export async function checkTraitsUrl(traitsUrl: string) {
+  const traitsResponse = await fetch(traitsUrl);
+  const traits = await traitsResponse.json();
+
+  if (!traits.description) {
+    throw new Error('Traits description is empty');
+  }
+
+  if (!Array.isArray(traits.attributes)) {
+    throw new Error('Traits attributes must be an array');
+  }
+
+  const requiredTraits = ['Creator', 'Data Preview URL'];
+  const traitsAttributes = traits.attributes;
+
+  for (const requiredTrait of requiredTraits) {
+    if (
+      !traitsAttributes.some(
+        (attribute: any) => attribute.trait_type === requiredTrait
+      )
+    ) {
+      throw new Error(`Missing required trait: ${requiredTrait}`);
+    }
+  }
+
+  for (const attribute of traitsAttributes) {
+    if (!attribute.value) {
+      throw new Error(`Empty value for trait: ${attribute.trait_type}`);
+    }
+  }
+  return true;
 }

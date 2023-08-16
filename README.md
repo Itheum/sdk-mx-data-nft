@@ -79,23 +79,57 @@ const requirements = await dataNftMinter.viewMinterRequirements('address');
 
 // View contract pause state
 const result = await dataNftMarket.viewContractPauseState();
+```
 
-// Create a mint transaction
+#### Create a mint transaction
+
+Method 1: Mint a new Data NFT with Ithuem generated image and traits.
+Currently only supports [nft.storage](https://nft.storage/docs/quickstart/#get-an-api-token).
+
+```typescript
 const transaction = await dataNftMarket.mint(
-  new Address('erd1'),
-  'TEST-TOKEN',
-  'https://marshal.com',
-  'https://streamdata.com',
-  'https://previewdata',
-  15,
-  1000,
-  'Test Title',
-  'Test Description',
-  10000000000,
-  'Nft storage API token'
+new Address('erd1'),
+'TEST-TOKEN',
+'https://marshal.com',
+'https://streamdata.com',
+'https://previewdata',
+15,
+1000,
+'Test Title',
+'Test Description',
+10000000000,
+options: {
+nftStorageToken:"API TOKEN",
+}
 );
+```
 
-// Create a burn transaction
+Method 2: Mint a new Data NFT with custom image and traits.
+Traits should be compliant with the Itheum [taits structure](#traits-structure).
+
+```typescript
+const transaction = await dataNftMarket.mint(
+new Address('erd1'),
+'TEST-TOKEN',
+'https://marshal.com',
+'https://streamdata.com',
+'https://previewdata',
+15,
+1000,
+'Test Title',
+'Test Description',
+10000000000,
+options: {
+imageUrl:"https://imageurl.com",
+traitsUrl:"https://traitsurl.com",
+}
+
+);
+```
+
+#### Create a burn transaction
+
+```typescript
 const transaction = await dataNftMarket.burn(
   new Address('erd1'),
   dataNftNonce,
@@ -161,4 +195,27 @@ const result = dataNftMarket.withdrawCancelledOffer(new Address(''), 0);
 
 // Create changeOfferPrice transaction
 const result = dataNftMarket.changeOfferPrice(new Address(''), 0, 0);
+```
+
+### Traits structure
+
+```json
+{
+  "description": "Data NFT description", //required
+  "attributes": [
+    {
+      "trait_type": "Creator", //required
+      "value": "creator address"
+    },
+    {
+      "trait_type": "Data Preview URL", //required
+      "value": "https://previewdata.com"
+    },
+    {
+      "trait_type": "extra trait",
+      "value": "extra trait value"
+    },
+    ...
+  ]
+}
 ```
