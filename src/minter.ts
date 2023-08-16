@@ -14,10 +14,14 @@ import {
   StringValue,
   BooleanValue
 } from '@multiversx/sdk-core/out';
-import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
+import {
+  ApiNetworkProvider,
+  TransactionStatus
+} from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   dataNftTokenIdentifier,
+  imageService,
   itheumTokenIdentifier,
   minterContractAddress,
   networkConfiguration
@@ -26,21 +30,24 @@ import dataNftMintAbi from './abis/datanftmint.abi.json';
 import { MinterRequirements } from './interfaces';
 import { NFTStorage } from 'nft.storage';
 import { File } from '@web-std/file';
+import { checkTraitsUrl } from './utils';
 
 export class DataNftMinter {
   readonly contract: SmartContract;
   readonly chainID: string;
   readonly networkProvider: ApiNetworkProvider;
   readonly env: string;
+  readonly imageServiceUrl: string;
 
   /**
-   * Creates a new instance of the `DataNftMinter` which can be used to interact with the DataNFT-FTs inside the marketplace
-   * @param env 'DEVNET' | 'MAINNET'
+   * Creates a new instance of the `DataNftMinter` which can be used to interact with the Data NFT-FT minter smart contract
+   * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: string, timeout: number = 10000) {
     this.env = env;
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
+    this.imageServiceUrl = imageService[env as EnvironmentsEnum];
     this.chainID = networkConfig.chainID;
     this.networkProvider = new ApiNetworkProvider(
       networkConfig.networkProvider,
@@ -161,6 +168,10 @@ export class DataNftMinter {
    *
    * NOTE: The `dataStreamUrl` is being encrypted and the `media` and `metadata` urls are build and uploaded to IPFS
    *
+   * NOTE: The `options.nftStorageToken` is required when not using custom image and traits, when using custom image and traits the traits should be compliant with the `traits` structure
+   *
+   * For more information, see the [README documentation](https://github.com/Itheum/sdk-mx-data-nft#create-a-mint-transaction).
+   *
    * @param senderAddress the address of the user
    * @param tokenName the name of the DataNFT-FT
    * @param dataMarshalUrl the url of the data marshal
@@ -170,11 +181,13 @@ export class DataNftMinter {
    * @param supply the supply of the Data NFT-FT
    * @param datasetTitle the title of the dataset
    * @param datasetDescription the description of the dataset
-   * @param antiSpamTax the anti spam tax to be set for the Data NFT-FT
-   * @param options optional parameters
-   *                 - imageUrl: the URL of the image for the Data NFT (optional, should be stored on `IPFS`)
-   *                 - imageDescription: a description for the image (optional, should be passed if the `imageUrl` is passed)
+   * @param antiSpamTax the anti spam tax to be set for the Data NFT-FT with decimals
+   * @param  options optional parameters
+   *                 - imageUrl: the URL of the image for the Data NFT
+   *                 - traitsUrl: the URL of the traits for the Data NFT
+   *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
    *                 - antiSpamTokenIdentifier: the anti spam token identifier to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
+   *
    */
   async mint(
     senderAddress: IAddress,
@@ -189,46 +202,57 @@ export class DataNftMinter {
     antiSpamTax: number,
     options?: {
       imageUrl?: string;
-      imageDescription?: string;
+      traitsUrl?: string;
+      nftStorageToken?: string;
       antiSpamTokenIdentifier?: string;
     }
   ): Promise<Transaction> {
     const {
-      imageUrl = '',
-      imageDescription = '',
+      imageUrl,
+      traitsUrl,
+      nftStorageToken,
       antiSpamTokenIdentifier = itheumTokenIdentifier[
         this.env as EnvironmentsEnum
       ]
     } = options ?? {};
 
-    if (imageUrl && !imageUrl.startsWith('https://ipfs.io/ipfs')) {
-      throw new Error('Invalid image url');
-    }
-
-    if (!imageDescription && imageUrl) {
-      throw new Error('Invalid image description');
-    }
+    let imageOnIpfsUrl: string;
+    let metadataOnIpfsUrl: string;
 
     const { dataNftHash, dataNftStreamUrlEncrypted } =
-      await this.dataNFTDataStreamAdvertise(dataStreamUrl);
+      await this.dataNFTDataStreamAdvertise(dataStreamUrl, dataMarshalUrl);
 
-    const { image, traits } = await this.createFileFromUrl(
-      imageUrl ||
-        `${process.env.REACT_APP_ENV_DATADEX_API}/v1/generateNFTArt?hash=${dataNftHash}`,
-      datasetTitle,
-      datasetDescription,
-      dataPreviewUrl,
-      senderAddress.bech32(),
-      imageDescription!,
-      Boolean(imageUrl)
-    );
+    if (!imageUrl) {
+      if (!nftStorageToken) {
+        throw new Error(
+          'NFT Storage token is required when not using custom image and traits'
+        );
+      }
+      const { image, traits } = await this.createFileFromUrl(
+        `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`,
+        datasetTitle,
+        datasetDescription,
+        dataPreviewUrl,
+        senderAddress.bech32()
+      );
 
-    let { imageOnIpfsUrl, metadataOnIpfsUrl } = await this.storeToIpfs(
-      traits,
-      imageUrl ? undefined : image
-    );
+      const {
+        imageOnIpfsUrl: imageIpfsUrl,
+        metadataOnIpfsUrl: metadataIpfsUrl
+      } = await this.storeToIpfs(nftStorageToken, traits, image);
 
-    imageOnIpfsUrl = imageUrl ? imageUrl : imageOnIpfsUrl;
+      imageOnIpfsUrl = imageIpfsUrl;
+      metadataOnIpfsUrl = metadataIpfsUrl;
+    } else {
+      if (!traitsUrl) {
+        throw new Error('Traits URL is required when using custom image');
+      }
+
+      await checkTraitsUrl(traitsUrl);
+
+      imageOnIpfsUrl = imageUrl;
+      metadataOnIpfsUrl = traitsUrl;
+    }
 
     let data;
     if (antiSpamTax > 0) {
@@ -276,7 +300,8 @@ export class DataNftMinter {
   }
 
   private async dataNFTDataStreamAdvertise(
-    dataNFTStreamUrl: string
+    dataNFTStreamUrl: string,
+    dataMarshalUrl: string
   ): Promise<{ dataNftHash: string; dataNftStreamUrlEncrypted: string }> {
     /*
       1) Call the data marshal and get a encrypted data stream url and hash of url (s1)
@@ -296,10 +321,7 @@ export class DataNftMinter {
     };
 
     try {
-      const res = await fetch(
-        `${process.env.REACT_APP_ENV_DATAMARSHAL_API}/generate`,
-        requestOptions
-      );
+      const res = await fetch(`${dataMarshalUrl}/generate`, requestOptions);
       const data = await res.json();
 
       if (data && data.encryptedMessage && data.messageHash) {
@@ -316,36 +338,24 @@ export class DataNftMinter {
   }
 
   private async storeToIpfs(
+    storageToken: string,
     traits: File,
-    image?: File
+    image: File
   ): Promise<{ imageOnIpfsUrl: string; metadataOnIpfsUrl: string }> {
     let res;
     try {
       const nftstorage = new NFTStorage({
-        token: process.env.REACT_APP_ENV_NFT_STORAGE_KEY || ''
+        token: storageToken
       });
-      res = await nftstorage.storeDirectory(image ? [image, traits] : [traits]);
+      const dir = [image, traits];
+      res = await nftstorage.storeDirectory(dir);
     } catch {
       throw new Error('Error while uploading to IPFS');
     }
-
-    if (!res) {
-      return {
-        imageOnIpfsUrl: '',
-        metadataOnIpfsUrl: ''
-      };
-    }
-    if (image) {
-      return {
-        imageOnIpfsUrl: `https://ipfs.io/ipfs/${res}/image.png`,
-        metadataOnIpfsUrl: `https://ipfs.io/ipfs/${res}/metadata.json`
-      };
-    } else {
-      return {
-        imageOnIpfsUrl: '',
-        metadataOnIpfsUrl: `https://ipfs.io/ipfs/${res}/metadata.json`
-      };
-    }
+    return {
+      imageOnIpfsUrl: `https://ipfs.io/ipfs/${res}/image.png`,
+      metadataOnIpfsUrl: `https://ipfs.io/ipfs/${res}/metadata.json`
+    };
   }
 
   private createIpfsMetadata(
@@ -353,9 +363,7 @@ export class DataNftMinter {
     datasetTitle: string,
     datasetDescription: string,
     dataNFTStreamPreviewUrl: string,
-    address: string,
-    imageDescription: string,
-    hasCustomImage = false
+    address: string
   ) {
     const metadata = {
       description: `${datasetTitle} : ${datasetDescription}`,
@@ -374,12 +382,6 @@ export class DataNftMinter {
       trait_type: 'Data Preview URL',
       value: dataNFTStreamPreviewUrl
     });
-    if (hasCustomImage) {
-      metadataAttributes.push({
-        trait_type: 'Image Description',
-        value: imageDescription
-      });
-    }
     metadataAttributes.push({ trait_type: 'Creator', value: address });
     metadata.attributes = metadataAttributes;
     return metadata;
@@ -390,9 +392,7 @@ export class DataNftMinter {
     datasetTitle: string,
     datasetDescription: string,
     dataNFTStreamPreviewUrl: string,
-    address: string,
-    imageDescription: string,
-    hasCustomImage = false
+    address: string
   ) {
     let res: any = '';
     let data: any = '';
@@ -407,9 +407,7 @@ export class DataNftMinter {
       datasetTitle,
       datasetDescription,
       dataNFTStreamPreviewUrl,
-      address,
-      imageDescription,
-      hasCustomImage
+      address
     );
     const _traitsFile = new File([JSON.stringify(traits)], 'metadata.json', {
       type: 'application/json'

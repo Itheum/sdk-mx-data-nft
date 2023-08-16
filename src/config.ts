@@ -60,3 +60,9 @@ export const networkConfiguration: { [key in EnvironmentsEnum]: Config } = {
   mainnet: mainnetNetworkConfig,
   testnet: testnetNetworkConfig
 };
+
+export const imageService: { [key in EnvironmentsEnum]: string } = {
+  devnet: 'https://api.itheumcloud-stg.com/datadexapi',
+  mainnet: 'https://api.itheumcloud.com/datadexapi',
+  testnet: ''
+};
