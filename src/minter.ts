@@ -247,11 +247,8 @@ export class DataNftMinter {
         throw new Error('Traits URL is required when using custom image');
       }
 
-      const isTraitsUrlValid = await checkTraitsUrl(traitsUrl);
+      await checkTraitsUrl(traitsUrl);
 
-      if (!isTraitsUrlValid) {
-        throw new Error('Traits structure is not valid');
-      }
       imageOnIpfsUrl = imageUrl;
       metadataOnIpfsUrl = traitsUrl;
     }

@@ -105,7 +105,7 @@ nftStorageToken:"API TOKEN",
 ```
 
 Method 2: Mint a new Data NFT with custom image and traits.
-Traits should be compliant with the Itheum [taits structure](#traits-structure).
+Traits should be compliant with the Itheum [traits structure](#traits-structure).
 
 ```typescript
 const transaction = await dataNftMarket.mint(

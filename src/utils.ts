@@ -85,5 +85,4 @@ export async function checkTraitsUrl(traitsUrl: string) {
       throw new Error(`Empty value for trait: ${attribute.trait_type}`);
     }
   }
-  return true;
 }

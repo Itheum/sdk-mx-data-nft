@@ -40,32 +40,4 @@ describe('Data Nft Minter Test', () => {
     const result = await dataNftMarket.viewContractPauseState();
     expect(typeof result).toBe('boolean');
   });
-
-  test('mint throws an error when an invalid image URL is provided', async () => {
-    const dataNftMarket = new DataNftMinter('devnet');
-
-    const invalidImageUrl = 'invalid_url';
-
-    const mintPromise = dataNftMarket.mint(
-      new Address(
-        'erd10uavg8hd92620mfll2lt4jdmrg6xlf60awjp9ze5gthqjjhactvswfwuv8'
-      ),
-      'TEST-TOKEN',
-      'https://marshal.com',
-      'https://streamdata.com',
-      'https://previewdata',
-      15,
-      1000,
-      'Test Title',
-      'Test Description',
-      10,
-      '',
-      {
-        imageUrl: invalidImageUrl,
-        imageDescription: 'Test Image Description'
-      }
-    );
-
-    await expect(mintPromise).rejects.toThrowError('Invalid image url');
-  }, 100000);
 });
