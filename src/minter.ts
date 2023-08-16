@@ -170,6 +170,8 @@ export class DataNftMinter {
    *
    * NOTE: The `options.nftStorageToken` is required when not using custom image and traits, when using custom image and traits the traits should be compliant with the `traits` structure
    *
+   * For more information, see the [README documentation](https://github.com/Itheum/sdk-mx-data-nft#create-a-mint-transaction).
+   *
    * @param senderAddress the address of the user
    * @param tokenName the name of the DataNFT-FT
    * @param dataMarshalUrl the url of the data marshal
@@ -186,7 +188,6 @@ export class DataNftMinter {
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
    *                 - antiSpamTokenIdentifier: the anti spam token identifier to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
    *
-   * For more information, see the [README documentation](https://github.com/Itheum/sdk-mx-data-nft#create-a-mint-transaction).
    */
   async mint(
     senderAddress: IAddress,
