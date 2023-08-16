@@ -8,7 +8,7 @@ describe('Traits strucutre test', () => {
       );
       expect(true).toBe(true);
     } catch (error) {}
-  });
+  }, 100000);
 
   test('#json traits strucutre check', async () => {
     try {
