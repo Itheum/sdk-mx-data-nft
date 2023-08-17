@@ -387,12 +387,6 @@ export class DataNftMarket {
     return addOfferTx;
   }
 
-  //  data = new ContractCallPayloadBuilder()
-  //         .setFunction(new ContractFunction('acceptOffer'))
-  //         .addArg(new U64Value(offerId))
-  //         .addArg(new U64Value(amount))
-  //         .build();
-
   /**
    * Creates a `acceptOffer` transaction with ESDT tokens
    * @param senderAddress the address of the sender
