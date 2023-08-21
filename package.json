@@ -8,7 +8,7 @@
     "out/**/*"
   ],
   "scripts": {
-    "test": "jest",
+    "test": "jest --runInBand --forceExit",
     "lint": "tslint --project .",
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build"
