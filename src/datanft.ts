@@ -209,14 +209,18 @@ export class DataNft {
    * @param signableMessage Signable message from the wallet
    * @param stream [optional] Instead of auto-downloading if possible, request if data should always be streamed or not. true=stream, false/undefined=default behavior
    * @param fwdAllHeaders [optional] Forward all request headers to the Origin Data Stream server. true=stream, false/undefined=default behavior
-   * @param fwdHeaderKeys [optional] Forward only selected headers. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 15 items. e.g. cookie,accept,authorization
+   * @param fwdHeaderKeys [optional] Forward only selected headers. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 5 items. e.g. cookie,authorization
+   * @param fwdHeaderMapLookup [optional] Used with fwdHeaderKeys to set a front-end client side lookup map of headers the SDK uses to setup the forward. e.g. { cookie : "xyz", authorization : "Bearer zxy" }. Note that these are case-sensitive and need to match fwdHeaderKeys exactly.
    */
   async viewData(
     signedMessage: string,
     signableMessage: SignableMessage,
     stream?: boolean,
     fwdAllHeaders?: boolean,
-    fwdHeaderKeys?: string
+    fwdHeaderKeys?: string,
+    fwdHeaderMapLookup?: {
+      [key: string]: any;
+    }
   ): Promise<ViewDataReturnType> {
     const signResult = {
       signature: '',
@@ -255,6 +259,14 @@ export class DataNft {
           : DataNft.networkConfiguration.chainID
       }&accessRequesterAddr=${signResult.addrInHex}`;
 
+      type FetchConfig = {
+        [key: string]: any;
+      };
+
+      const fetchConfig: FetchConfig = {
+        method: 'GET'
+      };
+
       // S: append optional params if found
       if (typeof stream !== 'undefined') {
         url += stream ? '&streamInLine=1' : '';
@@ -266,10 +278,22 @@ export class DataNft {
 
       if (typeof fwdHeaderKeys !== 'undefined') {
         url += `&fwdHeaderKeys=${fwdHeaderKeys}`;
+
+        // if fwdHeaderMapLookup exists, send these headers and values to the data marshal for forwarding
+        if (
+          typeof fwdHeaderMapLookup !== 'undefined' &&
+          Object.keys(fwdHeaderMapLookup).length > 0
+        ) {
+          fetchConfig.headers = {};
+
+          Object.keys(fwdHeaderMapLookup).forEach((headerKey: string) => {
+            fetchConfig.headers[headerKey] = fwdHeaderMapLookup[headerKey];
+          });
+        }
       }
       // E: append optional params...
 
-      const response = await fetch(url);
+      const response = await fetch(url, fetchConfig);
       const contentType = response.headers.get('content-type');
       const data = await response.blob();
 

@@ -63,7 +63,7 @@ const message = await dataNft.messageToSign();
 const signature = 'signature';
 
 // Unlock the data inside the dataNft
-dataNft.viewData(message, signature); // optional params "stream" (stream out data instead of downloading file), "fwdAllHeaders"/"fwdHeaderKeys" can be used to pass headers like Authorization to origin servers
+dataNft.viewData(message, signature); // optional params "stream" (stream out data instead of downloading file), "fwdAllHeaders"/"fwdHeaderKeys", "fwdHeaderMapLookup" can be used to pass headers like Authorization to origin servers
 ```
 
 ### 2. Interacting with Data NFT Minter
@@ -74,10 +74,12 @@ import { DataNftMinter } from '@itheum/sdk-mx-data-nft';
 const dataNftMinter = new DataNftMinter('devnet' | 'testnet' | 'mainnet');
 
 // View minter smart contract requirements
-const requirements = await dataNftMinter.viewMinterRequirements('address');
+const requirements = await dataNftMinter.viewMinterRequirements(
+  new Address('erd1...')
+);
 
 // View contract pause state
-const result = await dataNftMarket.viewContractPauseState();
+const result = await dataNftMinter.viewContractPauseState();
 ```
 
 #### Create a mint transaction
@@ -86,20 +88,20 @@ Method 1: Mint a new Data NFT with Ithuem generated image and traits.
 Currently only supports [nft.storage](https://nft.storage/docs/quickstart/#get-an-api-token).
 
 ```typescript
-const transaction = await dataNftMarket.mint(
-new Address('erd1'),
-'TEST-TOKEN',
-'https://marshal.com',
-'https://streamdata.com',
-'https://previewdata',
-15,
-1000,
-'Test Title',
-'Test Description',
-10000000000,
-options: {
-nftStorageToken:"API TOKEN",
-}
+const transaction = await dataNftMinter.mint(
+  new Address('erd1...'),
+  'TEST-TOKEN',
+  'https://marshal.com',
+  'https://streamdata.com',
+  'https://previewdata',
+  15,
+  1000,
+  'Test Title',
+  'Test Description',
+  10000000000,
+  {
+    nftStorageToken: 'API TOKEN'
+  }
 );
 ```
 
@@ -107,22 +109,21 @@ Method 2: Mint a new Data NFT with custom image and traits.
 Traits should be compliant with the Itheum [traits structure](#traits-structure).
 
 ```typescript
-const transaction = await dataNftMarket.mint(
-new Address('erd1'),
-'TEST-TOKEN',
-'https://marshal.com',
-'https://streamdata.com',
-'https://previewdata',
-15,
-1000,
-'Test Title',
-'Test Description',
-10000000000,
-options: {
-imageUrl:"https://imageurl.com",
-traitsUrl:"https://traitsurl.com",
-}
-
+const transaction = await dataNftMinter.mint(
+  new Address('erd1'),
+  'TEST-TOKEN',
+  'https://marshal.com',
+  'https://streamdata.com',
+  'https://previewdata',
+  15,
+  1000,
+  'Test Title',
+  'Test Description',
+  10000000000,
+  {
+    imageUrl: 'https://imageurl.com',
+    traitsUrl: 'https://traitsurl.com'
+  }
 );
 ```
 
@@ -198,16 +199,18 @@ const result = dataNftMarket.changeOfferPrice(new Address(''), 0, 0);
 
 ### Traits structure
 
+Items below marked "required" are the "minimum" required for it to be compatible with the Itheum protocol. You can add any additional traits you may need for your own reasons.
+
 ```json
 {
-  "description": "Data NFT description", //required
+  "description": "Data NFT description", // required
   "attributes": [
     {
-      "trait_type": "Creator", //required
+      "trait_type": "Creator", // required
       "value": "creator address"
     },
     {
-      "trait_type": "Data Preview URL", //required
+      "trait_type": "Data Preview URL", // required
       "value": "https://previewdata.com"
     },
     {
