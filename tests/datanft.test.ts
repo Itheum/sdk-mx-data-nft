@@ -4,8 +4,7 @@ describe('Data NFT test', () => {
   test('#getMessageToSign', async () => {
     DataNft.setNetworkConfig('devnet');
     const dataNft = new DataNft({
-      dataMarshal:
-        'https://api.itheumcloud-stg.com/datamarshalapi/achilles/v1'
+      dataMarshal: 'https://api.itheumcloud-stg.com/datamarshalapi/achilles/v1'
     });
 
     const nonceToSign = await dataNft.getMessageToSign();
@@ -28,4 +27,18 @@ describe('Data NFT test', () => {
       expect(item).toBeInstanceOf(Object as unknown as DataNft);
     }
   }, 10000);
+
+  test('#create many data NFTs different token identifiers', async () => {
+    DataNft.setNetworkConfig('devnet');
+
+    const dataNfts = await DataNft.createManyFromApi([
+      { nonce: 62, tokenIdentifier: 'DATANFTFT4-3ba099' },
+      { nonce: 2, tokenIdentifier: 'INSP-a65b3b' },
+      { nonce: 80 }
+    ]);
+
+    for (const item of dataNfts) {
+      expect(item).toBeInstanceOf(Object as unknown as DataNft);
+    }
+  }, 12000);
 });

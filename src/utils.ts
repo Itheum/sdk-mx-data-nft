@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { DataNft } from './datanft';
-import { NftType, Offer } from './interfaces';
+import { NftEnumType, NftType, Offer } from './interfaces';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
   let hex = new BigNumber(value).toString(16);
@@ -46,7 +46,11 @@ export function parseDataNft(value: NftType): DataNft {
     tokenIdentifier: value.identifier,
     nftImgUrl: value.url ?? '',
     tokenName: value.name,
-    supply: value.supply ? Number(value.supply) : 0,
+    supply: value.supply
+      ? Number(value.supply)
+      : value.type === NftEnumType.NonFungibleESDT
+      ? 1
+      : 0,
     royalties: value.royalties / 100,
     nonce: value.nonce,
     collection: value.collection,

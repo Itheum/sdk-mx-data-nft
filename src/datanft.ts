@@ -78,31 +78,36 @@ export class DataNft {
   }
 
   /**
-   * Creates DataNfts calling the API and also decoding the attributes.
+   * Creates an array of DataNfts by calling the API and decoding the attributes.
    *
-   * @param nonces an array of Token nonces
-   * @param tokenIdentifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link EnvironmentsEnum})
+   * @param tokens An array of objects containing token nonces and optional token identifiers.
+   *               Each object should have a `nonce` property representing the token nonce.
+   *               An optional `tokenIdentifier` property can be provided to specify the token identifier.
+   *               If not provided, the default token identifier based on the {@link EnvironmentsEnum}
+   * @returns An array of {@link DataNft} objects
    */
   static async createManyFromApi(
-    nonces: number[],
-    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+    tokens: { nonce: number; tokenIdentifier?: string }[]
   ): Promise<DataNft[]> {
-    const identifiers = nonces.map((nonce) =>
-      createNftIdentifier(tokenIdentifier, nonce)
+    const identifiers = tokens.map(({ nonce, tokenIdentifier }) =>
+      createNftIdentifier(
+        tokenIdentifier || dataNftTokenIdentifier[this.env as EnvironmentsEnum],
+        nonce
+      )
     );
+
     const response = await fetch(
       `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(
         ','
       )}&withSupply=true`
     );
-    const data: NftType[] = await response.json();
 
+    const data: NftType[] = await response.json();
     try {
       const dataNfts = data.map((value) => parseDataNft(value));
-
       return dataNfts;
     } catch {
-      throw new Error('Could not create DataNft from Api');
+      throw new Error('Could not create Data NFTs from Api');
     }
   }
 
