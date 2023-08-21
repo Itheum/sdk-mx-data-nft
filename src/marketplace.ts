@@ -34,7 +34,7 @@ export class DataNftMarket {
   readonly env: string;
 
   /**
-   * Creates a new instance of the DataNftMarket which can be used to interact with the DataNFT-FTs inside the marketplace
+   * Creates a new instance of the DataNftMarket which can be used to interact with the marketplace smart contract
    * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
