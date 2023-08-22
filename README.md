@@ -1,5 +1,7 @@
 # SDK MX - Data NFT
 
+[![npm (scoped)](https://img.shields.io/npm/v/@itheum/sdk-mx-data-nft?style=for-the-badge)](https://www.npmjs.com/package/@itheum/sdk-mx-data-nft)
+
 This SDK is currently focused on interacting with the Itheum's Data NFT technology that's deployed to the MultiversX blockchain.
 
 ## Contributing
