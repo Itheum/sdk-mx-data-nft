@@ -51,7 +51,10 @@ export function parseDataNft(value: NftType): DataNft {
       : value.type === NftEnumType.NonFungibleESDT
       ? 1
       : 0,
-    royalties: value.royalties / 100,
+    royalties:
+      value.royalties !== null && value.royalties !== 0
+        ? value.royalties / 100
+        : 0,
     nonce: value.nonce,
     collection: value.collection,
     balance: value.balance ? Number(value.balance) : 0,
