@@ -14,10 +14,7 @@ import {
   StringValue,
   BooleanValue
 } from '@multiversx/sdk-core/out';
-import {
-  ApiNetworkProvider,
-  TransactionStatus
-} from '@multiversx/sdk-network-providers/out';
+import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   dataNftTokenIdentifier,

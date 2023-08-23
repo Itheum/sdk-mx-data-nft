@@ -64,6 +64,7 @@ export class DataNft {
     nonce: number,
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft> {
+    this.ensureNetworkConfigSet();
     const identifier = createNftIdentifier(tokenIdentifier, nonce);
     const response = await fetch(`${this.apiConfiguration}/nfts/${identifier}`);
     const data: NftType = await response.json();
@@ -89,6 +90,7 @@ export class DataNft {
   static async createManyFromApi(
     tokens: { nonce: number; tokenIdentifier?: string }[]
   ): Promise<DataNft[]> {
+    this.ensureNetworkConfigSet();
     const identifiers = tokens.map(({ nonce, tokenIdentifier }) =>
       createNftIdentifier(
         tokenIdentifier || dataNftTokenIdentifier[this.env as EnvironmentsEnum],
@@ -172,6 +174,7 @@ export class DataNft {
     address: string,
     identifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft[]> {
+    this.ensureNetworkConfigSet();
     const res = await fetch(
       `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifier}&withSupply=true`
     );
@@ -185,6 +188,7 @@ export class DataNft {
    * Gets the message to sign from the data marshal of the DataNft
    */
   async getMessageToSign(): Promise<string> {
+    DataNft.ensureNetworkConfigSet();
     if (!this.dataMarshal) {
       throw new Error('Data marshal not set');
     }
@@ -222,6 +226,10 @@ export class DataNft {
       [key: string]: any;
     }
   ): Promise<ViewDataReturnType> {
+    DataNft.ensureNetworkConfigSet();
+    if (!this.dataMarshal) {
+      throw new Error('Data marshal not set');
+    }
     const signResult = {
       signature: '',
       addrInHex: '',
@@ -307,6 +315,14 @@ export class DataNft {
         contentType: '',
         error: (err as Error).message
       };
+    }
+  }
+
+  private static ensureNetworkConfigSet() {
+    if (!this.env || !this.apiConfiguration) {
+      throw new Error(
+        'Network configuration is not set. Call setNetworkConfig before calling any method that requires it.'
+      );
     }
   }
 }

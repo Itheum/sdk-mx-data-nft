@@ -1,6 +1,40 @@
+import { SignableMessage } from '@multiversx/sdk-core/out';
 import { DataNft } from '../src';
 
 describe('Data NFT test', () => {
+  test('#test not setting network config', async () => {
+    try {
+      await DataNft.createFromApi(62);
+    } catch (error) {
+      if (error instanceof Error) {
+        expect(error.message).toBe(
+          'Network configuration is not set. Call setNetworkConfig before calling any method that requires it.'
+        );
+      }
+    }
+  });
+
+  test('#test not setting network config', async () => {
+    try {
+      const dataNft = new DataNft({
+        dataMarshal:
+          'https://api.itheumcloud-stg.com/datamarshalapi/achilles/v1'
+      });
+
+      await dataNft.viewData(
+        'x',
+        new SignableMessage({ message: Buffer.from('test') }),
+        true
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        expect(error.message).toBe(
+          'Network configuration is not set. Call setNetworkConfig before calling any method that requires it.'
+        );
+      }
+    }
+  });
+
   test('#getMessageToSign', async () => {
     DataNft.setNetworkConfig('devnet');
     const dataNft = new DataNft({
