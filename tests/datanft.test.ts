@@ -8,7 +8,7 @@ describe('Data NFT test', () => {
     } catch (error) {
       if (error instanceof Error) {
         expect(error.message).toBe(
-          'Network configuration is not set. Call setNetworkConfig before calling any method that requires it.'
+          'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
         );
       }
     }
@@ -29,7 +29,7 @@ describe('Data NFT test', () => {
     } catch (error) {
       if (error instanceof Error) {
         expect(error.message).toBe(
-          'Network configuration is not set. Call setNetworkConfig before calling any method that requires it.'
+          'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
         );
       }
     }

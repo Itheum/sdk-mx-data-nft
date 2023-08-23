@@ -13,6 +13,13 @@ import {
 import { createNftIdentifier, numberToPaddedHex, parseDataNft } from './utils';
 import minterAbi from './abis/datanftmint.abi.json';
 import { NftType, ViewDataReturnType } from './interfaces';
+import {
+  ErrDataNftCreation,
+  ErrDecodeAttributes,
+  ErrFailedOperation,
+  ErrAttributeNotSet,
+  ErrNetworkConfig
+} from './errors';
 
 export class DataNft {
   readonly tokenIdentifier: string = '';
@@ -73,8 +80,12 @@ export class DataNft {
       const dataNft = parseDataNft(data);
 
       return dataNft;
-    } catch {
-      throw new Error('Could not create DataNft from Api');
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ErrDataNftCreation(error);
+      } else {
+        throw ErrDataNftCreation;
+      }
     }
   }
 
@@ -97,19 +108,23 @@ export class DataNft {
         nonce
       )
     );
-
-    const response = await fetch(
-      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(
-        ','
-      )}&withSupply=true`
-    );
-
-    const data: NftType[] = await response.json();
     try {
+      const response = await fetch(
+        `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(
+          ','
+        )}&withSupply=true`
+      );
+
+      const data: NftType[] = await response.json();
+
       const dataNfts = data.map((value) => parseDataNft(value));
       return dataNfts;
-    } catch {
-      throw new Error('Could not create Data NFTs from Api');
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ErrDataNftCreation(error);
+      } else {
+        throw ErrDataNftCreation;
+      }
     }
   }
 
@@ -121,17 +136,25 @@ export class DataNft {
   static createFromApiResponseOrBulk(payload: NftType | NftType[]): DataNft[] {
     const dataNfts: DataNft[] = [];
 
-    const parseNft = (nft: NftType) => {
-      const dataNft = parseDataNft(nft);
-      dataNfts.push(dataNft);
-    };
+    try {
+      const parseNft = (nft: NftType) => {
+        const dataNft = parseDataNft(nft);
+        dataNfts.push(dataNft);
+      };
 
-    if (Array.isArray(payload)) {
-      payload.forEach(parseNft);
-      return dataNfts;
-    } else {
-      parseNft(payload as NftType);
-      return dataNfts;
+      if (Array.isArray(payload)) {
+        payload.forEach(parseNft);
+        return dataNfts;
+      } else {
+        parseNft(payload as NftType);
+        return dataNfts;
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ErrDataNftCreation(error);
+      } else {
+        throw ErrDataNftCreation;
+      }
     }
   }
 
@@ -140,11 +163,11 @@ export class DataNft {
    * @param attributes Attributes of the DataNft
    */
   static decodeAttributes(attributes: any): Partial<DataNft> {
-    const codec = new BinaryCodec();
-    const abiRegistry = AbiRegistry.create(minterAbi);
-    const dataNftAttributes = abiRegistry.getStruct('DataNftAttributes');
-
     try {
+      const codec = new BinaryCodec();
+      const abiRegistry = AbiRegistry.create(minterAbi);
+      const dataNftAttributes = abiRegistry.getStruct('DataNftAttributes');
+
       const decodedAttributes = codec
         .decodeTopLevel(Buffer.from(attributes, 'base64'), dataNftAttributes)
         .valueOf();
@@ -161,12 +184,12 @@ export class DataNft {
         title: decodedAttributes['title'].toString()
       };
     } catch {
-      throw new Error('Could not decode attributes');
+      throw ErrDecodeAttributes;
     }
   }
 
   /**
-   *  Returns an array of `DataNft` owned by the address
+   *  Returns an array of `DataNft` objects owned by the address
    * @param address the address to query
    * @param identifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link EnvironmentsEnum})
    */
@@ -175,13 +198,21 @@ export class DataNft {
     identifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<DataNft[]> {
     this.ensureNetworkConfigSet();
-    const res = await fetch(
-      `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifier}&withSupply=true`
-    );
-    const data = await res.json();
-    const dataNfts: DataNft[] = this.createFromApiResponseOrBulk(data);
+    try {
+      const res = await fetch(
+        `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifier}&withSupply=true`
+      );
+      const data = await res.json();
+      const dataNfts: DataNft[] = this.createFromApiResponseOrBulk(data);
 
-    return dataNfts;
+      return dataNfts;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ErrFailedOperation(this.ownedByAddress.name, error);
+      } else {
+        throw ErrFailedOperation;
+      }
+    }
   }
 
   /**
@@ -190,21 +221,26 @@ export class DataNft {
   async getMessageToSign(): Promise<string> {
     DataNft.ensureNetworkConfigSet();
     if (!this.dataMarshal) {
-      throw new Error('Data marshal not set');
+      throw new ErrAttributeNotSet('dataMarshal');
     }
-    const res = await fetch(
-      `${this.dataMarshal}/preaccess?chainId=${
-        DataNft.networkConfiguration.chainID == 'D'
-          ? 'ED'
-          : DataNft.networkConfiguration.chainID
-      }`
-    );
-    const data = await res.json();
+    try {
+      const res = await fetch(
+        `${this.dataMarshal}/preaccess?chainId=${
+          DataNft.networkConfiguration.chainID == 'D'
+            ? 'ED'
+            : DataNft.networkConfiguration.chainID
+        }`
+      );
+      const data = await res.json();
 
-    if (data && data.nonce) {
       return data.nonce;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ErrFailedOperation(this.getMessageToSign.name, error);
+      } else {
+        throw ErrFailedOperation;
+      }
     }
-    throw new Error('Could not get nonce from data marshal');
   }
 
   /**
@@ -228,7 +264,7 @@ export class DataNft {
   ): Promise<ViewDataReturnType> {
     DataNft.ensureNetworkConfigSet();
     if (!this.dataMarshal) {
-      throw new Error('Data marshal not set');
+      throw new ErrAttributeNotSet('dataMarshal');
     }
     const signResult = {
       signature: '',
@@ -320,9 +356,7 @@ export class DataNft {
 
   private static ensureNetworkConfigSet() {
     if (!this.env || !this.apiConfiguration) {
-      throw new Error(
-        'Network configuration is not set. Call setNetworkConfig before calling any method that requires it.'
-      );
+      throw ErrNetworkConfig;
     }
   }
 }
