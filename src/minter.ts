@@ -27,7 +27,7 @@ import dataNftMintAbi from './abis/datanftmint.abi.json';
 import { MinterRequirements } from './interfaces';
 import { NFTStorage } from 'nft.storage';
 import { File } from '@web-std/file';
-import { checkTraitsUrl } from './utils';
+import { checkTraitsUrl, checkUrlIsUp } from './utils';
 import {
   ErrArgumentNotSet,
   ErrContractQuery,
@@ -219,6 +219,18 @@ export class DataNftMinter {
         this.env as EnvironmentsEnum
       ]
     } = options ?? {};
+
+    try {
+      await checkUrlIsUp(dataStreamUrl);
+      await checkUrlIsUp(dataPreviewUrl);
+      await checkUrlIsUp(dataMarshalUrl);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ErrFailedOperation(this.mint.name, error);
+      } else {
+        throw new ErrFailedOperation(this.mint.name);
+      }
+    }
 
     let imageOnIpfsUrl: string;
     let metadataOnIpfsUrl: string;

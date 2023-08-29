@@ -90,3 +90,11 @@ export async function checkTraitsUrl(traitsUrl: string) {
     }
   }
 }
+
+export async function checkUrlIsUp(url: string) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`URL is not up: ${url}`);
+  }
+}
