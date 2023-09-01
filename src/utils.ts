@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { DataNft } from './datanft';
-import { NftType, Offer } from './interfaces';
+import { NftEnumType, NftType, Offer } from './interfaces';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
   let hex = new BigNumber(value).toString(16);
@@ -46,8 +46,12 @@ export function parseDataNft(value: NftType): DataNft {
     tokenIdentifier: value.identifier,
     nftImgUrl: value.url ?? '',
     tokenName: value.name,
-    supply: value.supply ? Number(value.supply) : 0,
-    royalties: value.royalties / 100,
+    supply: value.supply
+      ? Number(value.supply)
+      : value.type === NftEnumType.NonFungibleESDT
+      ? 1
+      : 0,
+    royalties: value.royalties !== null ? value.royalties / 100 : 0,
     nonce: value.nonce,
     collection: value.collection,
     balance: value.balance ? Number(value.balance) : 0,
@@ -84,5 +88,13 @@ export async function checkTraitsUrl(traitsUrl: string) {
     if (!attribute.value) {
       throw new Error(`Empty value for trait: ${attribute.trait_type}`);
     }
+  }
+}
+
+export async function checkUrlIsUp(url: string) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`URL is not up: ${url}`);
   }
 }

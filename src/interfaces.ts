@@ -44,7 +44,7 @@ export interface NftType {
   }[];
 }
 
-export declare enum NftEnumType {
+export enum NftEnumType {
   NonFungibleESDT = 'NonFungibleESDT',
   SemiFungibleESDT = 'SemiFungibleESDT',
   MetaESDT = 'MetaESDT'

@@ -14,10 +14,7 @@ import {
   StringValue,
   BooleanValue
 } from '@multiversx/sdk-core/out';
-import {
-  ApiNetworkProvider,
-  TransactionStatus
-} from '@multiversx/sdk-network-providers/out';
+import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   dataNftTokenIdentifier,
@@ -30,7 +27,12 @@ import dataNftMintAbi from './abis/datanftmint.abi.json';
 import { MinterRequirements } from './interfaces';
 import { NFTStorage } from 'nft.storage';
 import { File } from '@web-std/file';
-import { checkTraitsUrl } from './utils';
+import { checkTraitsUrl, checkUrlIsUp } from './utils';
+import {
+  ErrArgumentNotSet,
+  ErrContractQuery,
+  ErrFailedOperation
+} from './errors';
 
 export class DataNftMinter {
   readonly contract: SmartContract;
@@ -108,7 +110,7 @@ export class DataNftMinter {
       };
       return requirements;
     } else {
-      throw new Error('Could not retrieve requirements');
+      throw new ErrContractQuery('Could not retrieve requirements');
     }
   }
 
@@ -128,7 +130,9 @@ export class DataNftMinter {
       const returnValue = firstValue?.valueOf();
       return new BooleanValue(returnValue).valueOf();
     } else {
-      throw new Error('Error while retrieving the contract pause state');
+      throw new ErrContractQuery(
+        'Error while retrieving the contract pause state'
+      );
     }
   }
 
@@ -216,6 +220,18 @@ export class DataNftMinter {
       ]
     } = options ?? {};
 
+    try {
+      await checkUrlIsUp(dataStreamUrl);
+      await checkUrlIsUp(dataPreviewUrl);
+      await checkUrlIsUp(dataMarshalUrl);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ErrFailedOperation(this.mint.name, error);
+      } else {
+        throw new ErrFailedOperation(this.mint.name);
+      }
+    }
+
     let imageOnIpfsUrl: string;
     let metadataOnIpfsUrl: string;
 
@@ -224,7 +240,8 @@ export class DataNftMinter {
 
     if (!imageUrl) {
       if (!nftStorageToken) {
-        throw new Error(
+        throw new ErrArgumentNotSet(
+          'nftStorageToken',
           'NFT Storage token is required when not using custom image and traits'
         );
       }
@@ -245,7 +262,10 @@ export class DataNftMinter {
       metadataOnIpfsUrl = metadataIpfsUrl;
     } else {
       if (!traitsUrl) {
-        throw new Error('Traits URL is required when using custom image');
+        throw new ErrArgumentNotSet(
+          'traitsUrl',
+          'Traits URL is required when using custom image'
+        );
       }
 
       await checkTraitsUrl(traitsUrl);
@@ -330,10 +350,17 @@ export class DataNftMinter {
           dataNftStreamUrlEncrypted: data.encryptedMessage
         };
       } else {
-        throw new Error('Could not generate data stream url');
+        throw new ErrFailedOperation(this.dataNFTDataStreamAdvertise.name);
       }
-    } catch {
-      throw new Error('Could not generate data stream url');
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ErrFailedOperation(
+          this.dataNFTDataStreamAdvertise.name,
+          error
+        );
+      } else {
+        throw new ErrFailedOperation(this.dataNFTDataStreamAdvertise.name);
+      }
     }
   }
 
@@ -350,7 +377,7 @@ export class DataNftMinter {
       const dir = [image, traits];
       res = await nftstorage.storeDirectory(dir);
     } catch {
-      throw new Error('Error while uploading to IPFS');
+      throw new ErrFailedOperation(this.storeToIpfs.name);
     }
     return {
       imageOnIpfsUrl: `https://ipfs.io/ipfs/${res}/image.png`,
