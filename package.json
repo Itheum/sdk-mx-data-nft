@@ -1,6 +1,6 @@
 {
   "name": "@itheum/sdk-mx-data-nft",
-  "version": "0.2.5",
+  "version": "0.3.0.beta.1",
   "description": "SDK for Itheum's Data NFT Technology on MultiversX Blockchain",
   "main": "out/index.js",
   "types": "out/index.d.js",
@@ -8,7 +8,7 @@
     "out/**/*"
   ],
   "scripts": {
-    "test": "jest",
+    "test": "jest --runInBand --forceExit",
     "lint": "tslint --project .",
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build"
@@ -19,7 +19,7 @@
     "@multiversx/sdk-core": "12.6.0",
     "@multiversx/sdk-network-providers": "1.5.0",
     "bignumber.js": "^9.1.1",
-    "nft.storage": "^7.0.3"
+    "nft.storage": "^7.1.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
