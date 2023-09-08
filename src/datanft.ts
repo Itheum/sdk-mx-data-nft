@@ -14,17 +14,17 @@ import {
   createNftIdentifier,
   numberToPaddedHex,
   parseDataNft,
-  validateSpecificParams
+  validateSpecificParamsViewData
 } from './utils';
 import minterAbi from './abis/datanftmint.abi.json';
 import { NftType, ViewDataReturnType } from './interfaces';
-import {
-  ErrDataNftCreation,
-  ErrDecodeAttributes,
-  ErrFailedOperation,
-  ErrAttributeNotSet,
-  ErrNetworkConfig
-} from './errors';
+// import {
+//   ErrDataNftCreation,
+//   ErrDecodeAttributes,
+//   ErrFailedOperation,
+//   ErrAttributeNotSet,
+//   ErrNetworkConfig
+// } from './errors';
 
 export class DataNft {
   readonly tokenIdentifier: string = '';
@@ -86,11 +86,12 @@ export class DataNft {
 
       return dataNft;
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ErrDataNftCreation(error);
-      } else {
-        throw ErrDataNftCreation;
-      }
+      throw error;
+      // if (error instanceof Error) {
+      //   throw new ErrDataNftCreation(error);
+      // } else {
+      //   throw ErrDataNftCreation;
+      // }
     }
   }
 
@@ -125,11 +126,12 @@ export class DataNft {
       const dataNfts = data.map((value) => parseDataNft(value));
       return dataNfts;
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ErrDataNftCreation(error);
-      } else {
-        throw ErrDataNftCreation;
-      }
+      throw error;
+      // if (error instanceof Error) {
+      //   throw new ErrDataNftCreation(error);
+      // } else {
+      //   throw ErrDataNftCreation;
+      // }
     }
   }
 
@@ -155,11 +157,12 @@ export class DataNft {
         return dataNfts;
       }
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ErrDataNftCreation(error);
-      } else {
-        throw ErrDataNftCreation;
-      }
+      throw error;
+      // if (error instanceof Error) {
+      //   throw new ErrDataNftCreation(error);
+      // } else {
+      //   throw ErrDataNftCreation;
+      // }
     }
   }
 
@@ -188,8 +191,9 @@ export class DataNft {
         description: decodedAttributes['description'].toString(),
         title: decodedAttributes['title'].toString()
       };
-    } catch {
-      throw ErrDecodeAttributes;
+    } catch (error) {
+      throw error;
+      // throw ErrDecodeAttributes;
     }
   }
 
@@ -212,11 +216,12 @@ export class DataNft {
 
       return dataNfts;
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ErrFailedOperation(this.ownedByAddress.name, error);
-      } else {
-        throw ErrFailedOperation;
-      }
+      throw error;
+      // if (error instanceof Error) {
+      //   throw new ErrFailedOperation(this.ownedByAddress.name, error);
+      // } else {
+      //   throw ErrFailedOperation;
+      // }
     }
   }
 
@@ -226,7 +231,8 @@ export class DataNft {
   async getMessageToSign(): Promise<string> {
     DataNft.ensureNetworkConfigSet();
     if (!this.dataMarshal) {
-      throw new ErrAttributeNotSet('dataMarshal');
+      throw new Error('No data marshal set for getMessageToSign');
+      // throw new ErrAttributeNotSet('dataMarshal');
     }
     try {
       const res = await fetch(
@@ -240,16 +246,17 @@ export class DataNft {
 
       return data.nonce;
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ErrFailedOperation(this.getMessageToSign.name, error);
-      } else {
-        throw ErrFailedOperation;
-      }
+      throw error;
+      // if (error instanceof Error) {
+      //   throw new ErrFailedOperation(this.getMessageToSign.name, error);
+      // } else {
+      //   throw ErrFailedOperation;
+      // }
     }
   }
 
   /**
-   * Method to get the data from the data marshal.
+   * Method to get the data via the Data Marshal.
    * @param signedMessage Signed message from the data marshal
    * @param signableMessage Signable message from the wallet
    * @param stream [optional] Instead of auto-downloading if possible, request if data should always be streamed or not. i.e. true=stream, false/undefined=default behavior
@@ -269,7 +276,8 @@ export class DataNft {
   }): Promise<ViewDataReturnType> {
     DataNft.ensureNetworkConfigSet();
     if (!this.dataMarshal) {
-      throw new ErrAttributeNotSet('dataMarshal');
+      throw new Error('No data marshal set for viewData');
+      // throw new ErrAttributeNotSet('dataMarshal');
     }
     const signResult = {
       signature: '',
@@ -277,8 +285,9 @@ export class DataNft {
       success: false,
       exception: ''
     };
+
     // S: run any format specific validation
-    const { allPassed, validationMessages } = validateSpecificParams({
+    const { allPassed, validationMessages } = validateSpecificParamsViewData({
       signedMessage: p.signedMessage,
       signableMessage: p.signableMessage,
       stream: p.stream,
@@ -314,10 +323,9 @@ export class DataNft {
     }
 
     try {
-      // let url = `${this.dataMarshal}/access?nonce=${p.signedMessage}&NFTId=${
-      let url = `http://localhost:4000/datamarshalapi/achilles/v1/access?nonce=${
-        p.signedMessage
-      }&NFTId=${this.collection}-${numberToPaddedHex(this.nonce)}&signature=${
+      let url = `${this.dataMarshal}/access?nonce=${p.signedMessage}&NFTId=${
+        this.collection
+      }-${numberToPaddedHex(this.nonce)}&signature=${
         signResult.signature
       }&chainId=${
         DataNft.networkConfiguration.chainID == 'D'
@@ -379,7 +387,7 @@ export class DataNft {
   /**
    * Method to get the data from the data marshal by authenticating and authorizing via MultiversX Native Auth. This has a better UX as it does not need a manually signed signableMessage
    * @param mvxNativeAuthOrigins An string array of domains that the access token is validated against. e.g. ["http://localhost:3000", "https://mycoolsite.com"]
-   * @param mvxNativeAuthMaxExpirySeconds An number of that represents the "max expiry seconds" of your access token. e.g. if your client side access token is set fr 5 mins then send in 300
+   * @param mvxNativeAuthMaxExpirySeconds An number of that represents the "max expiry seconds" of your access token. e.g. if your client side access token is set for 5 mins then send in 300
    * @param fwdHeaderMapLookup Used with fwdHeaderKeys to set a front-end client side lookup map of headers the SDK uses to setup the forward. e.g. { cookie : "xyz", authorization : "Bearer zxy" }. As it's Native Auth, you must sent in the authorization : "Bearer zxy" entry. Note that these are case-sensitive and need to match fwdHeaderKeys exactly for other entries.
    * @param fwdHeaderKeys [optional] Forward only selected headers to the Origin Data Stream server. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 5 items. e.g. cookie,authorization
    * @param fwdAllHeaders [optional] Forward all request headers to the Origin Data Stream server.
@@ -397,7 +405,7 @@ export class DataNft {
   }): Promise<ViewDataReturnType> {
     try {
       // S: run any format specific validation
-      const { allPassed, validationMessages } = validateSpecificParams({
+      const { allPassed, validationMessages } = validateSpecificParamsViewData({
         mvxNativeAuthOrigins: p.mvxNativeAuthOrigins,
         mvxNativeAuthMaxExpirySeconds: p.mvxNativeAuthMaxExpirySeconds,
         fwdHeaderKeys: p.fwdHeaderKeys,
@@ -427,8 +435,7 @@ export class DataNft {
       mvxNativeAuthOriginsToBase64 = window.btoa(mvxNativeAuthOriginsToBase64); // convert to base64
 
       // construct the api url
-      // let url = `${this.dataMarshal}/access?NFTId=${
-      let url = `http://localhost:4000/datamarshalapi/achilles/v1/access?NFTId=${
+      let url = `${this.dataMarshal}/access?NFTId=${
         this.collection
       }-${numberToPaddedHex(this.nonce)}&chainId=${
         DataNft.networkConfiguration.chainID == 'D'
@@ -499,7 +506,10 @@ export class DataNft {
 
   private static ensureNetworkConfigSet() {
     if (!this.env || !this.apiConfiguration) {
-      throw ErrNetworkConfig;
+      throw new Error(
+        'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
+      );
+      // throw ErrNetworkConfig;
     }
   }
 }

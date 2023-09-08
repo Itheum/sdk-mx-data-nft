@@ -10,7 +10,7 @@ export class Err extends Error {
   }
 
   /**
-   * Returns a pretty, friendly summary for the error or for the chain of errros (if appropriate).
+   * Returns a pretty, friendly summary for the error or for the chain of errors (if appropriate).
    */
   summary(): any[] {
     let result = [];

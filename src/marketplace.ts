@@ -26,7 +26,7 @@ import {
 import dataMarketAbi from './abis/data_market.abi.json';
 import { MarketplaceRequirements, Offer } from './interfaces';
 import { parseOffer } from './utils';
-import { ErrContractQuery } from './errors';
+// import { ErrContractQuery } from './errors';
 
 export class DataNftMarket {
   readonly contract: SmartContract;
@@ -281,9 +281,10 @@ export class DataNftMarket {
       };
       return requirements;
     } else {
-      throw new ErrContractQuery(
-        'Error while retrieving the marketplace requirements'
-      );
+      throw new Error('Error while retrieving the marketplace requirements');
+      // throw new ErrContractQuery(
+      //   'Error while retrieving the marketplace requirements'
+      // );
     }
   }
 
@@ -303,7 +304,9 @@ export class DataNftMarket {
       const returnValue = firstValue?.valueOf();
       return new U8Value(returnValue).valueOf().toNumber();
     }
-    throw new ErrContractQuery('Error while retrieving the number of offers');
+
+    throw new Error('Error while retrieving the number of offers');
+    // throw new ErrContractQuery('Error while retrieving the number of offers');
   }
 
   /**
@@ -322,9 +325,11 @@ export class DataNftMarket {
       const returnValue = firstValue?.valueOf();
       return new U64Value(returnValue).valueOf().toNumber();
     }
-    throw new ErrContractQuery(
-      'Error while retrieving the last valid offer id'
-    );
+
+    throw new Error('Error while retrieving the last valid offer id');
+    // throw new ErrContractQuery(
+    //   'Error while retrieving the last valid offer id'
+    // );
   }
 
   /**
@@ -343,9 +348,10 @@ export class DataNftMarket {
       const returnValue = firstValue?.valueOf();
       return new BooleanValue(returnValue).valueOf();
     } else {
-      throw new ErrContractQuery(
-        'Error while retrieving the contract pause state'
-      );
+      throw new Error('Error while retrieving the contract pause state');
+      // throw new ErrContractQuery(
+      //   'Error while retrieving the contract pause state'
+      // );
     }
   }
 
