@@ -10,7 +10,12 @@ import {
   dataNftTokenIdentifier,
   networkConfiguration
 } from './config';
-import { createNftIdentifier, numberToPaddedHex, parseDataNft } from './utils';
+import {
+  createNftIdentifier,
+  numberToPaddedHex,
+  parseDataNft,
+  validateSpecificParams
+} from './utils';
 import minterAbi from './abis/datanftmint.abi.json';
 import { NftType, ViewDataReturnType } from './interfaces';
 
@@ -45,7 +50,7 @@ export class DataNft {
 
   /**
    * Sets the network configuration for the DataNft class.
-   * @param env 'devent' | 'mainnet' | 'testnet'
+   * @param env 'devnet' | 'mainnet' | 'testnet'
    */
   static setNetworkConfig(env: string) {
     this.env = env;
@@ -202,38 +207,54 @@ export class DataNft {
    * Method to get the data from the data marshal.
    * @param signedMessage Signed message from the data marshal
    * @param signableMessage Signable message from the wallet
-   * @param stream [optional] Instead of auto-downloading if possible, request if data should always be streamed or not. true=stream, false/undefined=default behavior
-   * @param fwdAllHeaders [optional] Forward all request headers to the Origin Data Stream server. true=stream, false/undefined=default behavior
-   * @param fwdHeaderKeys [optional] Forward only selected headers. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 5 items. e.g. cookie,authorization
+   * @param stream [optional] Instead of auto-downloading if possible, request if data should always be streamed or not. i.e. true=stream, false/undefined=default behavior
+   * @param fwdAllHeaders [optional] Forward all request headers to the Origin Data Stream server.
+   * @param fwdHeaderKeys [optional] Forward only selected headers to the Origin Data Stream server. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 5 items. e.g. cookie,authorization
    * @param fwdHeaderMapLookup [optional] Used with fwdHeaderKeys to set a front-end client side lookup map of headers the SDK uses to setup the forward. e.g. { cookie : "xyz", authorization : "Bearer zxy" }. Note that these are case-sensitive and need to match fwdHeaderKeys exactly.
    */
-  async viewData(
-    signedMessage: string,
-    signableMessage: SignableMessage,
-    stream?: boolean,
-    fwdAllHeaders?: boolean,
-    fwdHeaderKeys?: string,
+  async viewData(p: {
+    signedMessage: string;
+    signableMessage: SignableMessage;
+    stream?: boolean;
+    fwdAllHeaders?: boolean;
+    fwdHeaderKeys?: string;
     fwdHeaderMapLookup?: {
       [key: string]: any;
-    }
-  ): Promise<ViewDataReturnType> {
+    };
+  }): Promise<ViewDataReturnType> {
     const signResult = {
       signature: '',
       addrInHex: '',
       success: false,
       exception: ''
     };
+    // S: run any format specific validation
+    const { allPassed, validationMessages } = validateSpecificParams({
+      signedMessage: p.signedMessage,
+      signableMessage: p.signableMessage,
+      stream: p.stream,
+      fwdAllHeaders: p.fwdAllHeaders,
+      fwdHeaderKeys: p.fwdHeaderKeys,
+      fwdHeaderMapLookup: p.fwdHeaderMapLookup,
+      _mandatoryParamsList: ['signedMessage', 'signableMessage']
+    });
+
+    if (!allPassed) {
+      throw new Error(`params have validation issues = ${validationMessages}`);
+    }
+    // E: run any format specific validation...
+
     try {
-      if (signableMessage?.signature && signableMessage?.address) {
-        if (signableMessage.signature instanceof Buffer) {
-          signResult.signature = signableMessage.signature.toString('hex');
+      if (p.signableMessage?.signature && p.signableMessage?.address) {
+        if (p.signableMessage.signature instanceof Buffer) {
+          signResult.signature = p.signableMessage.signature.toString('hex');
         } else if (
-          typeof (signableMessage.signature as any).hex === 'function'
+          typeof (p.signableMessage.signature as any).hex === 'function'
         ) {
-          signResult.signature = (signableMessage.signature as any).hex();
+          signResult.signature = (p.signableMessage.signature as any).hex();
         }
 
-        signResult.addrInHex = signableMessage.address.hex();
+        signResult.addrInHex = p.signableMessage.address.hex();
         signResult.success = true;
       } else {
         signResult.exception = 'Some Error';
@@ -244,9 +265,10 @@ export class DataNft {
     }
 
     try {
-      let url = `${this.dataMarshal}/access?nonce=${signedMessage}&NFTId=${
-        this.collection
-      }-${numberToPaddedHex(this.nonce)}&signature=${
+      // let url = `${this.dataMarshal}/access?nonce=${p.signedMessage}&NFTId=${
+      let url = `http://localhost:4000/datamarshalapi/achilles/v1/access?nonce=${
+        p.signedMessage
+      }&NFTId=${this.collection}-${numberToPaddedHex(this.nonce)}&signature=${
         signResult.signature
       }&chainId=${
         DataNft.networkConfiguration.chainID == 'D'
@@ -263,26 +285,147 @@ export class DataNft {
       };
 
       // S: append optional params if found
-      if (typeof stream !== 'undefined') {
-        url += stream ? '&streamInLine=1' : '';
+      if (typeof p.stream !== 'undefined') {
+        url += p.stream ? '&streamInLine=1' : '';
       }
 
-      if (typeof fwdAllHeaders !== 'undefined') {
-        url += fwdAllHeaders ? '&fwdAllHeaders=1' : '';
+      if (typeof p.fwdAllHeaders !== 'undefined') {
+        url += p.fwdAllHeaders ? '&fwdAllHeaders=1' : '';
       }
 
-      if (typeof fwdHeaderKeys !== 'undefined') {
-        url += `&fwdHeaderKeys=${fwdHeaderKeys}`;
+      if (typeof p.fwdHeaderKeys !== 'undefined') {
+        url += `&fwdHeaderKeys=${p.fwdHeaderKeys}`;
 
         // if fwdHeaderMapLookup exists, send these headers and values to the data marshal for forwarding
         if (
-          typeof fwdHeaderMapLookup !== 'undefined' &&
-          Object.keys(fwdHeaderMapLookup).length > 0
+          typeof p.fwdHeaderMapLookup !== 'undefined' &&
+          Object.keys(p.fwdHeaderMapLookup).length > 0
         ) {
           fetchConfig.headers = {};
 
-          Object.keys(fwdHeaderMapLookup).forEach((headerKey: string) => {
-            fetchConfig.headers[headerKey] = fwdHeaderMapLookup[headerKey];
+          Object.keys(p.fwdHeaderMapLookup).forEach((headerKey: string) => {
+            fetchConfig.headers[headerKey] = p.fwdHeaderMapLookup?.[headerKey];
+          });
+        }
+      }
+      // E: append optional params...
+
+      const response = await fetch(url, fetchConfig);
+      const contentType = response.headers.get('content-type');
+      const data = await response.blob();
+
+      return {
+        data: data,
+        contentType: contentType || ''
+      };
+    } catch (err) {
+      return {
+        data: undefined,
+        contentType: '',
+        error: (err as Error).message
+      };
+    }
+  }
+
+  /**
+   * Method to get the data from the data marshal by authenticating and authorizing via MultiversX Native Auth. This has a better UX as it does not need a manually signed signableMessage
+   * @param mvxNativeAuthOrigins An string array of domains that the access token is validated against. e.g. ["http://localhost:3000", "https://mycoolsite.com"]
+   * @param mvxNativeAuthMaxExpirySeconds An number of that represents the "max expiry seconds" of your access token. e.g. if your client side access token is set fr 5 mins then send in 300
+   * @param fwdHeaderMapLookup Used with fwdHeaderKeys to set a front-end client side lookup map of headers the SDK uses to setup the forward. e.g. { cookie : "xyz", authorization : "Bearer zxy" }. As it's Native Auth, you must sent in the authorization : "Bearer zxy" entry. Note that these are case-sensitive and need to match fwdHeaderKeys exactly for other entries.
+   * @param fwdHeaderKeys [optional] Forward only selected headers to the Origin Data Stream server. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 5 items. e.g. cookie,authorization
+   * @param fwdAllHeaders [optional] Forward all request headers to the Origin Data Stream server.
+   * @param stream [optional] Instead of auto-downloading if possible, request if data should always be streamed or not.i.e true=stream, false/undefined=default behavior
+   */
+  async viewDataViaMVXNativeAuth(p: {
+    mvxNativeAuthOrigins: string[];
+    mvxNativeAuthMaxExpirySeconds: number;
+    fwdHeaderMapLookup: {
+      [key: string]: any;
+    };
+    fwdHeaderKeys?: string;
+    fwdAllHeaders?: boolean;
+    stream?: boolean;
+  }): Promise<ViewDataReturnType> {
+    try {
+      // S: run any format specific validation
+      const { allPassed, validationMessages } = validateSpecificParams({
+        mvxNativeAuthOrigins: p.mvxNativeAuthOrigins,
+        mvxNativeAuthMaxExpirySeconds: p.mvxNativeAuthMaxExpirySeconds,
+        fwdHeaderKeys: p.fwdHeaderKeys,
+        fwdHeaderMapLookup: p.fwdHeaderMapLookup,
+        fwdAllHeaders: p.fwdAllHeaders,
+        stream: p.stream,
+        _fwdHeaderMapLookupMustContainBearerAuthHeader: true,
+        _mandatoryParamsList: [
+          'mvxNativeAuthOrigins',
+          'mvxNativeAuthMaxExpirySeconds',
+          'fwdHeaderMapLookup'
+        ]
+      });
+
+      if (!allPassed) {
+        throw new Error(
+          `params have validation issues = ${validationMessages}`
+        );
+      }
+      // E: run any format specific validation...
+
+      // convert mvxNativeAuthOrigins from a string array to API required base64 format
+      let mvxNativeAuthOriginsToBase64 = p.mvxNativeAuthOrigins.join(','); // convert the array to a string
+      mvxNativeAuthOriginsToBase64 = mvxNativeAuthOriginsToBase64
+        .trim()
+        .replaceAll(' ', ''); // remove all spaces
+      mvxNativeAuthOriginsToBase64 = window.btoa(mvxNativeAuthOriginsToBase64); // convert to base64
+
+      // construct the api url
+      // let url = `${this.dataMarshal}/access?NFTId=${
+      let url = `http://localhost:4000/datamarshalapi/achilles/v1/access?NFTId=${
+        this.collection
+      }-${numberToPaddedHex(this.nonce)}&chainId=${
+        DataNft.networkConfiguration.chainID == 'D'
+          ? 'ED'
+          : DataNft.networkConfiguration.chainID
+      }&mvxNativeAuthEnable=1&mvxNativeAuthMaxExpirySeconds=${
+        p.mvxNativeAuthMaxExpirySeconds
+      }&mvxNativeAuthOrigins=${mvxNativeAuthOriginsToBase64}`;
+
+      type FetchConfig = {
+        [key: string]: any;
+      };
+
+      const fetchConfig: FetchConfig = {
+        method: 'GET'
+      };
+
+      // S: append optional params if found
+      if (typeof p.stream !== 'undefined') {
+        url += p.stream ? '&streamInLine=1' : '';
+      }
+
+      if (typeof p.fwdAllHeaders !== 'undefined') {
+        url += p.fwdAllHeaders ? '&fwdAllHeaders=1' : '';
+      }
+
+      // if fwdHeaderMapLookup exists, send these headers and values to the data marshal for forwarding
+      if (
+        typeof p.fwdHeaderMapLookup !== 'undefined' &&
+        Object.keys(p.fwdHeaderMapLookup).length > 0
+      ) {
+        // authorization WILL be present based on validation, so let's fwd this as a request header param
+        fetchConfig.headers = {};
+        fetchConfig.headers['authorization'] =
+          p.fwdHeaderMapLookup['authorization'];
+
+        // ... and forward any OTHER params user wanted to forward to the origin server via the marshal
+        if (typeof p.fwdHeaderKeys !== 'undefined') {
+          url += `&fwdHeaderKeys=${p.fwdHeaderKeys}`;
+
+          Object.keys(p.fwdHeaderMapLookup).forEach((headerKey: string) => {
+            // already appended above so skip it...
+            if (headerKey !== 'authorization') {
+              fetchConfig.headers[headerKey] =
+                p.fwdHeaderMapLookup?.[headerKey];
+            }
           });
         }
       }

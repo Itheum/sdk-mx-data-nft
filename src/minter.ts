@@ -30,7 +30,7 @@ import dataNftMintAbi from './abis/datanftmint.abi.json';
 import { MinterRequirements } from './interfaces';
 import { NFTStorage } from 'nft.storage';
 import { File } from '@web-std/file';
-import { checkTraitsUrl } from './utils';
+import { checkTraitsUrl, checkUrlIsUp } from './utils';
 
 export class DataNftMinter {
   readonly contract: SmartContract;
