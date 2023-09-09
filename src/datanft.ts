@@ -64,15 +64,19 @@ export class DataNft {
    * Creates a DataNft calling the API and also decoding the attributes.
    *
    * Not useful for creating an array of DataNft, because it calls the API every single time.
-   * @param nonce Token nonce
-   * @param tokenIdentifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link EnvironmentsEnum})
+   * @param token Object should have a `nonce` property representing the token nonce. An optional `tokenIdentifier` property can be provided to specify the token identifier.
+   *               If not provided, the default token identifier based on the {@link EnvironmentsEnum}
    */
-  static async createFromApi(
-    nonce: number,
-    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
-  ): Promise<DataNft> {
+  static async createFromApi(token: {
+    nonce: number;
+    tokenIdentifier?: string;
+  }): Promise<DataNft> {
     this.ensureNetworkConfigSet();
-    const identifier = createNftIdentifier(tokenIdentifier, nonce);
+    const identifier = createNftIdentifier(
+      token.tokenIdentifier ||
+        dataNftTokenIdentifier[this.env as EnvironmentsEnum],
+      token.nonce
+    );
     const response = await fetch(`${this.apiConfiguration}/nfts/${identifier}`);
     const data: NftType = await response.json();
 
