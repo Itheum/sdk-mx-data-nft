@@ -4,7 +4,7 @@ import { DataNft } from '../src';
 describe('Data NFT test', () => {
   test('#test not setting network config', async () => {
     try {
-      await DataNft.createFromApi(62);
+      await DataNft.createFromApi({ nonce: 62 });
     } catch (error) {
       if (error instanceof Error) {
         expect(error.message).toBe(
@@ -45,7 +45,10 @@ describe('Data NFT test', () => {
 
     expect(typeof nonceToSign).toBe('string');
 
-    const nft = await DataNft.createFromApi(62, 'DATANFTFT3-d0978e');
+    const nft = await DataNft.createFromApi({
+      nonce: 62,
+      tokenIdentifier: 'DATANFTFT3-d0978e'
+    });
 
     expect(nft).toBeInstanceOf(DataNft);
   }, 10000);
