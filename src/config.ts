@@ -34,7 +34,7 @@ export const dataNftTokenIdentifier: { [key in EnvironmentsEnum]: string } = {
   devnet: 'DATANFTFT4-3ba099',
   mainnet: 'DATANFTFT-e936d4',
   testnet: ''
-};
+}; //[future] list of whitelisted tokens as Data NFTs
 
 export const marketPlaceContractAddress: { [key in EnvironmentsEnum]: string } =
   {

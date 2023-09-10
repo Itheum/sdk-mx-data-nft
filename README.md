@@ -26,6 +26,8 @@ This SDK is currently focused on interacting with the Itheum's Data NFT technolo
 
 ## SDK DOCS
 
+Note that all param requirements and method docs are marked up in the typescript code, so if you use typescript in your project your development tool (e.g. Visual Studio Code) will provide intellisense for all methods and functions.
+
 ### 1. Interacting with Data NFTs
 
 ```typescript
@@ -57,15 +59,32 @@ const address = 'address';
 const dataNfts = [];
 dataNfts = await DataNft.ownedByAddress(address);
 
-// Retrieves the DataNft message from marshal to sign
+// Retrieves the specific DataNft
 const dataNft = DataNft.createFromApi(nonce);
+
+// (A) Get a message from the Data Marshal node for your to sign to prove ownership
 const message = await dataNft.messageToSign();
 
-// Sign the message with a wallet
+// (B) Sign the message with a wallet and obtain a signature
 const signature = 'signature';
 
-// Unlock the data inside the dataNft
-dataNft.viewData(message, signature); // optional params "stream" (stream out data instead of downloading file), "fwdAllHeaders"/"fwdHeaderKeys", "fwdHeaderMapLookup" can be used to pass headers like Authorization to origin servers
+// There are 2 methods to open a data NFT and view the content -->
+
+// Method 1) Unlock the data inside the Data NFT via signature verification
+dataNft.viewData({
+  message,
+  signature
+}); // optional params "stream" (stream out data instead of downloading file), "fwdAllHeaders"/"fwdHeaderKeys", "fwdHeaderMapLookup" can be used to pass headers like Authorization to origin Data Stream servers
+
+
+// Method 2) OR, you can use a MultiversX Native Auth access token to unlock the data inside the Data NFT without the need for the the signature steps above (A)(B). This has a much better UX
+dataNft.viewDataViaMVXNativeAuth({
+  mvxNativeAuthOrigins: "http://localhost:3000", "https://mycoolsite.com"], // same whitelist domains your client app used when generating native auth token
+  mvxNativeAuthMaxExpirySeconds: 300, // same expiry seconds your client app used when generating native auth token
+  fwdHeaderMapLookup: {
+    authorization : "Bearer myNativeAuthToken"
+  }
+}); // optional params "stream" (stream out data instead of downloading file), "fwdAllHeaders"/"fwdHeaderKeys" can be used to pass on the headers like Authorization to origin Data Stream servers
 ```
 
 ### 2. Interacting with Data NFT Minter

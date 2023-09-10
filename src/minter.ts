@@ -14,10 +14,7 @@ import {
   StringValue,
   BooleanValue
 } from '@multiversx/sdk-core/out';
-import {
-  ApiNetworkProvider,
-  TransactionStatus
-} from '@multiversx/sdk-network-providers/out';
+import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   dataNftTokenIdentifier,
@@ -30,7 +27,16 @@ import dataNftMintAbi from './abis/datanftmint.abi.json';
 import { MinterRequirements } from './interfaces';
 import { NFTStorage } from 'nft.storage';
 import { File } from '@web-std/file';
-import { checkTraitsUrl } from './utils';
+import {
+  checkTraitsUrl,
+  checkUrlIsUp,
+  validateSpecificParamsMint
+} from './utils';
+// import {
+//   ErrArgumentNotSet,
+//   ErrContractQuery,
+//   ErrFailedOperation
+// } from './errors';
 
 export class DataNftMinter {
   readonly contract: SmartContract;
@@ -108,7 +114,8 @@ export class DataNftMinter {
       };
       return requirements;
     } else {
-      throw new Error('Could not retrieve requirements');
+      throw new Error('Could not retrieve minter contract requirements');
+      // throw new ErrContractQuery('Could not retrieve requirements');
     }
   }
 
@@ -129,6 +136,9 @@ export class DataNftMinter {
       return new BooleanValue(returnValue).valueOf();
     } else {
       throw new Error('Error while retrieving the contract pause state');
+      // throw new ErrContractQuery(
+      //   'Error while retrieving the contract pause state'
+      // );
     }
   }
 
@@ -173,16 +183,16 @@ export class DataNftMinter {
    * For more information, see the [README documentation](https://github.com/Itheum/sdk-mx-data-nft#create-a-mint-transaction).
    *
    * @param senderAddress the address of the user
-   * @param tokenName the name of the DataNFT-FT
-   * @param dataMarshalUrl the url of the data marshal
-   * @param dataStreamUrl the url of the data stream to be encrypted
-   * @param dataPreviewUrl the url of the data preview
-   * @param royalties the royalties to be set for the Data NFT-FT
-   * @param supply the supply of the Data NFT-FT
-   * @param datasetTitle the title of the dataset
-   * @param datasetDescription the description of the dataset
-   * @param antiSpamTax the anti spam tax to be set for the Data NFT-FT with decimals
-   * @param  options optional parameters
+   * @param tokenName the name of the DataNFT-FT. Between 3 and 20 alphanumeric characters, no spaces.
+   * @param dataMarshalUrl the url of the data marshal. A live HTTPS URL that returns a 200 OK HTTP code.
+   * @param dataStreamUrl the url of the data stream to be encrypted. A live HTTPS URL that returns a 200 OK HTTP code.
+   * @param dataPreviewUrl the url of the data preview. A live HTTPS URL that returns a 200 OK HTTP code.
+   * @param royalties the royalties to be set for the Data NFT-FT. A number between 0 and 50. This equates to a % value. e.g. 10%
+   * @param supply the supply of the Data NFT-FT. A number between 1 and 1000.
+   * @param datasetTitle the title of the dataset. Between 10 and 60 alphanumeric characters.
+   * @param datasetDescription the description of the dataset. Between 10 and 400 alphanumeric characters.
+   * @param antiSpamTax the anti spam tax to be set for the Data NFT-FT with decimals. Needs to be greater than 0 and should be obtained in real time via {@link viewMinterRequirements} prior to calling mint.
+   * @param options [optional] below parameters are all optional
    *                 - imageUrl: the URL of the image for the Data NFT
    *                 - traitsUrl: the URL of the traits for the Data NFT
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
@@ -216,6 +226,49 @@ export class DataNftMinter {
       ]
     } = options ?? {};
 
+    // S: run any format specific validation
+    const { allPassed, validationMessages } = validateSpecificParamsMint({
+      senderAddress,
+      tokenName,
+      royalties,
+      supply,
+      datasetTitle,
+      datasetDescription,
+      antiSpamTax,
+      _mandatoryParamsList: [
+        'senderAddress',
+        'tokenName',
+        'royalties',
+        'supply',
+        'datasetTitle',
+        'datasetDescription',
+        'antiSpamTax'
+      ]
+    });
+
+    if (!allPassed) {
+      throw new Error(`Params have validation issues = ${validationMessages}`);
+      // throw new ErrFailedOperation(
+      //   this.mint.name,
+      //   new Error(`params have validation issues = ${validationMessages}`)
+      // );
+    }
+    // E: run any format specific validation...
+
+    // deep validate all mandatory URLs
+    try {
+      await checkUrlIsUp(dataStreamUrl, [200, 403]);
+      await checkUrlIsUp(dataPreviewUrl, [200]);
+      await checkUrlIsUp(dataMarshalUrl + '/health-check', [200]);
+    } catch (error) {
+      throw error;
+      // if (error instanceof Error) {
+      //   throw new ErrFailedOperation(this.mint.name, error);
+      // } else {
+      //   throw new ErrFailedOperation(this.mint.name);
+      // }
+    }
+
     let imageOnIpfsUrl: string;
     let metadataOnIpfsUrl: string;
 
@@ -227,6 +280,10 @@ export class DataNftMinter {
         throw new Error(
           'NFT Storage token is required when not using custom image and traits'
         );
+        // throw new ErrArgumentNotSet(
+        //   'nftStorageToken',
+        //   'NFT Storage token is required when not using custom image and traits'
+        // );
       }
       const { image, traits } = await this.createFileFromUrl(
         `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`,
@@ -246,6 +303,10 @@ export class DataNftMinter {
     } else {
       if (!traitsUrl) {
         throw new Error('Traits URL is required when using custom image');
+        // throw new ErrArgumentNotSet(
+        //   'traitsUrl',
+        //   'Traits URL is required when using custom image'
+        // );
       }
 
       await checkTraitsUrl(traitsUrl);
@@ -303,13 +364,6 @@ export class DataNftMinter {
     dataNFTStreamUrl: string,
     dataMarshalUrl: string
   ): Promise<{ dataNftHash: string; dataNftStreamUrlEncrypted: string }> {
-    /*
-      1) Call the data marshal and get a encrypted data stream url and hash of url (s1)
-      2) Use the hash for to generate the gen img URL from the generative API (s2)
-        2.1) Save the new generative image to IPFS and get it's IPFS url (s3)
-      3) Mint the SFT via the Minter Contract (s4)
-    */
-
     const myHeaders = new Headers();
     myHeaders.append('cache-control', 'no-cache');
     myHeaders.append('Content-Type', 'application/json');
@@ -330,10 +384,19 @@ export class DataNftMinter {
           dataNftStreamUrlEncrypted: data.encryptedMessage
         };
       } else {
-        throw new Error('Could not generate data stream url');
+        throw new Error('Issue with data marshal generate payload');
+        // throw new ErrFailedOperation(this.dataNFTDataStreamAdvertise.name);
       }
-    } catch {
-      throw new Error('Could not generate data stream url');
+    } catch (error) {
+      throw error;
+      // if (error instanceof Error) {
+      //   throw new ErrFailedOperation(
+      //     this.dataNFTDataStreamAdvertise.name,
+      //     error
+      //   );
+      // } else {
+      //   throw new ErrFailedOperation(this.dataNFTDataStreamAdvertise.name);
+      // }
     }
   }
 
@@ -349,8 +412,9 @@ export class DataNftMinter {
       });
       const dir = [image, traits];
       res = await nftstorage.storeDirectory(dir);
-    } catch {
-      throw new Error('Error while uploading to IPFS');
+    } catch (error) {
+      throw error;
+      // throw new ErrFailedOperation(this.storeToIpfs.name);
     }
     return {
       imageOnIpfsUrl: `https://ipfs.io/ipfs/${res}/image.png`,
