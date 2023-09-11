@@ -528,14 +528,12 @@ export async function checkUrlIsUp(url: string, expectedHttpCodes: number[]) {
   const response = await fetch(url);
 
   if (!expectedHttpCodes.includes(response.status)) {
-    throw new Error(
-      `URL needs to return a 200 OK response code (or a 403 Forbidden error code is also allowed for protected Data Streams). url : ${url}, actual HTTP status: ${response.status}`
-    );
+    throw new ErrFetch(response.status, response.statusText);
   }
 }
 
 export function checkStatus(response: Response) {
-  if (response.status != 200) {
+  if (response.status >= 200 && response.status <= 299) {
     throw new ErrFetch(response.status, response.statusText);
   }
 }

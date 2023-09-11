@@ -28,15 +28,18 @@ import { MinterRequirements } from './interfaces';
 import { NFTStorage } from 'nft.storage';
 import { File } from '@web-std/file';
 import {
+  checkStatus,
   checkTraitsUrl,
   checkUrlIsUp,
   validateSpecificParamsMint
 } from './utils';
-// import {
-//   ErrArgumentNotSet,
-//   ErrContractQuery,
-//   ErrFailedOperation
-// } from './errors';
+import {
+  ErrBadType,
+  ErrContractQuery,
+  ErrFailedOperation,
+  ErrNetworkConfig,
+  ErrParamValidation
+} from './errors';
 
 export class DataNftMinter {
   readonly contract: SmartContract;
@@ -51,6 +54,11 @@ export class DataNftMinter {
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: string, timeout: number = 10000) {
+    if (!(env in EnvironmentsEnum)) {
+      throw new ErrNetworkConfig(
+        `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
+      );
+    }
     this.env = env;
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.imageServiceUrl = imageService[env as EnvironmentsEnum];
@@ -114,8 +122,10 @@ export class DataNftMinter {
       };
       return requirements;
     } else {
-      throw new Error('Could not retrieve minter contract requirements');
-      // throw new ErrContractQuery('Could not retrieve requirements');
+      throw new ErrContractQuery(
+        'viewMinterRequirements',
+        returnCode.toString()
+      );
     }
   }
 
@@ -135,10 +145,10 @@ export class DataNftMinter {
       const returnValue = firstValue?.valueOf();
       return new BooleanValue(returnValue).valueOf();
     } else {
-      throw new Error('Error while retrieving the contract pause state');
-      // throw new ErrContractQuery(
-      //   'Error while retrieving the contract pause state'
-      // );
+      throw new ErrContractQuery(
+        'viewContractPauseState',
+        returnCode.toString()
+      );
     }
   }
 
@@ -247,27 +257,15 @@ export class DataNftMinter {
     });
 
     if (!allPassed) {
-      throw new Error(`Params have validation issues = ${validationMessages}`);
-      // throw new ErrFailedOperation(
-      //   this.mint.name,
-      //   new Error(`params have validation issues = ${validationMessages}`)
-      // );
+      throw new ErrParamValidation(validationMessages);
     }
     // E: run any format specific validation...
 
     // deep validate all mandatory URLs
-    try {
-      await checkUrlIsUp(dataStreamUrl, [200, 403]);
-      await checkUrlIsUp(dataPreviewUrl, [200]);
-      await checkUrlIsUp(dataMarshalUrl + '/health-check', [200]);
-    } catch (error) {
-      throw error;
-      // if (error instanceof Error) {
-      //   throw new ErrFailedOperation(this.mint.name, error);
-      // } else {
-      //   throw new ErrFailedOperation(this.mint.name);
-      // }
-    }
+
+    await checkUrlIsUp(dataStreamUrl, [200, 403]);
+    await checkUrlIsUp(dataPreviewUrl, [200]);
+    await checkUrlIsUp(dataMarshalUrl + '/health-check', [200]);
 
     let imageOnIpfsUrl: string;
     let metadataOnIpfsUrl: string;
@@ -277,13 +275,12 @@ export class DataNftMinter {
 
     if (!imageUrl) {
       if (!nftStorageToken) {
-        throw new Error(
+        throw new ErrBadType(
+          'nftStorageToken',
+          'string',
+          nftStorageToken,
           'NFT Storage token is required when not using custom image and traits'
         );
-        // throw new ErrArgumentNotSet(
-        //   'nftStorageToken',
-        //   'NFT Storage token is required when not using custom image and traits'
-        // );
       }
       const { image, traits } = await this.createFileFromUrl(
         `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`,
@@ -302,11 +299,12 @@ export class DataNftMinter {
       metadataOnIpfsUrl = metadataIpfsUrl;
     } else {
       if (!traitsUrl) {
-        throw new Error('Traits URL is required when using custom image');
-        // throw new ErrArgumentNotSet(
-        //   'traitsUrl',
-        //   'Traits URL is required when using custom image'
-        // );
+        throw new ErrBadType(
+          'traitsUrl',
+          'string',
+          traitsUrl,
+          'Traits URL is required when using custom image'
+        );
       }
 
       await checkTraitsUrl(traitsUrl);
@@ -374,29 +372,21 @@ export class DataNftMinter {
       body: JSON.stringify({ dataNFTStreamUrl })
     };
 
-    try {
-      const res = await fetch(`${dataMarshalUrl}/generate`, requestOptions);
-      const data = await res.json();
+    const res = await fetch(`${dataMarshalUrl}/generate`, requestOptions);
+    const data = await res.json();
 
-      if (data && data.encryptedMessage && data.messageHash) {
-        return {
-          dataNftHash: data.messageHash,
-          dataNftStreamUrlEncrypted: data.encryptedMessage
-        };
-      } else {
-        throw new Error('Issue with data marshal generate payload');
-        // throw new ErrFailedOperation(this.dataNFTDataStreamAdvertise.name);
-      }
-    } catch (error) {
-      throw error;
-      // if (error instanceof Error) {
-      //   throw new ErrFailedOperation(
-      //     this.dataNFTDataStreamAdvertise.name,
-      //     error
-      //   );
-      // } else {
-      //   throw new ErrFailedOperation(this.dataNFTDataStreamAdvertise.name);
-      // }
+    checkStatus(res);
+
+    if (data && data.encryptedMessage && data.messageHash) {
+      return {
+        dataNftHash: data.messageHash,
+        dataNftStreamUrlEncrypted: data.encryptedMessage
+      };
+    } else {
+      throw new ErrFailedOperation(
+        'dataNFTDataStreamAdvertise',
+        'Invalid response from Data Marshal'
+      );
     }
   }
 
@@ -412,9 +402,8 @@ export class DataNftMinter {
       });
       const dir = [image, traits];
       res = await nftstorage.storeDirectory(dir);
-    } catch (error) {
-      throw error;
-      // throw new ErrFailedOperation(this.storeToIpfs.name);
+    } catch (error: any) {
+      throw new ErrFailedOperation('storeToIpfs', error.message);
     }
     return {
       imageOnIpfsUrl: `https://ipfs.io/ipfs/${res}/image.png`,

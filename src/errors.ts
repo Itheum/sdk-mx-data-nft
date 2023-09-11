@@ -14,8 +14,10 @@ export class ErrInvalidArgument extends Error {
 }
 
 export class ErrBadType extends Error {
-  public constructor(name: string, type: any, value?: any) {
-    super(`Bad type of "${name}": ${value}. Expected type: ${type}`);
+  public constructor(name: string, type: any, value?: any, context?: string) {
+    super(
+      `Bad type of "${name}": ${value}. Expected type: ${type}. Context: ${context}`
+    );
   }
 }
 
@@ -46,5 +48,17 @@ export class ErrAttributeNotSet extends Error {
 export class ErrContractQuery extends Error {
   public constructor(method: string, message?: string) {
     super(`Failed to query contract: Method: ${method} : ${message}`);
+  }
+}
+
+export class ErrParamValidation extends Error {
+  public constructor(message: string) {
+    super(`Params have validation issues : ${message}`);
+  }
+}
+
+export class ErrFailedOperation extends Error {
+  public constructor(method: string, message?: string) {
+    super(`Failed to perform operation: ${method} : ${message}`);
   }
 }
