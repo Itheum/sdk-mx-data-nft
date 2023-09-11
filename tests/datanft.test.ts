@@ -21,11 +21,11 @@ describe('Data NFT test', () => {
           'https://api.itheumcloud-stg.com/datamarshalapi/achilles/v1'
       });
 
-      await dataNft.viewData(
-        'x',
-        new SignableMessage({ message: Buffer.from('test') }),
-        true
-      );
+      await dataNft.viewData({
+        signedMessage: 'x',
+        signableMessage: new SignableMessage({ message: Buffer.from('test') }),
+        stream: true
+      });
     } catch (error) {
       if (error instanceof Error) {
         expect(error.message).toBe(

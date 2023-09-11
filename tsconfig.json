@@ -1,12 +1,9 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "target": "es2015",
+    "target": "es2021",
     "outDir": "out",
-    "lib": [
-      "ES2015",
-      "DOM"
-    ],
+    "lib": ["es2021", "DOM"],
     "sourceMap": true,
     "allowJs": true,
     "strict": true,
@@ -20,12 +17,6 @@
     "esModuleInterop": true,
     "declaration": true
   },
-  "include": [
-    "src/**/*.ts",
-  ],
-  "exclude": [
-    "node_modules",
-    "out",
-    "tests",
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "out", "tests"]
 }
