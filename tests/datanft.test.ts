@@ -5,12 +5,10 @@ describe('Data NFT test', () => {
   test('#test not setting network config', async () => {
     try {
       await DataNft.createFromApi({ nonce: 62 });
-    } catch (error) {
-      if (error instanceof Error) {
-        expect(error.message).toBe(
-          'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
-        );
-      }
+    } catch (error: any) {
+      expect(error.message).toBe(
+        'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
+      );
     }
   });
 
@@ -26,12 +24,10 @@ describe('Data NFT test', () => {
         signableMessage: new SignableMessage({ message: Buffer.from('test') }),
         stream: true
       });
-    } catch (error) {
-      if (error instanceof Error) {
-        expect(error.message).toBe(
-          'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
-        );
-      }
+    } catch (error: any) {
+      expect(error.message).toBe(
+        'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
+      );
     }
   });
 
