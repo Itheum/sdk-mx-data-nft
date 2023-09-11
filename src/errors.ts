@@ -62,3 +62,15 @@ export class ErrFailedOperation extends Error {
     super(`Failed to perform operation: ${method} : ${message}`);
   }
 }
+
+export class ErrMissingTrait extends Error {
+  public constructor(trait: string) {
+    super(`Missing trait: ${trait}`);
+  }
+}
+
+export class ErrMissingValueForTrait extends Error {
+  public constructor(trait: string) {
+    super(`Missing value for trait: ${trait}`);
+  }
+}
