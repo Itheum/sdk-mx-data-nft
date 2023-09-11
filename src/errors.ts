@@ -21,7 +21,7 @@ export class ErrBadType extends Error {
 
 export class ErrDataNftCreate extends Error {
   public constructor(message?: string) {
-    super(`Could not create Data NFT: ${message}`);
+    super(`Failed to create Data NFT: ${message}`);
   }
 }
 
@@ -33,12 +33,18 @@ export class ErrFetch extends Error {
 
 export class ErrDecodeAttributes extends Error {
   public constructor(message?: string) {
-    super(`Could not decode attributes: ${message}`);
+    super(`Failed to decode attributes: ${message}`);
   }
 }
 
 export class ErrAttributeNotSet extends Error {
   public constructor(attribute: string) {
     super(`Attribute "${attribute}" is not set`);
+  }
+}
+
+export class ErrContractQuery extends Error {
+  public constructor(method: string, message?: string) {
+    super(`Failed to query contract: Method: ${method} : ${message}`);
   }
 }

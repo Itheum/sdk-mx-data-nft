@@ -61,7 +61,7 @@ export class DataNft {
    * @param env 'devnet' | 'mainnet' | 'testnet'
    */
   static setNetworkConfig(env: string) {
-    if (env !== 'devnet' && env !== 'mainnet' && env !== 'testnet') {
+    if (!(env in EnvironmentsEnum)) {
       throw new ErrNetworkConfig(
         `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
       );
