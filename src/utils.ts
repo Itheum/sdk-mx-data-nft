@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { DataNft } from './datanft';
 import { NftEnumType, NftType, Offer } from './interfaces';
+import { ErrFetch } from './errors';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
   let hex = new BigNumber(value).toString(16);
@@ -530,5 +531,11 @@ export async function checkUrlIsUp(url: string, expectedHttpCodes: number[]) {
     throw new Error(
       `URL needs to return a 200 OK response code (or a 403 Forbidden error code is also allowed for protected Data Streams). url : ${url}, actual HTTP status: ${response.status}`
     );
+  }
+}
+
+export function checkStatus(response: Response) {
+  if (response.status != 200) {
+    throw new ErrFetch(response.status, response.statusText);
   }
 }
