@@ -43,7 +43,7 @@ const dataNft = new DataNft({
 
 // Create a new DataNft object from API
 const nonce = 1;
-const nft = await DataNft.createFromApi(nonce);
+const nft = await DataNft.createFromApi({ nonce });
 
 // Create a new DataNft object from API Response
 const response = await fetch('https://devnet-api.multiversx.com/address/nfts');
@@ -60,7 +60,7 @@ const dataNfts = [];
 dataNfts = await DataNft.ownedByAddress(address);
 
 // Retrieves the specific DataNft
-const dataNft = DataNft.createFromApi(nonce);
+const dataNft = DataNft.createFromApi({ nonce });
 
 // (A) Get a message from the Data Marshal node for your to sign to prove ownership
 const message = await dataNft.messageToSign();
