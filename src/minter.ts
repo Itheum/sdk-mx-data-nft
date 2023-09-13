@@ -20,7 +20,6 @@ import {
   dataNftTokenIdentifier,
   imageService,
   itheumTokenIdentifier,
-  minterContractAddress,
   networkConfiguration
 } from './config';
 import dataNftMintAbi from './abis/datanftmint.abi.json';
@@ -37,7 +36,7 @@ import {
 //   ErrFailedOperation
 // } from './errors';
 
-export class DataNftMinter {
+export class Minter {
   readonly contract: SmartContract;
   readonly chainID: string;
   readonly networkProvider: ApiNetworkProvider;
@@ -49,7 +48,11 @@ export class DataNftMinter {
    * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
-  constructor(env: string, timeout: number = 10000) {
+  protected constructor(
+    env: string,
+    contractAddress: string,
+    timeout: number = 10000
+  ) {
     this.env = env;
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.imageServiceUrl = imageService[env as EnvironmentsEnum];
@@ -60,7 +63,6 @@ export class DataNftMinter {
         timeout: timeout
       }
     );
-    const contractAddress = minterContractAddress[env as EnvironmentsEnum];
     this.contract = new SmartContract({
       address: new Address(contractAddress),
       abi: AbiRegistry.create(dataNftMintAbi)
@@ -72,50 +74,6 @@ export class DataNftMinter {
    */
   getContractAddress(): IAddress {
     return this.contract.getAddress();
-  }
-
-  /**
-   * Retrieves the minter smart contract requirements for the given user
-   * @param address the address of the user
-   * @param taxToken the tax token to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
-   */
-  async viewMinterRequirements(
-    address: IAddress,
-    taxToken = itheumTokenIdentifier[this.env as EnvironmentsEnum]
-  ): Promise<MinterRequirements> {
-    const interaction = this.contract.methodsExplicit.getUserDataOut([
-      new AddressValue(address),
-      new TokenIdentifierValue(taxToken)
-    ]);
-    const query = interaction.buildQuery();
-    const queryResponse = await this.networkProvider.queryContract(query);
-    const endpointDefinition = interaction.getEndpoint();
-    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
-      queryResponse,
-      endpointDefinition
-    );
-    if (returnCode.isSuccess()) {
-      const returnValue = firstValue?.valueOf();
-      const requirements: MinterRequirements = {
-        antiSpamTaxValue: returnValue.anti_spam_tax_value.toNumber(),
-        contractPaused: returnValue.is_paused,
-        maxRoyalties: returnValue.max_royalties.toNumber(),
-        minRoyalties: returnValue.min_royalties.toNumber(),
-        maxSupply: returnValue.max_supply.toNumber(),
-        mintTimeLimit: returnValue.mint_time_limit.toNumber(),
-        lastUserMintTime: returnValue.last_mint_time,
-        userWhitelistedForMint: returnValue.is_whitelisted,
-        contractWhitelistEnabled: returnValue.whitelist_enabled,
-        numberOfMintsForUser: returnValue.minted_per_user.toNumber(),
-        totalNumberOfMints: returnValue.total_minted.toNumber(),
-        addressFrozen: returnValue.frozen,
-        frozenNonces: returnValue.frozen_nonces.map((v: any) => v.toNumber())
-      };
-      return requirements;
-    } else {
-      throw new Error('Could not retrieve minter contract requirements');
-      // throw new ErrContractQuery('Could not retrieve requirements');
-    }
   }
 
   /**
