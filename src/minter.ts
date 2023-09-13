@@ -34,7 +34,7 @@ import {
 //   ErrFailedOperation
 // } from './errors';
 
-export class Minter {
+export abstract class Minter {
   readonly contract: SmartContract;
   readonly chainID: string;
   readonly networkProvider: ApiNetworkProvider;

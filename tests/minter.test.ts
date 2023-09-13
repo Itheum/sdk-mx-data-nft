@@ -1,5 +1,5 @@
 import { Address, Transaction } from '@multiversx/sdk-core/out';
-import { DataNftMinter, MinterRequirements } from '../src';
+import { DataNftMinter, Minter, MinterRequirements } from '../src';
 
 describe('Data Nft Minter Test', () => {
   test('#getAddress', async () => {
