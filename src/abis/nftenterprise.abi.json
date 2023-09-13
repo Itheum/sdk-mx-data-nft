@@ -73,8 +73,28 @@
             ],
             "inputs": [
                 {
-                    "name": "attributes",
-                    "type": "DataNftAttributes"
+                    "name": "data_marshal",
+                    "type": "bytes"
+                },
+                {
+                    "name": "data_stream",
+                    "type": "bytes"
+                },
+                {
+                    "name": "data_preview",
+                    "type": "bytes"
+                },
+                {
+                    "name": "creator",
+                    "type": "Address"
+                },
+                {
+                    "name": "title",
+                    "type": "bytes"
+                },
+                {
+                    "name": "description",
+                    "type": "bytes"
                 }
             ],
             "outputs": []

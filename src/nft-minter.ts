@@ -6,14 +6,114 @@ import {
   ContractCallPayloadBuilder,
   ContractFunction,
   IAddress,
+  StringValue,
   TokenIdentifierValue,
-  Transaction
+  Transaction,
+  U64Value
 } from '@multiversx/sdk-core/out';
 import { Minter } from './minter';
 
 export class NftMinter extends Minter {
   constructor(env: string, contractAddress: string, timeout: number = 10000) {
     super(env, contractAddress, timeout);
+  }
+
+  /**
+   * Creates an initialize contract transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param collectionName The name of the NFT collection
+   * @param tokenTicker The ticker of the NFT collection
+   * @param mintLimit(seconds)- The mint limit between mints
+   * @param requireMintTax - A boolean value to set if the mint tax is required or not
+   * @param options - If `requireMintTax` is true, the `options` object must contain the `taxTokenIdentifier` and `taxTokenAmount`
+   */
+  initializeContract(
+    senderAddress: IAddress,
+    collectionName: string,
+    tokenTicker: string,
+    mintLimit: number,
+    requireMintTax: boolean,
+    options: {
+      taxTokenIdentifier: string;
+      taxTokenAmount: number;
+    }
+  ): Transaction {
+    let data;
+    if (requireMintTax && options) {
+      data = new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('initializeContract'))
+        .addArg(new StringValue(collectionName))
+        .addArg(new StringValue(tokenTicker))
+        .addArg(new BigUIntValue(mintLimit))
+        .addArg(new BooleanValue(requireMintTax))
+        .addArg(new TokenIdentifierValue(options.taxTokenIdentifier))
+        .addArg(new BigUIntValue(options.taxTokenAmount))
+        .build();
+    } else {
+      data = new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('initializeContract'))
+        .addArg(new StringValue(collectionName))
+        .addArg(new StringValue(tokenTicker))
+        .addArg(new BigUIntValue(mintLimit))
+        .addArg(new BooleanValue(requireMintTax))
+        .build();
+    }
+
+    const initializeContractTx = new Transaction({
+      value: 50000000000000000,
+      data: data,
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return initializeContractTx;
+  }
+
+  /**
+   * Creates a updateAttributes transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param tokenIdentiifer The token identifier of the data nft to update attributes
+   * @param nonce The nonce of the token to update attributes
+   * @param attributes The new attributes to update
+   * @param quantity The quantity of the token to update attributes (default: 1)
+   */
+  updateAttributes(
+    senderAddress: IAddress,
+    tokenIdentiifer: string,
+    nonce: number,
+    attributes: {
+      dataMarshalUrl: string;
+      dataStreamUrl: string;
+      dataPreviewUrl: string;
+      creator: IAddress;
+      title: string;
+      description: string;
+    },
+    quantity = 1
+  ): Transaction {
+    const updateAttributesTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('ESDTNFTTransfer'))
+        .addArg(new TokenIdentifierValue(tokenIdentiifer))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(quantity))
+        .addArg(new AddressValue(this.contract.getAddress()))
+        .addArg(new StringValue('updateAttributes'))
+        .addArg(new StringValue(attributes.dataMarshalUrl))
+        .addArg(new StringValue(attributes.dataStreamUrl))
+        .addArg(new StringValue(attributes.dataPreviewUrl))
+        .addArg(new AddressValue(attributes.creator))
+        .addArg(new StringValue(attributes.title))
+        .addArg(new StringValue(attributes.description))
+        .build(),
+      receiver: senderAddress,
+      gasLimit: 12000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return updateAttributesTx;
   }
 
   /**
@@ -52,33 +152,6 @@ export class NftMinter extends Minter {
       chainID: this.chainID
     });
     return setTransferRolesTx;
-  }
-
-  /**
-   * Creates an initialize contract transaction for the contract
-   * @param senderAddress The address of the sender, must be the admin of the contract
-   * @param collectionName The name of the NFT collection
-   * @param tokenTicker The ticker of the NFT collection
-   * @param mintLimit(seconds)- The mint limit between mints
-   * @param requireMintTax - A boolean value to set if the mint tax is required or not
-   * @param options - If `requireMintTax` is true, the `options` object must contain the `taxTokenIdentifier` and `taxTokenAmount`
-   */
-  initializeContract(
-    senderAddress: IAddress,
-    collectionName: string,
-    tokenTicker: string,
-    mintLimit: number,
-    requireMintTax: boolean,
-    options: {
-      taxTokenIdentifier: string;
-      taxTokenAmount: number;
-    }
-  ) {
-    // TODO implement
-  }
-
-  updateAttributes() {
-    // TODO implement
   }
 
   /**
