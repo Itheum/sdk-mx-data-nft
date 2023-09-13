@@ -14,7 +14,8 @@ import {
   createNftIdentifier,
   numberToPaddedHex,
   parseDataNft,
-  validateSpecificParamsViewData
+  validateSpecificParamsViewData,
+  checkStatus
 } from './utils';
 import minterAbi from './abis/datanftmint.abi.json';
 import { NftType, ViewDataReturnType } from './interfaces';
@@ -267,6 +268,7 @@ export class DataNft {
    * @param fwdAllHeaders [optional] Forward all request headers to the Origin Data Stream server.
    * @param fwdHeaderKeys [optional] Forward only selected headers to the Origin Data Stream server. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 5 items. e.g. cookie,authorization
    * @param fwdHeaderMapLookup [optional] Used with fwdHeaderKeys to set a front-end client side lookup map of headers the SDK uses to setup the forward. e.g. { cookie : "xyz", authorization : "Bearer zxy" }. Note that these are case-sensitive and need to match fwdHeaderKeys exactly.
+   * @param nestedIdxToStream [optional] If you are accessing a "nested stream", this is the index of the nested item you want drill into and fetch
    */
   async viewData(p: {
     signedMessage: string;
@@ -277,6 +279,7 @@ export class DataNft {
     fwdHeaderMapLookup?: {
       [key: string]: any;
     };
+    nestedIdxToStream?: number;
   }): Promise<ViewDataReturnType> {
     DataNft.ensureNetworkConfigSet();
     if (!this.dataMarshal) {
@@ -298,6 +301,7 @@ export class DataNft {
       fwdAllHeaders: p.fwdAllHeaders,
       fwdHeaderKeys: p.fwdHeaderKeys,
       fwdHeaderMapLookup: p.fwdHeaderMapLookup,
+      nestedIdxToStream: p.nestedIdxToStream,
       _mandatoryParamsList: ['signedMessage', 'signableMessage']
     });
 
@@ -354,6 +358,10 @@ export class DataNft {
         url += p.fwdAllHeaders ? '&fwdAllHeaders=1' : '';
       }
 
+      if (typeof p.nestedIdxToStream !== 'undefined') {
+        url += `&nestedIdxToStream=${p.nestedIdxToStream}`;
+      }
+
       if (typeof p.fwdHeaderKeys !== 'undefined') {
         url += `&fwdHeaderKeys=${p.fwdHeaderKeys}`;
 
@@ -374,6 +382,20 @@ export class DataNft {
       const response = await fetch(url, fetchConfig);
       const contentType = response.headers.get('content-type');
       const data = await response.blob();
+
+      // if the marshal returned a error, we should throw it here so that the SDK integrator can handle it
+      // ... if we don't, the marshal error response is just passed through as a normal data stream response
+      // ... and the user won't know what went wrong
+      try {
+        checkStatus(response);
+      } catch (e: any) {
+        // as it's a data marshal error, we get it's payload which is in JSON and send that thrown as text
+        const errorPayload = await (data as Blob).text();
+
+        throw new Error(
+          `${e.toString()}. Detailed error trace follows : ${errorPayload}`
+        );
+      }
 
       return {
         data: data,
@@ -396,6 +418,7 @@ export class DataNft {
    * @param fwdHeaderKeys [optional] Forward only selected headers to the Origin Data Stream server. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 5 items. e.g. cookie,authorization
    * @param fwdAllHeaders [optional] Forward all request headers to the Origin Data Stream server.
    * @param stream [optional] Instead of auto-downloading if possible, request if data should always be streamed or not.i.e true=stream, false/undefined=default behavior
+   * @param nestedIdxToStream [optional] If you are accessing a "nested stream", this is the index of the nested item you want drill into and fetch
    */
   async viewDataViaMVXNativeAuth(p: {
     mvxNativeAuthOrigins: string[];
@@ -406,6 +429,7 @@ export class DataNft {
     fwdHeaderKeys?: string;
     fwdAllHeaders?: boolean;
     stream?: boolean;
+    nestedIdxToStream?: number;
   }): Promise<ViewDataReturnType> {
     try {
       // S: run any format specific validation
@@ -416,6 +440,7 @@ export class DataNft {
         fwdHeaderMapLookup: p.fwdHeaderMapLookup,
         fwdAllHeaders: p.fwdAllHeaders,
         stream: p.stream,
+        nestedIdxToStream: p.nestedIdxToStream,
         _fwdHeaderMapLookupMustContainBearerAuthHeader: true,
         _mandatoryParamsList: [
           'mvxNativeAuthOrigins',
@@ -466,6 +491,10 @@ export class DataNft {
         url += p.fwdAllHeaders ? '&fwdAllHeaders=1' : '';
       }
 
+      if (typeof p.nestedIdxToStream !== 'undefined') {
+        url += `&nestedIdxToStream=${p.nestedIdxToStream}`;
+      }
+
       // if fwdHeaderMapLookup exists, send these headers and values to the data marshal for forwarding
       if (
         typeof p.fwdHeaderMapLookup !== 'undefined' &&
@@ -494,6 +523,20 @@ export class DataNft {
       const response = await fetch(url, fetchConfig);
       const contentType = response.headers.get('content-type');
       const data = await response.blob();
+
+      // if the marshal returned a error, we should throw it here so that the SDK integrator can handle it
+      // ... if we don't, the marshal error response is just passed through as a normal data stream response
+      // ... and the user won't know what went wrong
+      try {
+        checkStatus(response);
+      } catch (e: any) {
+        // as it's a data marshal error, we get it's payload which is in JSON and send that thrown as text
+        const errorPayload = await (data as Blob).text();
+
+        throw new Error(
+          `${e.toString()}. Detailed error trace follows : ${errorPayload}`
+        );
+      }
 
       return {
         data: data,

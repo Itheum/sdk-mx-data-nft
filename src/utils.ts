@@ -102,6 +102,7 @@ export function validateSpecificParamsViewData(params: {
   mvxNativeAuthMaxExpirySeconds?: number | undefined;
   mvxNativeAuthOrigins?: string[] | undefined;
   fwdHeaderMapLookup?: any;
+  nestedIdxToStream?: number | undefined;
   _fwdHeaderMapLookupMustContainBearerAuthHeader?: boolean | undefined;
   _mandatoryParamsList: string[]; // a pure JS fallback way to validate mandatory params, as typescript rules for mandatory can be bypassed by client app
 }): {
@@ -301,6 +302,32 @@ export function validateSpecificParamsViewData(params: {
       }
     }
 
+    // nestedIdxToStream test
+    let nestedIdxToStreamValid = true;
+
+    if (
+      params.nestedIdxToStream !== undefined ||
+      params._mandatoryParamsList.includes('nestedIdxToStream')
+    ) {
+      nestedIdxToStreamValid = false;
+
+      const nestedIdxToStreamToInt =
+        params.nestedIdxToStream !== undefined
+          ? parseInt(params.nestedIdxToStream.toString(), 10)
+          : null;
+
+      if (
+        nestedIdxToStreamToInt !== null &&
+        !isNaN(nestedIdxToStreamToInt) &&
+        nestedIdxToStreamToInt >= 0
+      ) {
+        nestedIdxToStreamValid = true;
+      } else {
+        validationMessages +=
+          '[nestedIdxToStream needs to be a number more than 0]';
+      }
+    }
+
     if (
       !signedMessageValid ||
       !signableMessageValid ||
@@ -309,7 +336,8 @@ export function validateSpecificParamsViewData(params: {
       !fwdHeaderKeysIsValid ||
       !fwdHeaderMapLookupIsValid ||
       !mvxNativeAuthMaxExpirySecondsValid ||
-      !mvxNativeAuthOriginsIsValid
+      !mvxNativeAuthOriginsIsValid ||
+      !nestedIdxToStreamValid
     ) {
       allPassed = false;
     }
@@ -529,6 +557,14 @@ export async function checkUrlIsUp(url: string, expectedHttpCodes: number[]) {
   if (!expectedHttpCodes.includes(response.status)) {
     throw new Error(
       `URL needs to return a 200 OK response code (or a 403 Forbidden error code is also allowed for protected Data Streams). url : ${url}, actual HTTP status: ${response.status}`
+    );
+  }
+}
+
+export function checkStatus(response: Response) {
+  if (!(response.status >= 200 && response.status <= 299)) {
+    throw new Error(
+      `Response returned non-success HTTP code. status = ${response?.status} statusText = ${response?.statusText}`
     );
   }
 }

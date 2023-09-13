@@ -1,6 +1,6 @@
 {
   "name": "@itheum/sdk-mx-data-nft",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "SDK for Itheum's Data NFT Technology on MultiversX Blockchain",
   "main": "out/index.js",
   "types": "out/index.d.js",
