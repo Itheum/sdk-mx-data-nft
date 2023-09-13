@@ -25,7 +25,7 @@ import {
 } from './config';
 import dataMarketAbi from './abis/data_market.abi.json';
 import { MarketplaceRequirements, Offer } from './interfaces';
-import { parseOffer } from './utils';
+import { parseOffer } from './common/utils';
 // import { ErrContractQuery } from './errors';
 
 export class DataNftMarket {

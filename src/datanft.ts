@@ -16,7 +16,7 @@ import {
   parseDataNft,
   validateSpecificParamsViewData,
   checkStatus
-} from './utils';
+} from './common/utils';
 import minterAbi from './abis/datanftmint.abi.json';
 import { NftType, ViewDataReturnType } from './interfaces';
 // import {
