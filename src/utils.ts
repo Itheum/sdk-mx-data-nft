@@ -471,7 +471,7 @@ export function validateSpecificParamsMint(params: {
         typeof params.royalties === 'number' &&
         !(params.royalties % 1 != 0) && // modulus checking. (10 % 1 != 0) EQ false, (10.5 % 1 != 0) EQ true,
         params.royalties >= 0 &&
-        params.royalties <= 50
+        params.royalties <= 5000
       ) {
         royaltiesValid = true;
       } else {
