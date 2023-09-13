@@ -421,4 +421,161 @@ export class NftMinter extends Minter {
     });
     return claimRoyaltiesTx;
   }
+
+  /**
+   * Pause collection transaction
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   */
+  pauseCollection(senderAddress: IAddress): Transaction {
+    const pauseCollectionTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('pause'))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return pauseCollectionTx;
+  }
+
+  /**
+   * Unpause collection transaction
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   */
+  unpauseCollection(senderAddress: IAddress): Transaction {
+    const unpauseCollectionTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('unpause'))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return unpauseCollectionTx;
+  }
+
+  /**
+   * Freeze transaction
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   */
+  freeze(senderAddress: IAddress, freezeAddress: IAddress): Transaction {
+    const freezeTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('freeze'))
+        .addArg(new AddressValue(freezeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return freezeTx;
+  }
+
+  /**
+   *  Unfreeze transaction
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   */
+  unfreeze(senderAddress: IAddress, unfreezeAddress: IAddress): Transaction {
+    const unfreezeTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('unfreeze'))
+        .addArg(new AddressValue(unfreezeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return unfreezeTx;
+  }
+
+  /**
+   *
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   * @param nonce The nonce of the token to freeze for `freezeAddress`
+   * @param freezeAddress The address to freeze
+   */
+  freezeSingleNFT(
+    senderAddress: IAddress,
+    nonce: number,
+    freezeAddress: IAddress
+  ): Transaction {
+    const freezeSingleNFTTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('freezeSingleNFT'))
+        .addArg(new U64Value(nonce))
+        .addArg(new AddressValue(freezeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return freezeSingleNFTTx;
+  }
+
+  /**
+   *
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   * @param nonce The nonce of the token to unfreeze for `unfreezeAddress`
+   * @param unfreezeAddress The address to unfreeze
+   */
+  unFreezeSingleNFT(
+    senderAddress: IAddress,
+    nonce: number,
+    unfreezeAddress: IAddress
+  ): Transaction {
+    const unFreezeSingleNFTTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('unFreezeSingleNFT'))
+        .addArg(new U64Value(nonce))
+        .addArg(new AddressValue(unfreezeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return unFreezeSingleNFTTx;
+  }
+
+  /**
+   *
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   * @param nonce The nonce of the token to wipe for `wipeAddress`
+   * @param wipeAddress The address to wipe from
+   * Important: This will wipe all NFTs from the address
+   * Note: The nonce must be freezed before wiping
+   */
+  wipeSingleNFT(
+    senderAddress: IAddress,
+    nonce: number,
+    wipeAddress: IAddress
+  ): Transaction {
+    const wipeSingleNFTTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('wipeSingleNFT'))
+        .addArg(new U64Value(nonce))
+        .addArg(new AddressValue(wipeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return wipeSingleNFTTx;
+  }
 }
