@@ -11,10 +11,16 @@ import {
   minterContractAddress
 } from './config';
 import { MinterRequirements } from './interfaces';
+import dataNftMinterAbi from './abis/datanftmint.abi.json';
 
 export class SftMinter extends Minter {
   constructor(env: string, timeout: number = 10000) {
-    super(env, minterContractAddress[env as EnvironmentsEnum], timeout);
+    super(
+      env,
+      minterContractAddress[env as EnvironmentsEnum],
+      dataNftMinterAbi,
+      timeout
+    );
   }
 
   /**

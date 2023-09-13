@@ -8,7 +8,7 @@
             "short": "rustc 1.71.0-nightly (7f94b314c 2023-04-23)"
         },
         "contractCrate": {
-            "name": "nftenterprise",
+            "name": "data-nft-lease",
             "version": "1.0.0"
         },
         "framework": {

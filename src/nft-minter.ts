@@ -12,10 +12,11 @@ import {
   U64Value
 } from '@multiversx/sdk-core/out';
 import { Minter } from './minter';
+import dataNftLeaseAbi from './abis/data-nft-lease.abi.json';
 
 export class NftMinter extends Minter {
   constructor(env: string, contractAddress: string, timeout: number = 10000) {
-    super(env, contractAddress, timeout);
+    super(env, contractAddress, dataNftLeaseAbi, timeout);
   }
 
   /**

@@ -22,8 +22,6 @@ import {
   itheumTokenIdentifier,
   networkConfiguration
 } from './config';
-import dataNftMintAbi from './abis/datanftmint.abi.json';
-import { MinterRequirements } from './interfaces';
 import { NFTStorage, File } from 'nft.storage';
 import {
   checkTraitsUrl,
@@ -51,6 +49,7 @@ export class Minter {
   protected constructor(
     env: string,
     contractAddress: string,
+    abiFile: any,
     timeout: number = 10000
   ) {
     this.env = env;
@@ -65,7 +64,7 @@ export class Minter {
     );
     this.contract = new SmartContract({
       address: new Address(contractAddress),
-      abi: AbiRegistry.create(dataNftMintAbi)
+      abi: AbiRegistry.create(abiFile)
     });
   }
 
