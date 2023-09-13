@@ -25,8 +25,7 @@ import {
 } from './config';
 import dataNftMintAbi from './abis/datanftmint.abi.json';
 import { MinterRequirements } from './interfaces';
-import { NFTStorage } from 'nft.storage';
-import { File } from '@web-std/file';
+import { NFTStorage, File } from 'nft.storage';
 import {
   checkTraitsUrl,
   checkUrlIsUp,
