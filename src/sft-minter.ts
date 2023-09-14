@@ -39,48 +39,87 @@ export class SftMinter extends Minter {
     );
   }
 
+  // [TO DO] Initialize the contract for sft minter
+
   /**
-   * Retrieves the minter smart contract requirements for the given user
-   * @param address the address of the user
-   * @param taxToken the tax token to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
+   * Creates an initialize contract transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param collectionName The name of the NFT collection
+   * @param tokenTicker The ticker of the NFT collection
+   * @param antiSpamTaxTokenIdentifier The token identifier of the anti spam token
+   * @param antiSpamTaxTokenAmount The amount of anti spam token to be used for minting as tax
+   * @param mintLimit(seconds)- The mint limit between mints
+   * @param treasury_address The address of the treasury to collect the anti spam tax
    */
-  async viewMinterRequirements(
-    address: IAddress,
-    taxToken = itheumTokenIdentifier[this.env as EnvironmentsEnum]
-  ): Promise<MinterRequirements> {
-    const interaction = this.contract.methodsExplicit.getUserDataOut([
-      new AddressValue(address),
-      new TokenIdentifierValue(taxToken)
-    ]);
-    const query = interaction.buildQuery();
-    const queryResponse = await this.networkProvider.queryContract(query);
-    const endpointDefinition = interaction.getEndpoint();
-    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
-      queryResponse,
-      endpointDefinition
-    );
-    if (returnCode.isSuccess()) {
-      const returnValue = firstValue?.valueOf();
-      const requirements: MinterRequirements = {
-        antiSpamTaxValue: returnValue.anti_spam_tax_value.toNumber(),
-        contractPaused: returnValue.is_paused,
-        maxRoyalties: returnValue.max_royalties.toNumber(),
-        minRoyalties: returnValue.min_royalties.toNumber(),
-        maxSupply: returnValue.max_supply.toNumber(),
-        mintTimeLimit: returnValue.mint_time_limit.toNumber(),
-        lastUserMintTime: returnValue.last_mint_time,
-        userWhitelistedForMint: returnValue.is_whitelisted,
-        contractWhitelistEnabled: returnValue.whitelist_enabled,
-        numberOfMintsForUser: returnValue.minted_per_user.toNumber(),
-        totalNumberOfMints: returnValue.total_minted.toNumber(),
-        addressFrozen: returnValue.frozen,
-        frozenNonces: returnValue.frozen_nonces.map((v: any) => v.toNumber())
-      };
-      return requirements;
-    } else {
-      throw new Error('Could not retrieve minter contract requirements');
-      // throw new ErrContractQuery('Could not retrieve requirements');
-    }
+  initializeContract(
+    senderAddress: IAddress,
+    collectionName: string,
+    tokenTicker: string,
+    antiSpamTaxTokenIdentifier: string,
+    antiSpamTaxTokenAmount: number,
+    mintLimit: number,
+    treasury_address: IAddress
+  ): Transaction {
+    const initializeContractTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('initializeContract'))
+        .addArg(new StringValue(collectionName))
+        .addArg(new StringValue(tokenTicker))
+        .addArg(new TokenIdentifierValue(antiSpamTaxTokenIdentifier))
+        .addArg(new BigUIntValue(antiSpamTaxTokenAmount))
+        .addArg(new U64Value(mintLimit))
+        .addArg(new AddressValue(treasury_address))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return initializeContractTx;
+  }
+
+  /**
+   *
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param treasuryAddress The address of the treasury to collect the anti spam tax
+   */
+  setTreasuryAddress(
+    senderAddress: IAddress,
+    treasuryAddress: IAddress
+  ): Transaction {
+    const setTreasuryAddressTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setTreasuryAddress'))
+        .addArg(new AddressValue(treasuryAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setTreasuryAddressTx;
+  }
+
+  /**
+   *
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param maxSupply The maximum supply that can be minted
+   */
+  setMaxSupply(senderAddress: IAddress, maxSupply: number): Transaction {
+    const setMaxSupplyTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setMaxSupply'))
+        .addArg(new BigUIntValue(maxSupply))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setMaxSupplyTx;
   }
 
   /**

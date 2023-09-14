@@ -28,6 +28,7 @@ import {
   checkUrlIsUp,
   validateSpecificParamsMint
 } from './common/utils';
+import { MinterRequirements } from './interfaces';
 // import {
 //   ErrArgumentNotSet,
 //   ErrContractQuery,
@@ -98,6 +99,53 @@ export abstract class Minter {
     }
   }
 
+  // [TO DO] Implement other general views between sft and nft minter
+  // [TO DO] Implement all general methods between sft and nft minter ?
+
+  /**
+   * Retrieves the minter smart contract requirements for the given user
+   * @param address the address of the user
+   * @param taxToken the tax token to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
+   */
+  async viewMinterRequirements(
+    address: IAddress,
+    taxToken = itheumTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Promise<MinterRequirements> {
+    const interaction = this.contract.methodsExplicit.getUserDataOut([
+      new AddressValue(address),
+      new TokenIdentifierValue(taxToken)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const requirements: MinterRequirements = {
+        antiSpamTaxValue: returnValue.anti_spam_tax_value.toNumber(),
+        contractPaused: returnValue.is_paused,
+        maxRoyalties: returnValue.max_royalties.toNumber(),
+        minRoyalties: returnValue.min_royalties.toNumber(),
+        maxSupply: returnValue.max_supply.toNumber(),
+        mintTimeLimit: returnValue.mint_time_limit.toNumber(),
+        lastUserMintTime: returnValue.last_mint_time,
+        userWhitelistedForMint: returnValue.is_whitelisted,
+        contractWhitelistEnabled: returnValue.whitelist_enabled,
+        numberOfMintsForUser: returnValue.minted_per_user.toNumber(),
+        totalNumberOfMints: returnValue.total_minted.toNumber(),
+        addressFrozen: returnValue.frozen,
+        frozenNonces: returnValue.frozen_nonces.map((v: any) => v.toNumber())
+      };
+      return requirements;
+    } else {
+      throw new Error('Could not retrieve minter contract requirements');
+      // throw new ErrContractQuery('Could not retrieve requirements');
+    }
+  }
+
   /**
    *  Creates a `burn` transaction
    * @param senderAddress the address of the user
@@ -127,5 +175,387 @@ export abstract class Minter {
       chainID: this.chainID
     });
     return burnTx;
+  }
+
+  /**
+   * Creates a setLocalRoles transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   */
+  setLocalRoles(senderAddress: IAddress): Transaction {
+    const setLocalRolesTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setLocalRoles'))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setLocalRolesTx;
+  }
+
+  /** Creates a pause transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   */
+  pauseContract(senderAddress: IAddress): Transaction {
+    const pauseContractTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setIsPaused'))
+        .addArg(new BooleanValue(true))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return pauseContractTx;
+  }
+
+  /** Creates a unpause transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   */
+  unpauseContract(senderAddress: IAddress): Transaction {
+    const unpauseContractTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setIsPaused'))
+        .addArg(new BooleanValue(false))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return unpauseContractTx;
+  }
+
+  /** Creates a set mint tax transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param tokenIdentifier The token identifier of the token to set the mint tax
+   * @param tax The tax to set for the token
+   */
+  setMintTax(
+    senderAddress: IAddress,
+    tokenIdentifier: string,
+    tax: number
+  ): Transaction {
+    const setMintTaxTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setAntiSpamTax'))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new BigUIntValue(tax))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setMintTaxTx;
+  }
+
+  /**
+   *
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param minRoyalties The minimum royalties to set for minting
+   * @param maxRoyalties The maximum royalties to set for minting
+   *
+   * Remarks: The royalties are set in percentage (e.g. 100% = 10000)
+   */
+  setRoyaltiesLimits(
+    senderAddress: IAddress,
+    minRoyalties: number,
+    maxRoyalties: number
+  ): Transaction {
+    const setRoyaltiesLimitsTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setRoyaltiesLimits'))
+        .addArg(new BigUIntValue(minRoyalties))
+        .addArg(new BigUIntValue(maxRoyalties))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setRoyaltiesLimitsTx;
+  }
+
+  /** Creates a set mint tax transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param is_enabled A boolean value to set if whitelist is enabled or not
+   */
+  setWhitelistIsEnabled(
+    senderAddress: IAddress,
+    is_enabled: boolean
+  ): Transaction {
+    const setWhitelistIsEnabledTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setWhiteListEnabled'))
+        .addArg(new BooleanValue(is_enabled))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setWhitelistIsEnabledTx;
+  }
+
+  /** Creates a whitelist transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param addresses The addresses to whitelist
+   */
+
+  whitelist(
+    senderAddress: IAddress,
+    addresses: string[],
+    gasLimit = 0
+  ): Transaction {
+    const whitelistTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setWhiteListSpots'))
+        .setArgs(
+          addresses.map((address) => new AddressValue(new Address(address)))
+        )
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000 + gasLimit,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return whitelistTx;
+  }
+
+  /**  Creates a delist transaction for the contract
+   *  @param senderAddress The address of the sender, must be the admin of the contract
+   *  @param addresses The addresses to delist
+   */
+  delist(
+    senderAddress: IAddress,
+    addresses: string[],
+    gasLimit: 0
+  ): Transaction {
+    const delistTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('removeWhiteListSpots'))
+        .setArgs(
+          addresses.map((address) => new AddressValue(new Address(address)))
+        )
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000 + gasLimit,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return delistTx;
+  }
+
+  /** Creates a set mint time limit transaction for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param timeLimit(seconds)  The time limit to set between mints
+   */
+  setMintTimeLimit(senderAddress: IAddress, timeLimit: number): Transaction {
+    const setMintTimeLimitTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setMintTimeLimit'))
+        .addArg(new U64Value(timeLimit))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setMintTimeLimitTx;
+  }
+
+  /** Sets a new administrator for the contract
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param newAdministrator The address of the new administrator
+   */
+  setAdministrator(
+    senderAddress: IAddress,
+    newAdministrator: IAddress
+  ): Transaction {
+    const setAdministratorTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setAdministrator'))
+        .addArg(new AddressValue(newAdministrator))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setAdministratorTx;
+  }
+
+  // Collection management methods
+
+  /**
+   * Pause collection transaction
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   */
+  pauseCollection(senderAddress: IAddress): Transaction {
+    const pauseCollectionTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('pause'))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return pauseCollectionTx;
+  }
+
+  /**
+   * Unpause collection transaction
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   */
+  unpauseCollection(senderAddress: IAddress): Transaction {
+    const unpauseCollectionTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('unpause'))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return unpauseCollectionTx;
+  }
+
+  /**
+   * Freeze transaction
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   */
+  freeze(senderAddress: IAddress, freezeAddress: IAddress): Transaction {
+    const freezeTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('freeze'))
+        .addArg(new AddressValue(freezeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return freezeTx;
+  }
+
+  /**
+   *  Unfreeze transaction
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   */
+  unfreeze(senderAddress: IAddress, unfreezeAddress: IAddress): Transaction {
+    const unfreezeTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('unfreeze'))
+        .addArg(new AddressValue(unfreezeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+
+    return unfreezeTx;
+  }
+
+  /**
+   *
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   * @param nonce The nonce of the token to freeze for `freezeAddress`
+   * @param freezeAddress The address to freeze
+   */
+  freezeSingleNFT(
+    senderAddress: IAddress,
+    nonce: number,
+    freezeAddress: IAddress
+  ): Transaction {
+    const freezeSingleNFTTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('freezeSingleNFT'))
+        .addArg(new U64Value(nonce))
+        .addArg(new AddressValue(freezeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return freezeSingleNFTTx;
+  }
+
+  /**
+   *
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   * @param nonce The nonce of the token to unfreeze for `unfreezeAddress`
+   * @param unfreezeAddress The address to unfreeze
+   */
+  unFreezeSingleNFT(
+    senderAddress: IAddress,
+    nonce: number,
+    unfreezeAddress: IAddress
+  ): Transaction {
+    const unFreezeSingleNFTTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('unFreezeSingleNFT'))
+        .addArg(new U64Value(nonce))
+        .addArg(new AddressValue(unfreezeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return unFreezeSingleNFTTx;
+  }
+
+  /**
+   *
+   * @param senderAddress The address of the sender, must be the admin or owner of the contract
+   * @param nonce The nonce of the token to wipe for `wipeAddress`
+   * @param wipeAddress The address to wipe from
+   * Important: This will wipe all NFTs from the address
+   * Note: The nonce must be freezed before wiping
+   */
+  wipeSingleNFT(
+    senderAddress: IAddress,
+    nonce: number,
+    wipeAddress: IAddress
+  ): Transaction {
+    const wipeSingleNFTTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('wipeSingleNFT'))
+        .addArg(new U64Value(nonce))
+        .addArg(new AddressValue(wipeAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return wipeSingleNFTTx;
   }
 }
