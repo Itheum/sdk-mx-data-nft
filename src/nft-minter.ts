@@ -6,6 +6,7 @@ import {
   ContractCallPayloadBuilder,
   ContractFunction,
   IAddress,
+  ResultsParser,
   StringValue,
   TokenIdentifierValue,
   Transaction,
@@ -23,6 +24,7 @@ import {
   dataNFTDataStreamAdvertise,
   storeToIpfs
 } from './common/mint-utils';
+import { ContractConfiguration } from './interfaces';
 
 export class NftMinter extends Minter {
   constructor(env: string, contractAddress: string, timeout: number = 10000) {
@@ -418,5 +420,42 @@ export class NftMinter extends Minter {
       chainID: this.chainID
     });
     return claimRoyaltiesTx;
+  }
+
+  /**
+   * Retrieves the smart contract configuration
+   */
+  async viewContractConfiguration(): Promise<ContractConfiguration> {
+    const interaction =
+      this.contract.methodsExplicit.getContractConfiguration();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const contractConfiguration: ContractConfiguration = {
+        tokenIdentifier: returnValue?.token_identifier.toString(),
+        mintedTokens: returnValue?.minted_tokens.toNumber(),
+        isTaxRequired: returnValue?.tax_required as boolean,
+        maxRoyalties: returnValue?.max_royalties.toNumber(),
+        minRoyalties: returnValue?.min_royalties.toNumber(),
+        mintTimeLimit: returnValue?.mint_time_limit.toNumber(),
+        isWhitelistEnabled: returnValue?.whitelist_enabled as boolean,
+        isContractPaused: returnValue?.is_paused as boolean,
+        rolesAreSet: returnValue?.roles_are_set as boolean,
+        claimsAddress: returnValue?.claims_address.toString(),
+        administratorAddress: returnValue?.administrator_address.toString()
+      };
+      return contractConfiguration;
+    } else {
+      throw new Error('Error while retrieving the contract pause state');
+      // throw new ErrContractQuery(
+      //   'Error while retrieving the contract pause state'
+      // );
+    }
   }
 }

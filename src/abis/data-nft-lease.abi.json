@@ -606,6 +606,16 @@
             ]
         },
         {
+            "name": "getContractConfiguration",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "ContractConfiguration"
+                }
+            ]
+        },
+        {
             "name": "pause",
             "mutability": "mutable",
             "inputs": [],
@@ -979,6 +989,55 @@
     ],
     "hasCallback": true,
     "types": {
+        "ContractConfiguration": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "minted_tokens",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "tax_required",
+                    "type": "bool"
+                },
+                {
+                    "name": "is_paused",
+                    "type": "bool"
+                },
+                {
+                    "name": "max_royalties",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "min_royalties",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "mint_time_limit",
+                    "type": "u64"
+                },
+                {
+                    "name": "is_whitelist_enabled",
+                    "type": "bool"
+                },
+                {
+                    "name": "roles_are_set",
+                    "type": "bool"
+                },
+                {
+                    "name": "claims_address",
+                    "type": "Address"
+                },
+                {
+                    "name": "administrator_address",
+                    "type": "Address"
+                }
+            ]
+        },
         "DataNftAttributes": {
             "type": "struct",
             "fields": [
