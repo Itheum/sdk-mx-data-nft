@@ -147,6 +147,81 @@ export abstract class Minter {
   }
 
   /**
+   * Retrieves the minter whitelist
+   */
+  async viewWhitelist(): Promise<string[]> {
+    const interaction = this.contract.methodsExplicit.getWhiteList();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const whitelist: string[] = returnValue.map((addres: any) =>
+        addres.toString()
+      );
+      return whitelist;
+    } else {
+      throw new Error('Could not retrieve minter whitelist');
+      // throw new ErrContractQuery('Could not retrieve requirements');
+    }
+  }
+
+  /**
+   * Retrives a list of addresses that are frozen for collection
+   */
+  async viewCollectionFrozenAddresses(): Promise<string[]> {
+    const interaction = this.contract.methodsExplicit.getCollectionFrozenList();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const frozenAddresses: string[] = returnValue.map((addres: any) =>
+        addres.toString()
+      );
+      return frozenAddresses;
+    } else {
+      throw new Error('Could not retrieve frozen addresses');
+      // throw new ErrContractQuery('Could not retrieve requirements');
+    }
+  }
+
+  /**
+   * Retrives a list of nonces that are frozen for address
+   * @param address The address to check
+   */
+  async viewAddressFrozenNonces(address: IAddress): Promise<number[]> {
+    const interaction = this.contract.methodsExplicit.getSftsFrozenForAddress([
+      new AddressValue(address)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const frozenNonces: number[] = returnValue.map((nonce: any) =>
+        nonce.toNumber()
+      );
+      return frozenNonces;
+    } else {
+      throw new Error('Could not retrieve frozen nonces');
+      // throw new ErrContractQuery('Could not retrieve requirements');
+    }
+  }
+
+  /**
    *  Creates a `burn` transaction
    * @param senderAddress the address of the user
    * @param dataNftNonce the nonce of the DataNFT-FT

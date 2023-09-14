@@ -458,4 +458,62 @@ export class NftMinter extends Minter {
       // );
     }
   }
+
+  /**
+   * Retrieves the addresses with transfer roles for contract collection
+   */
+  async viewTransferRoles(): Promise<string[]> {
+    const interaction =
+      this.contract.methodsExplicit.getAddressesWithTransferRole();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const addressesWithTransferRole: string[] = returnValue?.map(
+        (address: any) => address.toString()
+      );
+      return addressesWithTransferRole;
+    } else {
+      throw new Error(
+        'Error while retrieving the addresses with transfer roles'
+      );
+      // throw new ErrContractQuery(
+      //   'Error while retrieving the addresses with transfer roles'
+      // );
+    }
+  }
+
+  /**
+   * Retrieves the addresss with update attributes roles for contract collection
+   */
+  async viewUpdateAttributesRoles(): Promise<string[]> {
+    const interaction =
+      this.contract.methodsExplicit.getAddressesWithUpdateAttributesRole();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const addressesWithUpdateAttributesRole: string[] = returnValue?.map(
+        (address: any) => address.toString()
+      );
+      return addressesWithUpdateAttributesRole;
+    } else {
+      throw new Error(
+        'Error while retrieving the addresses with update attributes roles'
+      );
+      // throw new ErrContractQuery(
+      //   'Error while retrieving the addresses with update attributes roles'
+      // );
+    }
+  }
 }
