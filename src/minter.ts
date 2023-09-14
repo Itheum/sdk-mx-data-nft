@@ -42,11 +42,6 @@ export abstract class Minter {
   readonly env: string;
   readonly imageServiceUrl: string;
 
-  /**
-   * Creates a new instance of the `DataNftMinter` which can be used to interact with the Data NFT-FT minter smart contract
-   * @param env 'devnet' | 'mainnet' | 'testnet'
-   * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
-   */
   protected constructor(
     env: string,
     contractAddress: string,
