@@ -12,6 +12,7 @@ jobs:
 
       - name: Create docs
         run: |
+          npm install
           npx typedoc src/index.ts
 
       - name: Deploy
