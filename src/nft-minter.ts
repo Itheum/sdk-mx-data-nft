@@ -52,7 +52,7 @@ export class NftMinter extends Minter {
     tokenTicker: string,
     mintLimit: number,
     requireMintTax: boolean,
-    options: {
+    options?: {
       taxTokenIdentifier: string;
       taxTokenAmount: number;
     }
@@ -82,7 +82,7 @@ export class NftMinter extends Minter {
       value: 50000000000000000,
       data: data,
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 50000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -150,7 +150,6 @@ export class NftMinter extends Minter {
    * @param dataStreamUrl the url of the data stream to be encrypted. A live HTTPS URL that returns a 200 OK HTTP code.
    * @param dataPreviewUrl the url of the data preview. A live HTTPS URL that returns a 200 OK HTTP code.
    * @param royalties the royalties to be set for the Data NFT-FT. A number between 0 and 50. This equates to a % value. e.g. 10%
-   * @param supply the supply of the Data NFT-FT. A number between 1 and 1000.
    * @param datasetTitle the title of the dataset. Between 10 and 60 alphanumeric characters.
    * @param datasetDescription the description of the dataset. Between 10 and 400 alphanumeric characters.
    * @param options [optional] below parameters are optional or required based on use case
@@ -167,7 +166,6 @@ export class NftMinter extends Minter {
     dataStreamUrl: string,
     dataPreviewUrl: string,
     royalties: number,
-    supply: number,
     datasetTitle: string,
     datasetDescription: string,
     options?: {
@@ -191,14 +189,12 @@ export class NftMinter extends Minter {
       senderAddress,
       tokenName,
       royalties,
-      supply,
       datasetTitle,
       datasetDescription,
       _mandatoryParamsList: [
         'senderAddress',
         'tokenName',
         'royalties',
-        'supply',
         'datasetTitle',
         'datasetDescription'
       ]
@@ -274,7 +270,12 @@ export class NftMinter extends Minter {
     }
 
     let data;
-    if (antiSpamTax && antiSpamTokenIdentifier && antiSpamTax > 0) {
+    if (
+      antiSpamTax &&
+      antiSpamTokenIdentifier &&
+      antiSpamTokenIdentifier != 'EGLD' &&
+      antiSpamTax > 0
+    ) {
       data = new ContractCallPayloadBuilder()
         .setFunction(new ContractFunction('ESDTTransfer'))
         .addArg(new TokenIdentifierValue(antiSpamTokenIdentifier))
@@ -287,7 +288,6 @@ export class NftMinter extends Minter {
         .addArg(new StringValue(dataNftStreamUrlEncrypted))
         .addArg(new StringValue(dataPreviewUrl))
         .addArg(new U64Value(royalties))
-        .addArg(new U64Value(supply))
         .addArg(new StringValue(datasetTitle))
         .addArg(new StringValue(datasetDescription))
         .build();
@@ -301,13 +301,13 @@ export class NftMinter extends Minter {
         .addArg(new StringValue(dataNftStreamUrlEncrypted))
         .addArg(new StringValue(dataPreviewUrl))
         .addArg(new U64Value(royalties))
-        .addArg(new U64Value(supply))
         .addArg(new StringValue(datasetTitle))
         .addArg(new StringValue(datasetDescription))
         .build();
     }
 
     const mintTx = new Transaction({
+      value: antiSpamTokenIdentifier == 'EGLD' ? antiSpamTax : 0,
       data,
       sender: senderAddress,
       receiver: this.contract.getAddress(),
@@ -450,7 +450,7 @@ export class NftMinter extends Minter {
         maxRoyalties: returnValue?.max_royalties.toNumber(),
         minRoyalties: returnValue?.min_royalties.toNumber(),
         mintTimeLimit: returnValue?.mint_time_limit.toNumber(),
-        isWhitelistEnabled: returnValue?.whitelist_enabled as boolean,
+        isWhitelistEnabled: returnValue?.is_whitelist_enabled as boolean,
         isContractPaused: returnValue?.is_paused as boolean,
         rolesAreSet: returnValue?.roles_are_set as boolean,
         claimsAddress: returnValue?.claims_address.toString(),

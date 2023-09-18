@@ -22,18 +22,7 @@ import {
   itheumTokenIdentifier,
   networkConfiguration
 } from './config';
-import { NFTStorage, File } from 'nft.storage';
-import {
-  checkTraitsUrl,
-  checkUrlIsUp,
-  validateSpecificParamsMint
-} from './common/utils';
 import { MinterRequirements } from './interfaces';
-// import {
-//   ErrArgumentNotSet,
-//   ErrContractQuery,
-//   ErrFailedOperation
-// } from './errors';
 
 export abstract class Minter {
   readonly contract: SmartContract;
@@ -258,7 +247,7 @@ export abstract class Minter {
         .setFunction(new ContractFunction('setLocalRoles'))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 90000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -276,7 +265,7 @@ export abstract class Minter {
         .addArg(new BooleanValue(true))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 6000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -295,7 +284,7 @@ export abstract class Minter {
         .addArg(new BooleanValue(false))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 6000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -321,7 +310,7 @@ export abstract class Minter {
         .addArg(new BigUIntValue(tax))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 6000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -349,7 +338,7 @@ export abstract class Minter {
         .addArg(new BigUIntValue(maxRoyalties))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 6000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -371,7 +360,7 @@ export abstract class Minter {
         .addArg(new BooleanValue(is_enabled))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 6000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -386,7 +375,7 @@ export abstract class Minter {
   whitelist(
     senderAddress: IAddress,
     addresses: string[],
-    gasLimit = 0
+    extraGas = 0
   ): Transaction {
     const whitelistTx = new Transaction({
       value: 0,
@@ -397,7 +386,7 @@ export abstract class Minter {
         )
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000 + gasLimit,
+      gasLimit: 50000000 + extraGas,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -411,7 +400,7 @@ export abstract class Minter {
   delist(
     senderAddress: IAddress,
     addresses: string[],
-    gasLimit: 0
+    extraGas = 0
   ): Transaction {
     const delistTx = new Transaction({
       value: 0,
@@ -422,7 +411,7 @@ export abstract class Minter {
         )
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000 + gasLimit,
+      gasLimit: 50000000 + extraGas,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -441,7 +430,7 @@ export abstract class Minter {
         .addArg(new U64Value(timeLimit))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 6000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -463,7 +452,7 @@ export abstract class Minter {
         .addArg(new AddressValue(newAdministrator))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 6000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -483,7 +472,7 @@ export abstract class Minter {
         .setFunction(new ContractFunction('pause'))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 100000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -501,7 +490,7 @@ export abstract class Minter {
         .setFunction(new ContractFunction('unpause'))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 100000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -521,7 +510,7 @@ export abstract class Minter {
         .addArg(new AddressValue(freezeAddress))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 100000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -541,7 +530,7 @@ export abstract class Minter {
         .addArg(new AddressValue(unfreezeAddress))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 100000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -568,7 +557,7 @@ export abstract class Minter {
         .addArg(new AddressValue(freezeAddress))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 100000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -594,7 +583,7 @@ export abstract class Minter {
         .addArg(new AddressValue(unfreezeAddress))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 100000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -622,7 +611,7 @@ export abstract class Minter {
         .addArg(new AddressValue(wipeAddress))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+      gasLimit: 100000000,
       sender: senderAddress,
       chainID: this.chainID
     });
