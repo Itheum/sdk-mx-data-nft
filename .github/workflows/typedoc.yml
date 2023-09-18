@@ -1,5 +1,8 @@
 name: Create documentation and deploy to GitHub Pages
-on: [push]
+on:
+  push:
+    branches:
+      - main
 permissions:
   contents: write
 jobs:
