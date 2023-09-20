@@ -37,6 +37,11 @@ export abstract class Minter {
     abiFile: any,
     timeout: number = 10000
   ) {
+    if (!(env in EnvironmentsEnum)) {
+      throw new Error(
+        `Invalid environment: ${env}, Expected: 'devnet' | 'devnet2' | 'mainnet' | 'testnet'`
+      );
+    }
     this.env = env;
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.imageServiceUrl = imageService[env as EnvironmentsEnum];

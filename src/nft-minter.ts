@@ -29,7 +29,7 @@ import { ContractConfiguration } from './interfaces';
 export class NftMinter extends Minter {
   /**
    * Creates a new instance of the `NftMinter` class, which is used to interact with the factory generated smart contract.
-   * @param env 'devnet' | 'mainnet' | 'testnet'
+   * @param env 'devnet' | 'devnet2'| 'mainnet' | 'testnet'
    * @param contractAddress The address of the factory generated smart contract
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
