@@ -1,9 +1,9 @@
 import { Address, Transaction } from '@multiversx/sdk-core/out';
-import { DataNftMinter, Minter, MinterRequirements } from '../src';
+import { SftMinter, Minter, MinterRequirements } from '../src';
 
 describe('Data Nft Minter Test', () => {
   test('#getAddress', async () => {
-    const dataNftMarket = new DataNftMinter('devnet');
+    const dataNftMarket = new SftMinter('devnet');
     expect(dataNftMarket.getContractAddress()).toBeInstanceOf(Address);
     expect(dataNftMarket.getContractAddress().bech32()).toStrictEqual(
       'erd1qqqqqqqqqqqqqpgqpd9qxrq5a03jrneafmlmckmlj5zgdj55fsxsqa7jsm'
@@ -11,7 +11,7 @@ describe('Data Nft Minter Test', () => {
   });
 
   test('#viewMinterRequirements', async () => {
-    const dataNftMarket = new DataNftMinter('devnet');
+    const dataNftMarket = new SftMinter('devnet');
 
     const result = await dataNftMarket.viewMinterRequirements(
       new Address(
@@ -22,7 +22,7 @@ describe('Data Nft Minter Test', () => {
   });
 
   test('#burn', async () => {
-    const dataNftMarket = new DataNftMinter('devnet');
+    const dataNftMarket = new SftMinter('devnet');
 
     const result = await dataNftMarket.burn(
       new Address(
@@ -35,7 +35,7 @@ describe('Data Nft Minter Test', () => {
   });
 
   test('#viewContractpauseState', async () => {
-    const dataNftMarket = new DataNftMinter('devnet');
+    const dataNftMarket = new SftMinter('devnet');
 
     const result = await dataNftMarket.viewContractPauseState();
     expect(typeof result).toBe('boolean');
