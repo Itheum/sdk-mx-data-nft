@@ -25,6 +25,7 @@ import {
   storeToIpfs
 } from './common/mint-utils';
 import { ContractConfiguration } from './interfaces';
+import { ErrArgumentNotSet } from './errors';
 
 export class NftMinter extends Minter {
   /**
@@ -234,13 +235,10 @@ export class NftMinter extends Minter {
 
     if (!imageUrl) {
       if (!nftStorageToken) {
-        throw new Error(
+        throw new ErrArgumentNotSet(
+          'nftStorageToken',
           'NFT Storage token is required when not using custom image and traits'
         );
-        // throw new ErrArgumentNotSet(
-        //   'nftStorageToken',
-        //   'NFT Storage token is required when not using custom image and traits'
-        // );
       }
       const { image, traits } = await createFileFromUrl(
         `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`,

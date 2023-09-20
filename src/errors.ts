@@ -7,6 +7,11 @@ export class ErrNetworkConfig extends Error {
   }
 }
 
+export class ErrArgumentNotSet extends Error {
+  public constructor(argument: string, message?: string) {
+    super(`Argument "${argument}" is not set. ${message}`);
+  }
+}
 export class ErrInvalidArgument extends Error {
   public constructor(message: string) {
     super(`Invalid argument: ${message}`);
