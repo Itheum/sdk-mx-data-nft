@@ -52,6 +52,10 @@
                     "type": "bool"
                 },
                 {
+                    "name": "claims_address",
+                    "type": "Address"
+                },
+                {
                     "name": "payment",
                     "type": "optional<multi<EgldOrEsdtTokenIdentifier,BigUint>>",
                     "multi_arg": true
