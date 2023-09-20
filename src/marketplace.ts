@@ -26,6 +26,7 @@ import {
 import dataMarketAbi from './abis/data_market.abi.json';
 import { MarketplaceRequirements, Offer } from './interfaces';
 import { parseOffer } from './common/utils';
+import { ErrContractQuery, ErrNetworkConfig } from './errors';
 // import { ErrContractQuery } from './errors';
 
 export class DataNftMarket {
@@ -40,6 +41,11 @@ export class DataNftMarket {
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: string, timeout: number = 10000) {
+    if (!(env in EnvironmentsEnum)) {
+      throw new ErrNetworkConfig(
+        `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
+      );
+    }
     this.env = env;
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.chainID = networkConfig.chainID;
@@ -87,7 +93,10 @@ export class DataNftMarket {
       );
       return offers;
     } else {
-      return [];
+      throw new ErrContractQuery(
+        'viewAddressListedOffers',
+        returnCode.toString()
+      );
     }
   }
 
@@ -122,7 +131,10 @@ export class DataNftMarket {
       );
       return offers;
     } else {
-      return [];
+      throw new ErrContractQuery(
+        'viewAddressPagedOffers',
+        returnCode.toString()
+      );
     }
   }
 
@@ -145,7 +157,10 @@ export class DataNftMarket {
       const returnValue = firstValue?.valueOf();
       return returnValue.toNumber();
     } else {
-      return 0;
+      throw new ErrContractQuery(
+        'viewAddressTotalOffers',
+        returnCode.toString()
+      );
     }
   }
 
@@ -171,7 +186,10 @@ export class DataNftMarket {
       );
       return offers;
     } else {
-      return [];
+      throw new ErrContractQuery(
+        'viewAddressCancelledOffers',
+        returnCode.toString()
+      );
     }
   }
 
@@ -199,7 +217,7 @@ export class DataNftMarket {
       );
       return offers;
     } else {
-      return [];
+      throw new ErrContractQuery('viewPagedOffers', returnCode.toString());
     }
   }
 
@@ -248,7 +266,7 @@ export class DataNftMarket {
       );
       return offers;
     } else {
-      return [];
+      throw new ErrContractQuery('viewOffers', returnCode.toString());
     }
   }
 
@@ -281,10 +299,7 @@ export class DataNftMarket {
       };
       return requirements;
     } else {
-      throw new Error('Error while retrieving the marketplace requirements');
-      // throw new ErrContractQuery(
-      //   'Error while retrieving the marketplace requirements'
-      // );
+      throw new ErrContractQuery('viewRequirements', returnCode.toString());
     }
   }
 
@@ -304,9 +319,7 @@ export class DataNftMarket {
       const returnValue = firstValue?.valueOf();
       return new U8Value(returnValue).valueOf().toNumber();
     }
-
-    throw new Error('Error while retrieving the number of offers');
-    // throw new ErrContractQuery('Error while retrieving the number of offers');
+    throw new ErrContractQuery('viewNumberOfOffers', returnCode.toString());
   }
 
   /**
@@ -326,10 +339,7 @@ export class DataNftMarket {
       return new U64Value(returnValue).valueOf().toNumber();
     }
 
-    throw new Error('Error while retrieving the last valid offer id');
-    // throw new ErrContractQuery(
-    //   'Error while retrieving the last valid offer id'
-    // );
+    throw new ErrContractQuery('viewLastValidOfferId', returnCode.toString());
   }
 
   /**
@@ -348,10 +358,10 @@ export class DataNftMarket {
       const returnValue = firstValue?.valueOf();
       return new BooleanValue(returnValue).valueOf();
     } else {
-      throw new Error('Error while retrieving the contract pause state');
-      // throw new ErrContractQuery(
-      //   'Error while retrieving the contract pause state'
-      // );
+      throw new ErrContractQuery(
+        'viewContractPauseState',
+        returnCode.toString()
+      );
     }
   }
 

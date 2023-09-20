@@ -23,6 +23,7 @@ import {
   networkConfiguration
 } from './config';
 import { MinterRequirements } from './interfaces';
+import { ErrContractQuery } from './errors';
 
 export abstract class Minter {
   readonly contract: SmartContract;
@@ -130,8 +131,10 @@ export abstract class Minter {
       };
       return requirements;
     } else {
-      throw new Error('Could not retrieve minter contract requirements');
-      // throw new ErrContractQuery('Could not retrieve requirements');
+      throw new ErrContractQuery(
+        'viewMinterRequirements',
+        returnCode.toString()
+      );
     }
   }
 

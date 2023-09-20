@@ -1,4 +1,4 @@
-import { checkTraitsUrl } from '../src';
+import { checkTraitsUrl } from '../src/common/utils';
 
 describe('Traits strucutre test', () => {
   // test('#json traits strucutre check', async () => {
@@ -15,8 +15,8 @@ describe('Traits strucutre test', () => {
       await checkTraitsUrl(
         'https://ipfs.io/ipfs/bafybeicbmpiehja5rjk425ol4rmrorrg5xh62vcbeqigv3zjcrfk4rtggm/metadata.json'
       );
-    } catch (error) {
-      expect(error).toStrictEqual(Error('Missing required trait: Creator'));
+    } catch (error: any) {
+      expect(error.message).toBe('Missing trait: Creator');
     }
   }, 100000);
 });

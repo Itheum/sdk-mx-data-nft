@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { DataNft } from '../datanft';
 import { NftEnumType, NftType, Offer } from '../interfaces';
+import { ErrFetch, ErrMissingTrait, ErrMissingValueForTrait } from '../errors';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
   let hex = new BigNumber(value).toString(16);
@@ -63,12 +64,14 @@ export async function checkTraitsUrl(traitsUrl: string) {
   const traitsResponse = await fetch(traitsUrl);
   const traits = await traitsResponse.json();
 
+  checkStatus(traitsResponse);
+
   if (!traits.description) {
-    throw new Error('Traits description is empty');
+    throw new ErrMissingTrait(traits.description);
   }
 
   if (!Array.isArray(traits.attributes)) {
-    throw new Error('Traits attributes must be an array');
+    throw new ErrMissingTrait(traits.attributes);
   }
 
   const requiredTraits = ['Creator', 'Data Preview URL'];
@@ -80,13 +83,13 @@ export async function checkTraitsUrl(traitsUrl: string) {
         (attribute: any) => attribute.trait_type === requiredTrait
       )
     ) {
-      throw new Error(`Missing required trait: ${requiredTrait}`);
+      throw new ErrMissingTrait(requiredTrait);
     }
   }
 
   for (const attribute of traitsAttributes) {
     if (!attribute.value) {
-      throw new Error(`Empty value for trait: ${attribute.trait_type}`);
+      throw new ErrMissingValueForTrait(attribute.trait_type);
     }
   }
 }
@@ -555,16 +558,12 @@ export async function checkUrlIsUp(url: string, expectedHttpCodes: number[]) {
   const response = await fetch(url);
 
   if (!expectedHttpCodes.includes(response.status)) {
-    throw new Error(
-      `URL needs to return a 200 OK response code (or a 403 Forbidden error code is also allowed for protected Data Streams). url : ${url}, actual HTTP status: ${response.status}`
-    );
+    throw new ErrFetch(response.status, response.statusText);
   }
 }
 
 export function checkStatus(response: Response) {
   if (!(response.status >= 200 && response.status <= 299)) {
-    throw new Error(
-      `Response returned non-success HTTP code. status = ${response?.status} statusText = ${response?.statusText}`
-    );
+    throw new ErrFetch(response.status, response.statusText);
   }
 }
