@@ -16,7 +16,6 @@ import {
   itheumTokenIdentifier,
   minterContractAddress
 } from './config';
-import { MinterRequirements } from './interfaces';
 import dataNftMinterAbi from './abis/datanftmint.abi.json';
 import {
   checkTraitsUrl,

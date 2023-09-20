@@ -164,7 +164,9 @@ export class DataNft {
         return dataNfts;
       }
     } catch (error: any) {
-      throw new ErrDataNftCreate('Response could not be parsed');
+      throw new ErrDataNftCreate(
+        'Payload could not be parsed: ' + error.message
+      );
     }
   }
 
@@ -216,8 +218,8 @@ export class DataNft {
     checkStatus(res);
 
     const data = await res.json();
-    const dataNfts: DataNft[] = this.createFromApiResponseOrBulk(data);
 
+    const dataNfts: DataNft[] = this.createFromApiResponseOrBulk(data);
     return dataNfts;
   }
 
