@@ -87,6 +87,133 @@ dataNft.viewDataViaMVXNativeAuth({
 }); // optional params "stream" (stream out data instead of downloading file), "fwdAllHeaders"/"fwdHeaderKeys" can be used to pass on the headers like Authorization to origin Data Stream servers
 ```
 
+### 2. Interacting with Data NFT Minter
+
+```typescript
+import { DataNftMinter } from '@itheum/sdk-mx-data-nft';
+
+const dataNftMinter = new DataNftMinter('devnet' | 'testnet' | 'mainnet');
+
+// View minter smart contract requirements
+const requirements = await dataNftMinter.viewMinterRequirements(
+  new Address('erd1...')
+);
+
+// View contract pause state
+const result = await dataNftMinter.viewContractPauseState();
+```
+
+#### Create a mint transaction
+
+Method 1: Mint a new Data NFT with Ithuem generated image and traits.
+Currently only supports [nft.storage](https://nft.storage/docs/quickstart/#get-an-api-token).
+
+```typescript
+const transaction = await nftMinter.mint(
+  new Address('erd1...'),
+  'TEST-TOKEN',
+  'https://marshal.com',
+  'https://streamdata.com',
+  'https://previewdata',
+  1000,
+  'Test Title',
+  'Test Description',
+  {
+    nftStorageToken: 'API TOKEN'
+  }
+);
+```
+
+Method 2: Mint a new Data NFT with custom image and traits.
+Traits should be compliant with the Itheum [traits structure](#traits-structure).
+
+```typescript
+const transaction = await nftMinter.mint(
+  new Address('erd1'),
+  'TEST-TOKEN',
+  'https://marshal.com',
+  'https://streamdata.com',
+  'https://previewdata',
+  1000,
+  'Test Title',
+  'Test Description',
+  {
+    imageUrl: 'https://imageurl.com',
+    traitsUrl: 'https://traitsurl.com'
+  }
+);
+```
+
+#### Create a burn transaction
+
+```typescript
+const transaction = await dataNftMarket.burn(
+  new Address('erd1'),
+  dataNftNonce,
+  quantityToBurn
+);
+```
+
+### 3. Interacting with Data NFT Marketplace
+
+```typescript
+import { DataNftMarket } from '@itheum/sdk-mx-data-nft';
+
+const dataNftMarket = new DataNftMarket('devnet' | 'testnet' | 'mainnet');
+
+// View requirements
+const result = await dataNftMarket.viewRequirements();
+
+// View address listed offers
+const result = await dataNftMarket.viewAddressListedOffers(new Address(''));
+
+// View address paged offers
+const result = await dataNftMarket.viewAddressPagedOffers(
+  1,
+  10,
+  new Address('')
+);
+
+// View address total offers
+const result = await dataNftMarket.viewAddressTotalOffers(new Address(''));
+
+// View address cancelled offers
+const result = await dataNftMarket.viewAddressCancelledOffers(new Address(''));
+
+// View offers paged
+const result = await dataNftMarket.viewPagedOffers(1, 10);
+
+// View offers
+const result = await dataNftMarket.viewOffers();
+
+// View number of offers listed
+const result = await dataNftMarket.viewNumberOfOffers();
+
+// View contract pause state
+const result = await dataNftMarket.viewContractPauseState();
+
+// View last valid offer id
+const result = await dataNftMarket.viewLastValidOfferId();
+
+// Create addOffer transaction
+const result = dataNftMarket.addOffer(new Address(''), '', 0, 0, '', 0, 0, 0);
+
+// Create acceptOffer transaction
+const result = dataNftMarket.acceptOffer(new Address(''), 0, 0, 0);
+
+// Create cancelOffer transaction
+const result = dataNftMarket.cancelOffer(new Address(''), 0);
+
+// Create cancelOffer transaction without sending the funds back to the owner
+const result = dataNftMarket.cancelOffer(new Address(''), 0, false);
+
+// Create withdrawFromCancelledOffer transaction
+const result = dataNftMarket.withdrawCancelledOffer(new Address(''), 0);
+
+// Create changeOfferPrice transaction
+const result = dataNftMarket.changeOfferPrice(new Address(''), 0, 0);
+```
+
 ### Traits structure
 
 Items below marked "required" are the "minimum" required for it to be compatible with the Itheum protocol. You can add any additional traits you may need for your own reasons.

@@ -1,4 +1,5 @@
 import {
+  Address,
   AddressValue,
   BigUIntValue,
   ContractCallPayloadBuilder,
@@ -37,7 +38,7 @@ export class SftMinter extends Minter {
   constructor(env: string, timeout: number = 10000) {
     super(
       env,
-      minterContractAddress[env as EnvironmentsEnum],
+      new Address(minterContractAddress[env as EnvironmentsEnum]),
       dataNftMinterAbi,
       timeout
     );

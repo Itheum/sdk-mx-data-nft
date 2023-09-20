@@ -33,7 +33,7 @@ export class NftMinter extends Minter {
    * @param contractAddress The address of the factory generated smart contract
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
-  constructor(env: string, contractAddress: string, timeout: number = 10000) {
+  constructor(env: string, contractAddress: IAddress, timeout: number = 10000) {
     super(env, contractAddress, dataNftLeaseAbi, timeout);
   }
 
@@ -143,7 +143,7 @@ export class NftMinter extends Minter {
    *
    * NOTE: The `dataStreamUrl` is being encrypted and the `media` and `metadata` urls are build and uploaded to IPFS
    *
-   * NOTE: The `options.nftStorageToken` is required when not using custom image and traits, when using custom image and traits the traits should be compliant with the `traits` structure
+   * NOTE: The `options.nftStorageToken` is required when not using custom image and traits, when using custom image and traits the traits should be compliant with the [Traits](https://github.com/Itheum/sdk-mx-data-nft#traits-structure) structure
    *
    * For more information, see the [README documentation](https://github.com/Itheum/sdk-mx-data-nft#create-a-mint-transaction).
    *
@@ -159,7 +159,7 @@ export class NftMinter extends Minter {
    *                 - imageUrl: the URL of the image for the Data NFT
    *                 - traitsUrl: the URL of the traits for the Data NFT
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
-   *                 - antiSpamTokenIdentifier: the anti spam token identifier to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
+   *                 - antiSpamTokenIdentifier: the anti spam token identifier to be used for the minting
    *                 - antiSpamTax: the anti spam tax to be set for the Data NFT-FT with decimals. Needs to be greater than 0 and should be obtained in real time via {@link viewMinterRequirements} prior to calling mint.
    */
   async mint(

@@ -34,7 +34,7 @@ export abstract class Minter {
 
   protected constructor(
     env: string,
-    contractAddress: string,
+    contractAddress: IAddress,
     abiFile: any,
     timeout: number = 10000
   ) {
@@ -54,7 +54,7 @@ export abstract class Minter {
       }
     );
     this.contract = new SmartContract({
-      address: new Address(contractAddress),
+      address: contractAddress,
       abi: AbiRegistry.create(abiFile)
     });
   }
