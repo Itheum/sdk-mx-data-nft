@@ -47,7 +47,7 @@ export class ErrAttributeNotSet extends Error {
 
 export class ErrContractQuery extends Error {
   public constructor(method: string, message?: string) {
-    super(`Failed to query contract: Method: ${method} : ${message}`);
+    super(`Failed to query contract with method: ${method} : ${message}`);
   }
 }
 

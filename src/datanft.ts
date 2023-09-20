@@ -11,7 +11,6 @@ import {
   networkConfiguration
 } from './config';
 import {
-  checkStatus,
   createNftIdentifier,
   numberToPaddedHex,
   parseDataNft,

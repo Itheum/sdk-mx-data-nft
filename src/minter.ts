@@ -23,7 +23,7 @@ import {
   networkConfiguration
 } from './config';
 import { MinterRequirements } from './interfaces';
-import { ErrContractQuery } from './errors';
+import { ErrContractQuery, ErrNetworkConfig } from './errors';
 
 export abstract class Minter {
   readonly contract: SmartContract;
@@ -39,7 +39,7 @@ export abstract class Minter {
     timeout: number = 10000
   ) {
     if (!(env in EnvironmentsEnum)) {
-      throw new Error(
+      throw new ErrNetworkConfig(
         `Invalid environment: ${env}, Expected: 'devnet' | 'devnet2' | 'mainnet' | 'testnet'`
       );
     }
@@ -82,16 +82,11 @@ export abstract class Minter {
       const returnValue = firstValue?.valueOf();
       return new BooleanValue(returnValue).valueOf();
     } else {
-      throw new Error('Error while retrieving the contract pause state');
-      // throw new ErrContractQuery(
-      //   'Error while retrieving the contract pause state'
-      // );
+      throw new ErrContractQuery(
+        'Error while retrieving the contract pause state'
+      );
     }
   }
-
-  // [TO DO] Implement other general views between sft and nft minter
-  // [TO DO] Implement all general methods between sft and nft minter ?
-
   /**
    * Retrieves the minter smart contract requirements for the given user
    * @param address the address of the user
@@ -157,8 +152,7 @@ export abstract class Minter {
       );
       return whitelist;
     } else {
-      throw new Error('Could not retrieve minter whitelist');
-      // throw new ErrContractQuery('Could not retrieve requirements');
+      throw new ErrContractQuery('viewWhitelist', returnCode.toString());
     }
   }
 
@@ -181,8 +175,10 @@ export abstract class Minter {
       );
       return frozenAddresses;
     } else {
-      throw new Error('Could not retrieve frozen addresses');
-      // throw new ErrContractQuery('Could not retrieve requirements');
+      throw new ErrContractQuery(
+        'viewCollectionFrozenAddresses',
+        returnCode.toString()
+      );
     }
   }
 
@@ -208,8 +204,10 @@ export abstract class Minter {
       );
       return frozenNonces;
     } else {
-      throw new Error('Could not retrieve frozen nonces');
-      // throw new ErrContractQuery('Could not retrieve requirements');
+      throw new ErrContractQuery(
+        'viewAddressFrozenNonces',
+        returnCode.toString()
+      );
     }
   }
 
