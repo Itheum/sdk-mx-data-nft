@@ -52,6 +52,7 @@ export class NftMinter extends Minter {
     tokenTicker: string,
     mintLimit: number,
     requireMintTax: boolean,
+    claimsAddress: IAddress,
     options?: {
       taxTokenIdentifier: string;
       taxTokenAmount: number;
@@ -65,6 +66,7 @@ export class NftMinter extends Minter {
         .addArg(new StringValue(tokenTicker))
         .addArg(new BigUIntValue(mintLimit))
         .addArg(new BooleanValue(requireMintTax))
+        .addArg(new AddressValue(claimsAddress))
         .addArg(new TokenIdentifierValue(options.taxTokenIdentifier))
         .addArg(new BigUIntValue(options.taxTokenAmount))
         .build();
@@ -75,6 +77,7 @@ export class NftMinter extends Minter {
         .addArg(new StringValue(tokenTicker))
         .addArg(new BigUIntValue(mintLimit))
         .addArg(new BooleanValue(requireMintTax))
+        .addArg(new AddressValue(claimsAddress))
         .build();
     }
 
