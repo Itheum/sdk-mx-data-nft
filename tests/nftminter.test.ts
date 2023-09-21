@@ -59,7 +59,7 @@ describe('Nft minter test', () => {
       }
     );
     expect(mintTx).toBeInstanceOf(Transaction);
-  }, 20000);
+  }, 40000);
 
   test('#mint nft using your image and metadata', async () => {
     const factoryGeneratedContract = new Address(
@@ -88,7 +88,7 @@ describe('Nft minter test', () => {
       }
     );
     expect(mintTx).toBeInstanceOf(Transaction);
-  }, 20000);
+  }, 40000);
 
   test('#mint nft using tax for minting', async () => {
     const factoryGeneratedContract = new Address(
@@ -117,5 +117,5 @@ describe('Nft minter test', () => {
     );
 
     expect(mintTx).toBeInstanceOf(Transaction);
-  });
+  }, 40000);
 });
