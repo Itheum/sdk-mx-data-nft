@@ -25,7 +25,11 @@ import {
   storeToIpfs
 } from './common/mint-utils';
 import { ContractConfiguration } from './interfaces';
-import { ErrArgumentNotSet } from './errors';
+import {
+  ErrArgumentNotSet,
+  ErrAttributeNotSet,
+  ErrContractQuery
+} from './errors';
 
 export class NftMinter extends Minter {
   /**
@@ -206,10 +210,6 @@ export class NftMinter extends Minter {
 
     if (!allPassed) {
       throw new Error(`Params have validation issues = ${validationMessages}`);
-      // throw new ErrFailedOperation(
-      //   this.mint.name,
-      //   new Error(`params have validation issues = ${validationMessages}`)
-      // );
     }
     // E: run any format specific validation...
 
@@ -220,11 +220,6 @@ export class NftMinter extends Minter {
       await checkUrlIsUp(dataMarshalUrl + '/health-check', [200]);
     } catch (error) {
       throw error;
-      // if (error instanceof Error) {
-      //   throw new ErrFailedOperation(this.mint.name, error);
-      // } else {
-      //   throw new ErrFailedOperation(this.mint.name);
-      // }
     }
 
     let imageOnIpfsUrl: string;
@@ -257,11 +252,10 @@ export class NftMinter extends Minter {
       metadataOnIpfsUrl = metadataIpfsUrl;
     } else {
       if (!traitsUrl) {
-        throw new Error('Traits URL is required when using custom image');
-        // throw new ErrArgumentNotSet(
-        //   'traitsUrl',
-        //   'Traits URL is required when using custom image'
-        // );
+        throw new ErrArgumentNotSet(
+          'traitsUrl',
+          'Traits URL is required when using custom image'
+        );
       }
 
       await checkTraitsUrl(traitsUrl);
@@ -459,10 +453,10 @@ export class NftMinter extends Minter {
       };
       return contractConfiguration;
     } else {
-      throw new Error('Error while retrieving the contract pause state');
-      // throw new ErrContractQuery(
-      //   'Error while retrieving the contract pause state'
-      // );
+      throw new ErrContractQuery(
+        'viewContractConfiguration',
+        returnCode.toString()
+      );
     }
   }
 
@@ -486,12 +480,7 @@ export class NftMinter extends Minter {
       );
       return addressesWithTransferRole;
     } else {
-      throw new Error(
-        'Error while retrieving the addresses with transfer roles'
-      );
-      // throw new ErrContractQuery(
-      //   'Error while retrieving the addresses with transfer roles'
-      // );
+      throw new ErrContractQuery('viewTransferRoles', returnCode.toString());
     }
   }
 
@@ -515,12 +504,10 @@ export class NftMinter extends Minter {
       );
       return addressesWithUpdateAttributesRole;
     } else {
-      throw new Error(
-        'Error while retrieving the addresses with update attributes roles'
+      throw new ErrContractQuery(
+        'viewUpdateAttributesRoles',
+        returnCode.toString()
       );
-      // throw new ErrContractQuery(
-      //   'Error while retrieving the addresses with update attributes roles'
-      // );
     }
   }
 }

@@ -24,19 +24,10 @@ export async function dataNFTDataStreamAdvertise(
         dataNftStreamUrlEncrypted: data.encryptedMessage
       };
     } else {
-      throw new Error('Issue with data marshal generate payload');
-      // throw new ErrFailedOperation(this.dataNFTDataStreamAdvertise.name);
+      throw new Error('Issue with data marshal generating payload');
     }
   } catch (error) {
     throw error;
-    // if (error instanceof Error) {
-    //   throw new ErrFailedOperation(
-    //     this.dataNFTDataStreamAdvertise.name,
-    //     error
-    //   );
-    // } else {
-    //   throw new ErrFailedOperation(this.dataNFTDataStreamAdvertise.name);
-    // }
   }
 }
 
@@ -54,7 +45,6 @@ export async function storeToIpfs(
     res = await nftstorage.storeDirectory(dir);
   } catch (error) {
     throw error;
-    // throw new ErrFailedOperation(this.storeToIpfs.name);
   }
   return {
     imageOnIpfsUrl: `https://ipfs.io/ipfs/${res}/image.png`,

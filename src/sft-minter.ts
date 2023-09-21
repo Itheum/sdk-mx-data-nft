@@ -28,6 +28,7 @@ import {
   dataNFTDataStreamAdvertise,
   storeToIpfs
 } from './common/mint-utils';
+import { ErrArgumentNotSet } from './errors';
 
 export class SftMinter extends Minter {
   /**
@@ -43,8 +44,6 @@ export class SftMinter extends Minter {
       timeout
     );
   }
-
-  // [TO DO] Initialize the contract for sft minter
 
   /**
    * Creates an initialize contract transaction for the contract
@@ -202,10 +201,6 @@ export class SftMinter extends Minter {
 
     if (!allPassed) {
       throw new Error(`Params have validation issues = ${validationMessages}`);
-      // throw new ErrFailedOperation(
-      //   this.mint.name,
-      //   new Error(`params have validation issues = ${validationMessages}`)
-      // );
     }
     // E: run any format specific validation...
 
@@ -216,11 +211,6 @@ export class SftMinter extends Minter {
       await checkUrlIsUp(dataMarshalUrl + '/health-check', [200]);
     } catch (error) {
       throw error;
-      // if (error instanceof Error) {
-      //   throw new ErrFailedOperation(this.mint.name, error);
-      // } else {
-      //   throw new ErrFailedOperation(this.mint.name);
-      // }
     }
 
     let imageOnIpfsUrl: string;
@@ -231,13 +221,10 @@ export class SftMinter extends Minter {
 
     if (!imageUrl) {
       if (!nftStorageToken) {
-        throw new Error(
+        throw new ErrArgumentNotSet(
+          'nftStorageToken',
           'NFT Storage token is required when not using custom image and traits'
         );
-        // throw new ErrArgumentNotSet(
-        //   'nftStorageToken',
-        //   'NFT Storage token is required when not using custom image and traits'
-        // );
       }
       const { image, traits } = await createFileFromUrl(
         `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`,
@@ -256,11 +243,10 @@ export class SftMinter extends Minter {
       metadataOnIpfsUrl = metadataIpfsUrl;
     } else {
       if (!traitsUrl) {
-        throw new Error('Traits URL is required when using custom image');
-        // throw new ErrArgumentNotSet(
-        //   'traitsUrl',
-        //   'Traits URL is required when using custom image'
-        // );
+        throw new ErrArgumentNotSet(
+          'traitsUrl',
+          'Traits URL is required when using custom image'
+        );
       }
 
       await checkTraitsUrl(traitsUrl);

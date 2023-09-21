@@ -83,7 +83,8 @@ export abstract class Minter {
       return new BooleanValue(returnValue).valueOf();
     } else {
       throw new ErrContractQuery(
-        'Error while retrieving the contract pause state'
+        'viewContractPauseState',
+        returnCode.toString()
       );
     }
   }
