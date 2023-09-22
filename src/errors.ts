@@ -1,72 +1,81 @@
-/**
- * The base class for exceptions (errors).
- */
-export class Err extends Error {
-  inner: Error | undefined = undefined;
-
-  public constructor(message: string, inner?: Error) {
-    super(message);
-    this.inner = inner;
-  }
-
-  /**
-   * Returns a pretty, friendly summary for the error or for the chain of errors (if appropriate).
-   */
-  summary(): any[] {
-    let result = [];
-
-    result.push({ name: this.name, message: this.message });
-
-    let inner: any = this.inner;
-    while (inner) {
-      result.push({ name: inner.name, message: inner.message });
-      inner = inner.inner;
-    }
-
-    return result;
-  }
-}
-
-export class ErrNetworkConfig extends Err {
-  public constructor() {
+export class ErrNetworkConfig extends Error {
+  public constructor(message?: string) {
     super(
-      'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
+      message ||
+        'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
     );
   }
 }
 
-export class ErrDataNftCreation extends Err {
-  public constructor(inner?: Error) {
-    super(`Could not create DataNft:`, inner);
+export class ErrArgumentNotSet extends Error {
+  public constructor(argument: string, message?: string) {
+    super(`Argument "${argument}" is not set. ${message}`);
   }
 }
-
-export class ErrDecodeAttributes extends Err {
-  public constructor() {
-    super('Could not decode attributes');
-  }
-}
-
-export class ErrAttributeNotSet extends Err {
-  public constructor(attributeName: string) {
-    super(`Attribute ${attributeName} is not set`);
-  }
-}
-
-export class ErrArgumentNotSet extends Err {
-  public constructor(argumentName: string, message: string) {
-    super(`Argument ${argumentName} is not set. ${message}`);
-  }
-}
-
-export class ErrFailedOperation extends Err {
-  public constructor(methodName: string, inner?: Error) {
-    super(`Function failed: ${methodName}:`, inner);
-  }
-}
-
-export class ErrContractQuery extends Err {
+export class ErrInvalidArgument extends Error {
   public constructor(message: string) {
-    super(`Contract query failed: ${message}`);
+    super(`Invalid argument: ${message}`);
+  }
+}
+
+export class ErrBadType extends Error {
+  public constructor(name: string, type: any, value?: any, context?: string) {
+    super(
+      `Bad type of "${name}": ${value}. Expected type: ${type}. Context: ${context}`
+    );
+  }
+}
+
+export class ErrDataNftCreate extends Error {
+  public constructor(message?: string) {
+    super(`Failed to create Data NFT: ${message}`);
+  }
+}
+
+export class ErrFetch extends Error {
+  public constructor(status: number, message: string) {
+    super(`Fetch error with status code: ${status} and message: ${message}`);
+  }
+}
+
+export class ErrDecodeAttributes extends Error {
+  public constructor(message?: string) {
+    super(`Failed to decode attributes: ${message}`);
+  }
+}
+
+export class ErrAttributeNotSet extends Error {
+  public constructor(attribute: string) {
+    super(`Attribute "${attribute}" is not set`);
+  }
+}
+
+export class ErrContractQuery extends Error {
+  public constructor(method: string, message?: string) {
+    super(`Failed to query contract with method: ${method} : ${message}`);
+  }
+}
+
+export class ErrParamValidation extends Error {
+  public constructor(message: string) {
+    super(`Params have validation issues : ${message}`);
+  }
+}
+
+export class ErrFailedOperation extends Error {
+  public constructor(method: string, message?: string) {
+    super(`Failed to perform operation: ${method} : ${message}`);
+  }
+}
+
+export class ErrMissingTrait extends Error {
+  public constructor(trait: string) {
+    super(`Missing trait: ${trait}`);
+  }
+}
+
+export class ErrMissingValueForTrait extends Error {
+  public constructor(trait: string) {
+    super(`Missing value for trait: ${trait}`);
   }
 }
