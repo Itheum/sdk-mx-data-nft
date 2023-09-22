@@ -100,14 +100,14 @@ export class NftMinter extends Minter {
   /**
    * Creates a updateAttributes transaction for the contract
    * @param senderAddress The address of the sender, must be the admin of the contract
-   * @param tokenIdentiifer The token identifier of the data nft to update attributes
+   * @param tokenIdentifier The token identifier of the data nft to update attributes
    * @param nonce The nonce of the token to update attributes
    * @param attributes The new attributes to update
    * @param quantity The quantity of the token to update attributes (default: 1)
    */
   updateAttributes(
     senderAddress: IAddress,
-    tokenIdentiifer: string,
+    tokenIdentifier: string,
     nonce: number,
     attributes: {
       dataMarshalUrl: string;
@@ -123,7 +123,7 @@ export class NftMinter extends Minter {
       value: 0,
       data: new ContractCallPayloadBuilder()
         .setFunction(new ContractFunction('ESDTNFTTransfer'))
-        .addArg(new TokenIdentifierValue(tokenIdentiifer))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
         .addArg(new U64Value(nonce))
         .addArg(new U64Value(quantity))
         .addArg(new AddressValue(this.contract.getAddress()))
@@ -485,7 +485,7 @@ export class NftMinter extends Minter {
   }
 
   /**
-   * Retrieves the addresss with update attributes roles for contract collection
+   * Retrieves the address with update attributes roles for contract collection
    */
   async viewUpdateAttributesRoles(): Promise<string[]> {
     const interaction =

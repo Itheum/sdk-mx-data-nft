@@ -60,7 +60,7 @@ export abstract class Minter {
   }
 
   /**
-   * Retrives the address of the minter smart contract based on the environment
+   * Retrieves the address of the minter smart contract based on the environment
    */
   getContractAddress(): IAddress {
     return this.contract.getAddress();
@@ -158,7 +158,7 @@ export abstract class Minter {
   }
 
   /**
-   * Retrives a list of addresses that are frozen for collection
+   * Retrieves a list of addresses that are frozen for collection
    */
   async viewCollectionFrozenAddresses(): Promise<string[]> {
     const interaction = this.contract.methodsExplicit.getCollectionFrozenList();
@@ -184,7 +184,7 @@ export abstract class Minter {
   }
 
   /**
-   * Retrives a list of nonces that are frozen for address
+   * Retrieves a list of nonces that are frozen for address
    * @param address The address to check
    */
   async viewAddressFrozenNonces(address: IAddress): Promise<number[]> {

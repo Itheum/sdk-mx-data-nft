@@ -12,7 +12,7 @@ This SDK is currently focused on interacting with the Itheum's Data NFT technolo
 
 ### Dev Testing
 
-- Only simple dev testing added. First **Build** as below and then run `npm run devtest` and work on the test.mjs file for live reload
+- Only simple dev testing added. First **Build** as below and then run `npm run test` and work on the test.mjs file for live reload
 
 ### Build
 

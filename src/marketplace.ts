@@ -64,7 +64,7 @@ export class DataNftMarket {
   }
 
   /**
-   * Retrives the address of the marketplace smart contract based on the environment
+   * Retrieves the address of the marketplace smart contract based on the environment
    */
   getContractAddress(): IAddress {
     return this.contract.getAddress();
@@ -222,7 +222,7 @@ export class DataNftMarket {
   }
 
   /**
-   * Retrives an array of `Offer` objects.
+   * Retrieves an array of `Offer` objects.
    */
   async viewOffers(): Promise<Offer[]> {
     const interaction = this.contract.methodsExplicit.getOffers();

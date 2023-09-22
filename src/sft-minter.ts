@@ -5,7 +5,6 @@ import {
   ContractCallPayloadBuilder,
   ContractFunction,
   IAddress,
-  ResultsParser,
   StringValue,
   TokenIdentifierValue,
   Transaction,
