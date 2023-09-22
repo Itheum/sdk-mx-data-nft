@@ -12,7 +12,7 @@ This SDK is currently focused on interacting with the Itheum's Data NFT technolo
 
 ### Dev Testing
 
-- Only simple dev testing added. First **Build** as below and then run `npm run devtest` and work on the test.mjs file for live reload
+- Only simple dev testing added. First **Build** as below and then run `npm run test` and work on the test.mjs file for live reload
 
 ### Build
 
@@ -109,17 +109,15 @@ Method 1: Mint a new Data NFT with Ithuem generated image and traits.
 Currently only supports [nft.storage](https://nft.storage/docs/quickstart/#get-an-api-token).
 
 ```typescript
-const transaction = await dataNftMinter.mint(
+const transaction = await nftMinter.mint(
   new Address('erd1...'),
   'TEST-TOKEN',
   'https://marshal.com',
   'https://streamdata.com',
   'https://previewdata',
-  15,
   1000,
   'Test Title',
   'Test Description',
-  10000000000,
   {
     nftStorageToken: 'API TOKEN'
   }
@@ -130,17 +128,15 @@ Method 2: Mint a new Data NFT with custom image and traits.
 Traits should be compliant with the Itheum [traits structure](#traits-structure).
 
 ```typescript
-const transaction = await dataNftMinter.mint(
+const transaction = await nftMinter.mint(
   new Address('erd1'),
   'TEST-TOKEN',
   'https://marshal.com',
   'https://streamdata.com',
   'https://previewdata',
-  15,
   1000,
   'Test Title',
   'Test Description',
-  10000000000,
   {
     imageUrl: 'https://imageurl.com',
     traitsUrl: 'https://traitsurl.com'

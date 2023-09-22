@@ -16,7 +16,6 @@ dist
 .yalc
 .husky
 out
-docs
 
 # misc
 .DS_Store
@@ -33,3 +32,4 @@ yarn-error.log*
 
 coverage
 
+docs

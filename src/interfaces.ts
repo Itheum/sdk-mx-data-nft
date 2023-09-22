@@ -92,3 +92,17 @@ export interface ViewDataReturnType {
   contentType: string;
   error?: string;
 }
+
+export interface ContractConfiguration {
+  tokenIdentifier: string;
+  mintedTokens: number;
+  isTaxRequired: boolean;
+  isContractPaused: boolean;
+  maxRoyalties: number;
+  minRoyalties: number;
+  mintTimeLimit: number;
+  isWhitelistEnabled: boolean;
+  rolesAreSet: boolean;
+  claimsAddress: string;
+  administratorAddress: string;
+}

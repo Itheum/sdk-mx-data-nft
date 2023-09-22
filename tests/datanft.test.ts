@@ -5,12 +5,10 @@ describe('Data NFT test', () => {
   test('#test not setting network config', async () => {
     try {
       await DataNft.createFromApi({ nonce: 62 });
-    } catch (error) {
-      if (error instanceof Error) {
-        expect(error.message).toBe(
-          'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
-        );
-      }
+    } catch (error: any) {
+      expect(error.message).toBe(
+        'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
+      );
     }
   });
 
@@ -26,12 +24,24 @@ describe('Data NFT test', () => {
         signableMessage: new SignableMessage({ message: Buffer.from('test') }),
         stream: true
       });
-    } catch (error) {
-      if (error instanceof Error) {
-        expect(error.message).toBe(
-          'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
-        );
-      }
+    } catch (error: any) {
+      expect(error.message).toBe(
+        'Network configuration is not set. Call setNetworkConfig static method before calling any method that requires network configuration.'
+      );
+    }
+  });
+
+  test('#test bad input on createFromApi', async () => {
+    try {
+      DataNft.setNetworkConfig('devnet');
+      await DataNft.createFromApi({
+        nonce: 62,
+        tokenIdentifier: 'DATANFTFT3-d0978a'
+      });
+    } catch (error: any) {
+      expect(error.message).toBe(
+        'Fetch error with status code: 404 and message: Not Found'
+      );
     }
   });
 
@@ -44,7 +54,6 @@ describe('Data NFT test', () => {
     const nonceToSign = await dataNft.getMessageToSign();
 
     expect(typeof nonceToSign).toBe('string');
-
     const nft = await DataNft.createFromApi({
       nonce: 62,
       tokenIdentifier: 'DATANFTFT3-d0978e'

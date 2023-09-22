@@ -1,5 +1,5 @@
 import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
-import { DataNftMarket, DataNftMinter } from '../src/index';
+import { DataNftMarket, SftMinter } from '../src/index';
 
 describe('testing environment market', () => {
   test('#devnet-default', async () => {
@@ -49,7 +49,7 @@ describe('testing environment market', () => {
 
 describe('testing environment minter', () => {
   test('#devnet-default', async () => {
-    const datanft = new DataNftMinter('devnet');
+    const datanft = new SftMinter('devnet');
 
     expect(datanft.chainID).toStrictEqual('D');
     expect(datanft.networkProvider).toStrictEqual(
@@ -71,7 +71,7 @@ describe('testing environment minter', () => {
   });
 
   test('#devnet-custom-timeout', async () => {
-    const datanft = new DataNftMinter('devnet', 5000);
+    const datanft = new SftMinter('devnet', 5000);
 
     expect(datanft.chainID).toStrictEqual('D');
     expect(datanft.networkProvider).toStrictEqual(
@@ -82,7 +82,7 @@ describe('testing environment minter', () => {
   });
 
   test('#mainnet-custom-timeout', async () => {
-    const datanft = new DataNftMinter('mainnet', 5000);
+    const datanft = new SftMinter('mainnet', 5000);
 
     expect(datanft.chainID).toStrictEqual('1');
     expect(datanft.networkProvider).toStrictEqual(
