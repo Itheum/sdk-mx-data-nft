@@ -47,7 +47,7 @@ describe('Nft minter test', () => {
     const mintTx = await nftMinter.mint(
       senderAddress,
       'TokenName',
-      'https://d37x5igq4vw5mq.cloudfront.net/datamarshalapi/achilles/v1',
+      'https://d37x5igq4vw5mq.cloudfront.net/datamarshalapi/router/v1',
       'https://raw.githubusercontent.com/Itheum/data-assets/main/Health/H1__Signs_of_Anxiety_in_American_Households_due_to_Covid19/dataset.json',
       'https://itheumapi.com/programReadingPreview/70dc6bd0-59b0-11e8-8d54-2d562f6cba54',
       1000,
@@ -74,7 +74,7 @@ describe('Nft minter test', () => {
     const mintTx = await nftMinter.mint(
       senderAddress,
       'TokenName',
-      'https://d37x5igq4vw5mq.cloudfront.net/datamarshalapi/achilles/v1',
+      'https://d37x5igq4vw5mq.cloudfront.net/datamarshalapi/router/v1',
       'https://raw.githubusercontent.com/Itheum/data-assets/main/Health/H1__Signs_of_Anxiety_in_American_Households_due_to_Covid19/dataset.json',
       'https://itheumapi.com/programReadingPreview/70dc6bd0-59b0-11e8-8d54-2d562f6cba54',
       1000,
@@ -102,7 +102,7 @@ describe('Nft minter test', () => {
     const mintTx = await nftMinter.mint(
       senderAddress,
       'TokenName',
-      'https://d37x5igq4vw5mq.cloudfront.net/datamarshalapi/achilles/v1',
+      'https://d37x5igq4vw5mq.cloudfront.net/datamarshalapi/router/v1',
       'https://raw.githubusercontent.com/Itheum/data-assets/main/Health/H1__Signs_of_Anxiety_in_American_Households_due_to_Covid19/dataset.json',
       'https://itheumapi.com/programReadingPreview/70dc6bd0-59b0-11e8-8d54-2d562f6cba54',
       1000,

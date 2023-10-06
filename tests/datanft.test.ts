@@ -15,8 +15,7 @@ describe('Data NFT test', () => {
   test('#test not setting network config', async () => {
     try {
       const dataNft = new DataNft({
-        dataMarshal:
-          'https://api.itheumcloud-stg.com/datamarshalapi/achilles/v1'
+        dataMarshal: 'https://api.itheumcloud-stg.com/datamarshalapi/router/v1'
       });
 
       await dataNft.viewData({
@@ -48,7 +47,7 @@ describe('Data NFT test', () => {
   test('#getMessageToSign', async () => {
     DataNft.setNetworkConfig('devnet');
     const dataNft = new DataNft({
-      dataMarshal: 'https://api.itheumcloud-stg.com/datamarshalapi/achilles/v1'
+      dataMarshal: 'https://api.itheumcloud-stg.com/datamarshalapi/router/v1'
     });
 
     const nonceToSign = await dataNft.getMessageToSign();
