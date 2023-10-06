@@ -216,7 +216,11 @@ export class SftMinter extends Minter {
     let metadataOnIpfsUrl: string;
 
     const { dataNftHash, dataNftStreamUrlEncrypted } =
-      await dataNFTDataStreamAdvertise(dataStreamUrl, dataMarshalUrl);
+      await dataNFTDataStreamAdvertise(
+        dataStreamUrl,
+        dataMarshalUrl,
+        senderAddress.bech32()
+      );
 
     if (!imageUrl) {
       if (!nftStorageToken) {

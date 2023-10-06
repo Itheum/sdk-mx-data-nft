@@ -2,7 +2,8 @@ import { NFTStorage, File } from 'nft.storage';
 
 export async function dataNFTDataStreamAdvertise(
   dataNFTStreamUrl: string,
-  dataMarshalUrl: string
+  dataMarshalUrl: string,
+  dataCreatorAddress: string
 ): Promise<{ dataNftHash: string; dataNftStreamUrlEncrypted: string }> {
   const myHeaders = new Headers();
   myHeaders.append('cache-control', 'no-cache');
@@ -11,11 +12,14 @@ export async function dataNFTDataStreamAdvertise(
   const requestOptions = {
     method: 'POST',
     headers: myHeaders,
-    body: JSON.stringify({ dataNFTStreamUrl })
+    body: JSON.stringify({
+      dataNFTStreamUrl,
+      dataCreatorERDAddress: dataCreatorAddress
+    })
   };
 
   try {
-    const res = await fetch(`${dataMarshalUrl}/generate`, requestOptions);
+    const res = await fetch(`${dataMarshalUrl}/generate_V2`, requestOptions);
     const data = await res.json();
 
     if (data && data.encryptedMessage && data.messageHash) {
