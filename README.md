@@ -54,7 +54,7 @@ response.forEach(async (nft) => {
   dataNfts.push(data);
 });
 
-// Retrieves the DataNfts owned by a address
+// Retrieves the DataNfts owned by an address
 const address = 'address';
 const dataNfts = [];
 dataNfts = await DataNft.ownedByAddress(address);
@@ -62,7 +62,7 @@ dataNfts = await DataNft.ownedByAddress(address);
 // Retrieves the specific DataNft
 const dataNft = DataNft.createFromApi({ nonce });
 
-// (A) Get a message from the Data Marshal node for your to sign to prove ownership
+// (A) Get a message from the Data Marshal node for you to sign to prove ownership
 const message = await dataNft.messageToSign();
 
 // (B) Sign the message with a wallet and obtain a signature
@@ -77,7 +77,7 @@ dataNft.viewData({
 }); // optional params "stream" (stream out data instead of downloading file), "fwdAllHeaders"/"fwdHeaderKeys", "fwdHeaderMapLookup" can be used to pass headers like Authorization to origin Data Stream servers
 
 
-// Method 2) OR, you can use a MultiversX Native Auth access token to unlock the data inside the Data NFT without the need for the the signature steps above (A)(B). This has a much better UX
+// Method 2) OR, you can use a MultiversX Native Auth access token to unlock the data inside the Data NFT without the need for the signature steps above (A)(B). This has a much better UX
 dataNft.viewDataViaMVXNativeAuth({
   mvxNativeAuthOrigins: "http://localhost:3000", "https://mycoolsite.com"], // same whitelist domains your client app used when generating native auth token
   mvxNativeAuthMaxExpirySeconds: 300, // same expiry seconds your client app used when generating native auth token
