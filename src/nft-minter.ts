@@ -229,7 +229,7 @@ export class NftMinter extends Minter {
       await dataNFTDataStreamAdvertise(
         dataStreamUrl,
         dataMarshalUrl,
-        senderAddress.bech32()
+        this.getContractAddress().bech32() // the minter is the Creator
       );
 
     if (!imageUrl) {

@@ -219,7 +219,7 @@ export class SftMinter extends Minter {
       await dataNFTDataStreamAdvertise(
         dataStreamUrl,
         dataMarshalUrl,
-        senderAddress.bech32()
+        senderAddress.bech32() // the caller is the Creator
       );
 
     if (!imageUrl) {
