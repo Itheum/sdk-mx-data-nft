@@ -400,16 +400,16 @@ export abstract class Minter {
     return whitelistTx;
   }
 
-  /**  Creates a delist transaction for the contract
+  /**  Creates a remove whitelist transaction for the contract
    *  @param senderAddress The address of the sender, must be the admin of the contract
-   *  @param addresses The addresses to delist
+   *  @param addresses The addresses to remove from the whitelist
    */
-  delist(
+  removeWhitelist(
     senderAddress: IAddress,
     addresses: string[],
     extraGas = 0
   ): Transaction {
-    const delistTx = new Transaction({
+    const removeWhitelistTx = new Transaction({
       value: 0,
       data: new ContractCallPayloadBuilder()
         .setFunction(new ContractFunction('removeWhiteListSpots'))
@@ -422,7 +422,7 @@ export abstract class Minter {
       sender: senderAddress,
       chainID: this.chainID
     });
-    return delistTx;
+    return removeWhitelistTx;
   }
 
   /** Creates a set mint time limit transaction for the contract
