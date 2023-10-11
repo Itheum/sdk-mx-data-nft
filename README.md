@@ -9,6 +9,7 @@ This SDK is currently focused on interacting with the Itheum's Data NFT technolo
 - requires `node@19.7X`
 - `npm install`
 - work on typescript code in the `/src` folder
+- handy tip: when developing locally, you can do integration tests by running `npm run prepare` and the `npm install --save ../sdk-mx-data-nft` in the host project
 
 ### Dev Testing
 
