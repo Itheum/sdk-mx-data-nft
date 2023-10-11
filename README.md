@@ -91,9 +91,9 @@ dataNft.viewDataViaMVXNativeAuth({
 ### 2. Interacting with Data NFT Minter
 
 ```typescript
-import { DataNftMinter } from '@itheum/sdk-mx-data-nft';
+import { SftMinter } from '@itheum/sdk-mx-data-nft';
 
-const dataNftMinter = new DataNftMinter('devnet' | 'testnet' | 'mainnet');
+const dataNftMinter = new SftMinter('devnet' | 'testnet' | 'mainnet');
 
 // View minter smart contract requirements
 const requirements = await dataNftMinter.viewMinterRequirements(
