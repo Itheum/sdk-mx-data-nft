@@ -203,16 +203,20 @@ export class DataNft {
   /**
    *  Returns an array of `DataNft` objects owned by the address
    * @param address the address to query
-   * @param identifier the Data NFT-FT token identifier (default = `DATA-NFT-FT` token identifier based on the {@link EnvironmentsEnum})
+   * @param collections the collection identifiers to query. If not provided, the default collection identifier based on the {@link EnvironmentsEnum}
    */
   static async ownedByAddress(
     address: string,
-    identifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+    collections?: string[]
   ): Promise<DataNft[]> {
     this.ensureNetworkConfigSet();
 
+    const identifiersMap =
+      collections?.join(',') ||
+      dataNftTokenIdentifier[this.env as EnvironmentsEnum];
+
     const res = await fetch(
-      `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifier}&withSupply=true`
+      `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifiersMap}&withSupply=true`
     );
 
     checkStatus(res);

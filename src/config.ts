@@ -25,26 +25,26 @@ const testnetNetworkConfig: Config = {
 };
 
 export const itheumTokenIdentifier: { [key in EnvironmentsEnum]: string } = {
-  devnet: 'ITHEUM-a61317',
+  devnet: 'ITHEUM-fce905',
   mainnet: 'ITHEUM-df6f26',
   testnet: ''
 };
 
 export const dataNftTokenIdentifier: { [key in EnvironmentsEnum]: string } = {
-  devnet: 'DATANFTFT4-3ba099',
+  devnet: 'DATANFTFT-e0b917',
   mainnet: 'DATANFTFT-e936d4',
   testnet: ''
 }; //[future] list of whitelisted tokens as Data NFTs
 
 export const marketPlaceContractAddress: { [key in EnvironmentsEnum]: string } =
   {
-    devnet: 'erd1qqqqqqqqqqqqqpgqrwtl03qdxjv2e52ta5ry4rg0z7l95neqfsxsp4y4xh',
+    devnet: 'erd1qqqqqqqqqqqqqpgqlhewm06p4c9qhq32p239hs45dvry948tfsxshx3e0l',
     mainnet: 'erd1qqqqqqqqqqqqqpgqay2r64l9nhhvmaqw4qanywfd0954w2m3c77qm7drxc',
     testnet: ''
   };
 
 export const minterContractAddress: { [key in EnvironmentsEnum]: string } = {
-  devnet: 'erd1qqqqqqqqqqqqqpgqpd9qxrq5a03jrneafmlmckmlj5zgdj55fsxsqa7jsm',
+  devnet: 'erd1qqqqqqqqqqqqqpgq7thwlde9hvc5ty7lx2j3l9tvy3wgkwu7fsxsvz9rat',
   mainnet: 'erd1qqqqqqqqqqqqqpgqmuzgkurn657afd3r2aldqy2snsknwvrhc77q3lj8l6',
   testnet: ''
 };
