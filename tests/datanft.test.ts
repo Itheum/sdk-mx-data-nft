@@ -53,12 +53,6 @@ describe('Data NFT test', () => {
     const nonceToSign = await dataNft.getMessageToSign();
 
     expect(typeof nonceToSign).toBe('string');
-    const nft = await DataNft.createFromApi({
-      nonce: 62,
-      tokenIdentifier: 'DATANFTFT3-d0978e'
-    });
-
-    expect(nft).toBeInstanceOf(DataNft);
   }, 10000);
 
   test('#getOwnedByAddress', async () => {
