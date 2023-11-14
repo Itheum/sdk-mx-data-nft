@@ -451,7 +451,9 @@ export class DataNft {
       mvxNativeAuthOriginsToBase64 = mvxNativeAuthOriginsToBase64
         .trim()
         .replaceAll(' ', ''); // remove all spaces
-      mvxNativeAuthOriginsToBase64 = window.btoa(mvxNativeAuthOriginsToBase64); // convert to base64
+      mvxNativeAuthOriginsToBase64 = Buffer.from(
+        mvxNativeAuthOriginsToBase64
+      ).toString('base64');
 
       // construct the api url
       let url = `${this.dataMarshal}/access?NFTId=${
