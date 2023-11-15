@@ -2,10 +2,10 @@
     "buildInfo": {
         "rustc": {
             "version": "1.71.0-nightly",
-            "commitHash": "7f94b314cead7059a71a265a8b64905ef2511796",
-            "commitDate": "2023-04-23",
+            "commitHash": "a2b1646c597329d0a25efa3889b66650f65de1de",
+            "commitDate": "2023-05-25",
             "channel": "Nightly",
-            "short": "rustc 1.71.0-nightly (7f94b314c 2023-04-23)"
+            "short": "rustc 1.71.0-nightly (a2b1646c5 2023-05-25)"
         },
         "contractCrate": {
             "name": "data-nft-lease",
@@ -13,15 +13,15 @@
         },
         "framework": {
             "name": "multiversx-sc",
-            "version": "0.43.2"
+            "version": "0.43.5"
         }
     },
     "name": "DataNftMint",
     "constructor": {
         "inputs": [
             {
-                "name": "administrator",
-                "type": "optional<Address>",
+                "name": "setup_values",
+                "type": "optional<multi<Address,Address>>",
                 "multi_arg": true
             }
         ],
@@ -196,7 +196,7 @@
             "outputs": []
         },
         {
-            "name": "setAntiSpamTax",
+            "name": "setMintTaxFee",
             "mutability": "mutable",
             "inputs": [
                 {
@@ -295,26 +295,6 @@
             "outputs": []
         },
         {
-            "name": "setTax",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "itheum_address",
-                    "type": "Address"
-                },
-                {
-                    "name": "tax",
-                    "type": "BigUint"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
             "name": "setClaimsAddress",
             "mutability": "mutable",
             "inputs": [
@@ -372,6 +352,16 @@
             "outputs": [
                 {
                     "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "getTaxTokens",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "EgldOrEsdtTokenIdentifier"
                 }
             ]
         },
@@ -561,17 +551,7 @@
             ]
         },
         {
-            "name": "getItheumTax",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
-            "name": "getItheumTaxAddress",
+            "name": "getRoyaltiesAddress",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [
@@ -581,7 +561,7 @@
             ]
         },
         {
-            "name": "getClaimsAddress",
+            "name": "getFactoryAddress",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [
@@ -697,6 +677,67 @@
                 }
             ],
             "outputs": []
+        },
+        {
+            "name": "check_claims",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address_to_check",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "get_claims",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "factory_treasury_address",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "factory_tax",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "factory_claims_contract_address",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "factory_claims_token_identifier",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "TokenIdentifier"
+                }
+            ]
         }
     ],
     "events": [
@@ -816,7 +857,7 @@
             ]
         },
         {
-            "identifier": "antiSpamTaxSet",
+            "identifier": "mintTaxFee",
             "inputs": [
                 {
                     "name": "token",
@@ -855,6 +896,16 @@
             "inputs": [
                 {
                     "name": "administrator",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "setFactoryAddress",
+            "inputs": [
+                {
+                    "name": "factory_address",
                     "type": "Address",
                     "indexed": true
                 }
@@ -1039,6 +1090,10 @@
                 {
                     "name": "administrator_address",
                     "type": "Address"
+                },
+                {
+                    "name": "tax_token",
+                    "type": "EgldOrEsdtTokenIdentifier"
                 }
             ]
         },
