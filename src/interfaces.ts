@@ -105,4 +105,5 @@ export interface ContractConfiguration {
   rolesAreSet: boolean;
   claimsAddress: string;
   administratorAddress: string;
+  taxToken: string;
 }
