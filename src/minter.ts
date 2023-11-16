@@ -254,7 +254,7 @@ export abstract class Minter {
         .setFunction(new ContractFunction('setLocalRoles'))
         .build(),
       receiver: this.contract.getAddress(),
-      gasLimit: 90000000,
+      gasLimit: 100000000,
       sender: senderAddress,
       chainID: this.chainID
     });

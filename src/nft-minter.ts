@@ -90,7 +90,7 @@ export class NftMinter extends Minter {
       value: 50000000000000000,
       data: data,
       receiver: this.contract.getAddress(),
-      gasLimit: 50000000,
+      gasLimit: 100000000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -453,7 +453,8 @@ export class NftMinter extends Minter {
         isContractPaused: returnValue?.is_paused as boolean,
         rolesAreSet: returnValue?.roles_are_set as boolean,
         claimsAddress: returnValue?.claims_address.toString(),
-        administratorAddress: returnValue?.administrator_address.toString()
+        administratorAddress: returnValue?.administrator_address.toString(),
+        taxToken: returnValue?.tax_token.toString()
       };
       return contractConfiguration;
     } else {
