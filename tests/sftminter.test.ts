@@ -1,5 +1,5 @@
 import { Address, Transaction } from '@multiversx/sdk-core/out';
-import { SftMinter, Minter, MinterRequirements } from '../src';
+import { SftMinter, Minter, SftMinterRequirements } from '../src';
 
 describe('Data Nft Minter Test', () => {
   test('#getAddress', async () => {
@@ -18,7 +18,7 @@ describe('Data Nft Minter Test', () => {
         'erd10uavg8hd92620mfll2lt4jdmrg6xlf60awjp9ze5gthqjjhactvswfwuv8'
       )
     );
-    expect(result).toBeInstanceOf(Object as unknown as MinterRequirements);
+    expect(result).toBeInstanceOf(Object as unknown as SftMinterRequirements);
   });
 
   test('#burn', async () => {

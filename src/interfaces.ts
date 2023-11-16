@@ -59,7 +59,7 @@ export interface MarketplaceRequirements {
   sellerTaxPercentage: number;
 }
 
-export interface MinterRequirements {
+export interface SftMinterRequirements {
   antiSpamTaxValue: number;
   addressFrozen: boolean;
   frozenNonces: number[];
@@ -68,6 +68,21 @@ export interface MinterRequirements {
   lastUserMintTime: number;
   maxRoyalties: number;
   maxSupply: number;
+  minRoyalties: number;
+  mintTimeLimit: number;
+  numberOfMintsForUser: number;
+  totalNumberOfMints: number;
+  contractWhitelistEnabled: boolean;
+}
+
+export interface NftMinterRequirements {
+  antiSpamTaxValue: number;
+  addressFrozen: boolean;
+  frozenNonces: number[];
+  contractPaused: boolean;
+  userWhitelistedForMint: boolean;
+  lastUserMintTime: number;
+  maxRoyalties: number;
   minRoyalties: number;
   mintTimeLimit: number;
   numberOfMintsForUser: number;

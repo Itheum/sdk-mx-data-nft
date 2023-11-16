@@ -22,7 +22,7 @@ import {
   itheumTokenIdentifier,
   networkConfiguration
 } from './config';
-import { MinterRequirements } from './interfaces';
+import { SftMinterRequirements } from './interfaces';
 import { ErrContractQuery, ErrNetworkConfig } from './errors';
 
 export abstract class Minter {
@@ -84,51 +84,6 @@ export abstract class Minter {
     } else {
       throw new ErrContractQuery(
         'viewContractPauseState',
-        returnCode.toString()
-      );
-    }
-  }
-  /**
-   * Retrieves the minter smart contract requirements for the given user
-   * @param address the address of the user
-   * @param taxToken the tax token to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
-   */
-  async viewMinterRequirements(
-    address: IAddress,
-    taxToken = itheumTokenIdentifier[this.env as EnvironmentsEnum]
-  ): Promise<MinterRequirements> {
-    const interaction = this.contract.methodsExplicit.getUserDataOut([
-      new AddressValue(address),
-      new TokenIdentifierValue(taxToken)
-    ]);
-    const query = interaction.buildQuery();
-    const queryResponse = await this.networkProvider.queryContract(query);
-    const endpointDefinition = interaction.getEndpoint();
-    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
-      queryResponse,
-      endpointDefinition
-    );
-    if (returnCode.isSuccess()) {
-      const returnValue = firstValue?.valueOf();
-      const requirements: MinterRequirements = {
-        antiSpamTaxValue: returnValue.anti_spam_tax_value.toNumber(),
-        contractPaused: returnValue.is_paused,
-        maxRoyalties: returnValue.max_royalties.toNumber(),
-        minRoyalties: returnValue.min_royalties.toNumber(),
-        maxSupply: returnValue.max_supply.toNumber(),
-        mintTimeLimit: returnValue.mint_time_limit.toNumber(),
-        lastUserMintTime: returnValue.last_mint_time,
-        userWhitelistedForMint: returnValue.is_whitelisted,
-        contractWhitelistEnabled: returnValue.whitelist_enabled,
-        numberOfMintsForUser: returnValue.minted_per_user.toNumber(),
-        totalNumberOfMints: returnValue.total_minted.toNumber(),
-        addressFrozen: returnValue.frozen,
-        frozenNonces: returnValue.frozen_nonces.map((v: any) => v.toNumber())
-      };
-      return requirements;
-    } else {
-      throw new ErrContractQuery(
-        'viewMinterRequirements',
         returnCode.toString()
       );
     }
