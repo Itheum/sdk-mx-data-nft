@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { DataNft } from '../datanft';
-import { NftEnumType, NftType, Offer } from '../interfaces';
 import { ErrFetch, ErrMissingTrait, ErrMissingValueForTrait } from '../errors';
+import { NftEnumType, NftType, Offer } from '../interfaces';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
   let hex = new BigNumber(value).toString(16);

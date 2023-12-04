@@ -11,25 +11,25 @@ import {
   Transaction,
   U64Value
 } from '@multiversx/sdk-core/out';
-import { Minter } from './minter';
-import {
-  EnvironmentsEnum,
-  itheumTokenIdentifier,
-  minterContractAddress
-} from './config';
 import dataNftMinterAbi from './abis/datanftmint.abi.json';
+import {
+  createFileFromUrl,
+  dataNFTDataStreamAdvertise,
+  storeToIpfs
+} from './common/mint-utils';
 import {
   checkTraitsUrl,
   checkUrlIsUp,
   validateSpecificParamsMint
 } from './common/utils';
 import {
-  createFileFromUrl,
-  dataNFTDataStreamAdvertise,
-  storeToIpfs
-} from './common/mint-utils';
+  EnvironmentsEnum,
+  itheumTokenIdentifier,
+  minterContractAddress
+} from './config';
 import { ErrArgumentNotSet, ErrContractQuery } from './errors';
 import { SftMinterRequirements } from './interfaces';
+import { Minter } from './minter';
 
 export class SftMinter extends Minter {
   /**

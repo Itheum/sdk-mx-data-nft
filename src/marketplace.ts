@@ -17,16 +17,16 @@ import {
   VariadicValue
 } from '@multiversx/sdk-core/out';
 import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
+import dataMarketAbi from './abis/data_market.abi.json';
+import { parseOffer } from './common/utils';
 import {
   EnvironmentsEnum,
-  networkConfiguration,
+  itheumTokenIdentifier,
   marketPlaceContractAddress,
-  itheumTokenIdentifier
+  networkConfiguration
 } from './config';
-import dataMarketAbi from './abis/data_market.abi.json';
-import { MarketplaceRequirements, Offer } from './interfaces';
-import { parseOffer } from './common/utils';
 import { ErrContractQuery, ErrNetworkConfig } from './errors';
+import { MarketplaceRequirements, Offer } from './interfaces';
 // import { ErrContractQuery } from './errors';
 
 export class DataNftMarket {

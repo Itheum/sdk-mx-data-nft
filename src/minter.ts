@@ -1,28 +1,26 @@
 import {
-  SmartContract,
-  Address,
   AbiRegistry,
-  IAddress,
-  TokenIdentifierValue,
+  Address,
   AddressValue,
-  ResultsParser,
-  Transaction,
+  BigUIntValue,
+  BooleanValue,
   ContractCallPayloadBuilder,
   ContractFunction,
-  U64Value,
-  BigUIntValue,
+  IAddress,
+  ResultsParser,
+  SmartContract,
   StringValue,
-  BooleanValue
+  TokenIdentifierValue,
+  Transaction,
+  U64Value
 } from '@multiversx/sdk-core/out';
 import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   dataNftTokenIdentifier,
   imageService,
-  itheumTokenIdentifier,
   networkConfiguration
 } from './config';
-import { SftMinterRequirements } from './interfaces';
 import { ErrContractQuery, ErrNetworkConfig } from './errors';
 
 export abstract class Minter {

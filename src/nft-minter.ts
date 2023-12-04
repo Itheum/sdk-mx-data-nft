@@ -1,5 +1,4 @@
 import {
-  Address,
   AddressValue,
   BigUIntValue,
   BooleanValue,
@@ -12,29 +11,21 @@ import {
   Transaction,
   U64Value
 } from '@multiversx/sdk-core/out';
-import { Minter } from './minter';
 import dataNftLeaseAbi from './abis/data-nft-lease.abi.json';
-import {
-  checkTraitsUrl,
-  checkUrlIsUp,
-  validateSpecificParamsMint
-} from './common/utils';
 import {
   createFileFromUrl,
   dataNFTDataStreamAdvertise,
   storeToIpfs
 } from './common/mint-utils';
 import {
-  ContractConfiguration,
-  NftMinterRequirements,
-  SftMinterRequirements
-} from './interfaces';
-import {
-  ErrArgumentNotSet,
-  ErrAttributeNotSet,
-  ErrContractQuery
-} from './errors';
+  checkTraitsUrl,
+  checkUrlIsUp,
+  validateSpecificParamsMint
+} from './common/utils';
 import { EnvironmentsEnum, itheumTokenIdentifier } from './config';
+import { ErrArgumentNotSet, ErrContractQuery } from './errors';
+import { ContractConfiguration, NftMinterRequirements } from './interfaces';
+import { Minter } from './minter';
 
 export class NftMinter extends Minter {
   /**
