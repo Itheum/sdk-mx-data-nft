@@ -25,6 +25,7 @@ import {
   ErrNetworkConfig
 } from './errors';
 import { NftType, ViewDataReturnType } from './interfaces';
+import BigNumber from 'bignumber.js';
 
 export class DataNft {
   readonly tokenIdentifier: string = '';
@@ -35,14 +36,14 @@ export class DataNft {
   readonly tokenName: string = '';
   readonly creator: string = '';
   readonly creationTime: Date = new Date();
-  readonly supply: number = 0;
+  readonly supply: BigNumber.Value = 0;
   readonly description: string = '';
   readonly title: string = '';
   readonly royalties: number = 0;
   readonly nonce: number = 0;
   readonly collection: string = '';
-  readonly balance: number = 0;
-  readonly owner: string = '';
+  readonly balance: BigNumber.Value = 0;
+  readonly owner: string = ''; // works if tokenIdentifier is an NFT
 
   static networkConfiguration: Config;
   static apiConfiguration: string;

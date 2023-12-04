@@ -363,7 +363,7 @@ export function validateSpecificParamsMint(params: {
   datasetDescription?: string | undefined;
   royalties?: number | undefined;
   supply?: number | undefined;
-  antiSpamTax?: number | undefined;
+  antiSpamTax?: BigNumber.Value | undefined;
   _mandatoryParamsList: string[]; // a pure JS fallback way to validate mandatory params, as typescript rules for mandatory can be bypassed by client app
 }): {
   allPassed: boolean;

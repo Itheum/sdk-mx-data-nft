@@ -22,6 +22,7 @@ import {
   networkConfiguration
 } from './config';
 import { ErrContractQuery, ErrNetworkConfig } from './errors';
+import BigNumber from 'bignumber.js';
 
 export abstract class Minter {
   readonly contract: SmartContract;
@@ -175,7 +176,7 @@ export abstract class Minter {
   burn(
     senderAddress: IAddress,
     dataNftNonce: number,
-    quantityToBurn: number,
+    quantityToBurn: BigNumber.Value,
     dataNftIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Transaction {
     const burnTx = new Transaction({
@@ -260,7 +261,7 @@ export abstract class Minter {
   setMintTax(
     senderAddress: IAddress,
     tokenIdentifier: string,
-    tax: number
+    tax: BigNumber.Value
   ): Transaction {
     const setMintTaxTx = new Transaction({
       value: 0,
@@ -287,8 +288,8 @@ export abstract class Minter {
    */
   setRoyaltiesLimits(
     senderAddress: IAddress,
-    minRoyalties: number,
-    maxRoyalties: number
+    minRoyalties: BigNumber.Value,
+    maxRoyalties: BigNumber.Value
   ): Transaction {
     const setRoyaltiesLimitsTx = new Transaction({
       value: 0,
@@ -330,6 +331,7 @@ export abstract class Minter {
   /** Creates a whitelist transaction for the contract
    * @param senderAddress The address of the sender, must be the admin of the contract
    * @param addresses The addresses to whitelist
+   * @param extraGas The extra gas to add to the transaction
    */
 
   whitelist(
@@ -356,6 +358,7 @@ export abstract class Minter {
   /**  Creates a remove whitelist transaction for the contract
    *  @param senderAddress The address of the sender, must be the admin of the contract
    *  @param addresses The addresses to remove from the whitelist
+   *  @param extraGas The extra gas to add to the transaction
    */
   removeWhitelist(
     senderAddress: IAddress,

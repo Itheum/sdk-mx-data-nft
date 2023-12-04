@@ -26,6 +26,7 @@ import { EnvironmentsEnum, itheumTokenIdentifier } from './config';
 import { ErrArgumentNotSet, ErrContractQuery } from './errors';
 import { ContractConfiguration, NftMinterRequirements } from './interfaces';
 import { Minter } from './minter';
+import BigNumber from 'bignumber.js';
 
 export class NftMinter extends Minter {
   /**
@@ -56,7 +57,7 @@ export class NftMinter extends Minter {
     claimsAddress: IAddress,
     options?: {
       taxTokenIdentifier: string;
-      taxTokenAmount: number;
+      taxTokenAmount: BigNumber.Value;
     }
   ): Transaction {
     let data;
@@ -177,7 +178,7 @@ export class NftMinter extends Minter {
       traitsUrl?: string;
       nftStorageToken?: string;
       antiSpamTokenIdentifier?: string;
-      antiSpamTax?: number;
+      antiSpamTax?: BigNumber.Value;
     }
   ): Promise<Transaction> {
     const {
@@ -269,7 +270,7 @@ export class NftMinter extends Minter {
       antiSpamTax &&
       antiSpamTokenIdentifier &&
       antiSpamTokenIdentifier != 'EGLD' &&
-      antiSpamTax > 0
+      antiSpamTax > BigNumber(0)
     ) {
       data = new ContractCallPayloadBuilder()
         .setFunction(new ContractFunction('ESDTTransfer'))

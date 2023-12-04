@@ -30,6 +30,7 @@ import {
 import { ErrArgumentNotSet, ErrContractQuery } from './errors';
 import { SftMinterRequirements } from './interfaces';
 import { Minter } from './minter';
+import BigNumber from 'bignumber.js';
 
 export class SftMinter extends Minter {
   /**
@@ -107,7 +108,7 @@ export class SftMinter extends Minter {
     collectionName: string,
     tokenTicker: string,
     antiSpamTaxTokenIdentifier: string,
-    antiSpamTaxTokenAmount: number,
+    antiSpamTaxTokenAmount: BigNumber.Value,
     mintLimit: number,
     treasury_address: IAddress
   ): Transaction {
@@ -158,7 +159,10 @@ export class SftMinter extends Minter {
    * @param senderAddress The address of the sender, must be the admin of the contract
    * @param maxSupply The maximum supply that can be minted
    */
-  setMaxSupply(senderAddress: IAddress, maxSupply: number): Transaction {
+  setMaxSupply(
+    senderAddress: IAddress,
+    maxSupply: BigNumber.Value
+  ): Transaction {
     const setMaxSupplyTx = new Transaction({
       value: 0,
       data: new ContractCallPayloadBuilder()
@@ -209,7 +213,7 @@ export class SftMinter extends Minter {
     supply: number,
     datasetTitle: string,
     datasetDescription: string,
-    antiSpamTax: number,
+    antiSpamTax: BigNumber.Value,
     options?: {
       imageUrl?: string;
       traitsUrl?: string;
@@ -307,7 +311,7 @@ export class SftMinter extends Minter {
     }
 
     let data;
-    if (antiSpamTax > 0) {
+    if (antiSpamTax > BigNumber(0)) {
       data = new ContractCallPayloadBuilder()
         .setFunction(new ContractFunction('ESDTTransfer'))
         .addArg(new TokenIdentifierValue(antiSpamTokenIdentifier))
