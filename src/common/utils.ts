@@ -56,6 +56,7 @@ export function parseDataNft(value: NftType): DataNft {
     nonce: value.nonce,
     collection: value.collection,
     balance: value.balance ? Number(value.balance) : 0,
+    owner: value.owner ? value.owner : '',
     ...DataNft.decodeAttributes(value.attributes)
   });
 }

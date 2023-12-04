@@ -43,6 +43,7 @@ export class DataNft {
   readonly nonce: number = 0;
   readonly collection: string = '';
   readonly balance: number = 0;
+  readonly owner: string = '';
 
   static networkConfiguration: Config;
   static apiConfiguration: string;
