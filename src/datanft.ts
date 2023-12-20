@@ -3,6 +3,14 @@ import {
   BinaryCodec,
   SignableMessage
 } from '@multiversx/sdk-core/out';
+import minterAbi from './abis/datanftmint.abi.json';
+import {
+  checkStatus,
+  createNftIdentifier,
+  numberToPaddedHex,
+  parseDataNft,
+  validateSpecificParamsViewData
+} from './common/utils';
 import {
   Config,
   EnvironmentsEnum,
@@ -11,21 +19,13 @@ import {
   networkConfiguration
 } from './config';
 import {
-  createNftIdentifier,
-  numberToPaddedHex,
-  parseDataNft,
-  validateSpecificParamsViewData,
-  checkStatus
-} from './common/utils';
-import minterAbi from './abis/datanftmint.abi.json';
-import { NftType, ViewDataReturnType } from './interfaces';
-import {
   ErrAttributeNotSet,
   ErrDataNftCreate,
   ErrDecodeAttributes,
-  ErrFetch,
   ErrNetworkConfig
 } from './errors';
+import { NftType, ViewDataReturnType } from './interfaces';
+import BigNumber from 'bignumber.js';
 
 export class DataNft {
   readonly tokenIdentifier: string = '';
@@ -36,13 +36,14 @@ export class DataNft {
   readonly tokenName: string = '';
   readonly creator: string = '';
   readonly creationTime: Date = new Date();
-  readonly supply: number = 0;
+  readonly supply: BigNumber.Value = 0;
   readonly description: string = '';
   readonly title: string = '';
   readonly royalties: number = 0;
   readonly nonce: number = 0;
   readonly collection: string = '';
-  readonly balance: number = 0;
+  readonly balance: BigNumber.Value = 0;
+  readonly owner: string = ''; // works if tokenIdentifier is an NFT
 
   static networkConfiguration: Config;
   static apiConfiguration: string;
@@ -225,6 +226,26 @@ export class DataNft {
 
     const dataNfts: DataNft[] = this.createFromApiResponseOrBulk(data);
     return dataNfts;
+  }
+
+  /**
+   *  Returns an array of `{address:string,balance:number}` representing the addresses that own the token
+   */
+  async getOwners(): Promise<{ address: string; balance: number }[]> {
+    if (!this.tokenIdentifier && !this.nonce) {
+      throw new ErrAttributeNotSet('tokenIdentifier, nonce');
+    }
+    const identifier = createNftIdentifier(this.tokenIdentifier, this.nonce);
+
+    const response = await fetch(
+      `${DataNft.apiConfiguration}/nfts/${identifier}/accounts`
+    );
+
+    checkStatus(response);
+
+    const data = await response.json();
+
+    return data;
   }
 
   /**

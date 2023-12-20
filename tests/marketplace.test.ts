@@ -1,4 +1,4 @@
-import { Address, BigUIntValue, Transaction } from '@multiversx/sdk-core/out';
+import { Address, Transaction } from '@multiversx/sdk-core/out';
 import { DataNftMarket, MarketplaceRequirements, Offer } from '../src';
 
 describe('Marketplace Sdk test', () => {

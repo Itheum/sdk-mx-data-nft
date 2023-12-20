@@ -1,4 +1,4 @@
-import { NFTStorage, File } from 'nft.storage';
+import { File, NFTStorage } from 'nft.storage';
 
 export async function dataNFTDataStreamAdvertise(
   dataNFTStreamUrl: string,

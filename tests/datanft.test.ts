@@ -71,13 +71,24 @@ describe('Data NFT test', () => {
     DataNft.setNetworkConfig('devnet');
 
     const dataNfts = await DataNft.createManyFromApi([
-      { nonce: 62, tokenIdentifier: 'DATANFTFT4-3ba099' },
-      { nonce: 2, tokenIdentifier: 'INSP-a65b3b' },
-      { nonce: 80 }
+      { nonce: 1, tokenIdentifier: 'DATANFTFT-e0b917' },
+      { nonce: 2, tokenIdentifier: 'DATANFTFT-e0b917' },
+      { nonce: 3 }
     ]);
 
     for (const item of dataNfts) {
       expect(item).toBeInstanceOf(Object as unknown as DataNft);
     }
   }, 12000);
+
+  test('#get owners of data Nft', async () => {
+    DataNft.setNetworkConfig('devnet');
+
+    let dataNft = new DataNft({
+      nonce: 2,
+      tokenIdentifier: 'DATANFTFT-e0b917'
+    });
+
+    const owners = await dataNft.getOwners();
+  });
 });
