@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { DataNft } from '../datanft';
-import { NftEnumType, NftType, Offer } from '../interfaces';
 import { ErrFetch, ErrMissingTrait, ErrMissingValueForTrait } from '../errors';
+import { NftEnumType, NftType, Offer } from '../interfaces';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
   let hex = new BigNumber(value).toString(16);
@@ -56,6 +56,7 @@ export function parseDataNft(value: NftType): DataNft {
     nonce: value.nonce,
     collection: value.collection,
     balance: value.balance ? Number(value.balance) : 0,
+    owner: value.owner ? value.owner : '',
     ...DataNft.decodeAttributes(value.attributes)
   });
 }
@@ -362,7 +363,7 @@ export function validateSpecificParamsMint(params: {
   datasetDescription?: string | undefined;
   royalties?: number | undefined;
   supply?: number | undefined;
-  antiSpamTax?: number | undefined;
+  antiSpamTax?: BigNumber.Value | undefined;
   _mandatoryParamsList: string[]; // a pure JS fallback way to validate mandatory params, as typescript rules for mandatory can be bypassed by client app
 }): {
   allPassed: boolean;
