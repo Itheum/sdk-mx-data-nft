@@ -487,6 +487,29 @@ export class NftMinter extends Minter {
   }
 
   /**
+   * Retrieves a list of nonces that are frozen
+   */
+  async viewFrozenNonces(): Promise<number[]> {
+    const interaction = this.contract.methodsExplicit.getFrozenNonces();
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const frozenNonces: number[] = returnValue.map((nonce: any) =>
+        nonce.toNumber()
+      );
+      return frozenNonces;
+    } else {
+      throw new ErrContractQuery('viewFrozenNonces', returnCode.toString());
+    }
+  }
+
+  /**
    * Retrieves the address with update attributes roles for contract collection
    */
   async viewUpdateAttributesRoles(): Promise<string[]> {
