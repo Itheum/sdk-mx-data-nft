@@ -138,35 +138,6 @@ export abstract class Minter {
   }
 
   /**
-   * Retrieves a list of nonces that are frozen for address
-   * @param address The address to check
-   */
-  async viewAddressFrozenNonces(address: IAddress): Promise<number[]> {
-    const interaction = this.contract.methodsExplicit.getSftsFrozenForAddress([
-      new AddressValue(address)
-    ]);
-    const query = interaction.buildQuery();
-    const queryResponse = await this.networkProvider.queryContract(query);
-    const endpointDefinition = interaction.getEndpoint();
-    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
-      queryResponse,
-      endpointDefinition
-    );
-    if (returnCode.isSuccess()) {
-      const returnValue = firstValue?.valueOf();
-      const frozenNonces: number[] = returnValue.map((nonce: any) =>
-        nonce.toNumber()
-      );
-      return frozenNonces;
-    } else {
-      throw new ErrContractQuery(
-        'viewAddressFrozenNonces',
-        returnCode.toString()
-      );
-    }
-  }
-
-  /**
    *  Creates a `burn` transaction
    * @param senderAddress the address of the user
    * @param dataNftNonce the nonce of the DataNFT-FT
