@@ -468,33 +468,13 @@
             ]
         },
         {
-            "name": "getSftsFrozenForAddress",
+            "name": "getFrozenNonces",
             "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                }
-            ],
+            "inputs": [],
             "outputs": [
                 {
                     "type": "variadic<u64>",
                     "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getFrozenCount",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "u32"
                 }
             ]
         },
@@ -792,13 +772,8 @@
             ]
         },
         {
-            "identifier": "frozenSftsPerAddress",
+            "identifier": "frozenNfts",
             "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address",
-                    "indexed": true
-                },
                 {
                     "name": "nonce",
                     "type": "u64",
@@ -807,13 +782,8 @@
             ]
         },
         {
-            "identifier": "unfrozenSftsPerAddress",
+            "identifier": "unfrozenNfts",
             "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address",
-                    "indexed": true
-                },
                 {
                     "name": "nonce",
                     "type": "u64",
@@ -1037,6 +1007,41 @@
                 {
                     "name": "price",
                     "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "claimRoyalties",
+            "inputs": [
+                {
+                    "name": "claim_address",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "tax",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "tax_address",
+                    "type": "Address",
                     "indexed": true
                 }
             ]
