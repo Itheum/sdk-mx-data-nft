@@ -14,6 +14,7 @@ import {
 import {
   Config,
   EnvironmentsEnum,
+  MAX_ITEMS,
   apiConfiguration,
   dataNftTokenIdentifier,
   networkConfiguration
@@ -22,7 +23,8 @@ import {
   ErrAttributeNotSet,
   ErrDataNftCreate,
   ErrDecodeAttributes,
-  ErrNetworkConfig
+  ErrNetworkConfig,
+  ErrTooManyItems
 } from './errors';
 import { NftType, ViewDataReturnType } from './interfaces';
 import BigNumber from 'bignumber.js';
@@ -124,11 +126,13 @@ export class DataNft {
         nonce
       )
     );
-
+    if (identifiers.length > MAX_ITEMS) {
+      throw new ErrTooManyItems();
+    }
     const response = await fetch(
       `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(
         ','
-      )}&withSupply=true`
+      )}&withSupply=true&size=${identifiers.length}`
     );
 
     checkStatus(response);

@@ -1,3 +1,5 @@
+import { MAX_ITEMS } from './config';
+
 export class ErrNetworkConfig extends Error {
   public constructor(message?: string) {
     super(
@@ -77,5 +79,11 @@ export class ErrMissingTrait extends Error {
 export class ErrMissingValueForTrait extends Error {
   public constructor(trait: string) {
     super(`Missing value for trait: ${trait}`);
+  }
+}
+
+export class ErrTooManyItems extends Error {
+  public constructor() {
+    super(`Too many items. Max: ${MAX_ITEMS}`);
   }
 }

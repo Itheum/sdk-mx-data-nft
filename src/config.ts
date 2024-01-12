@@ -66,3 +66,5 @@ export const imageService: { [key in EnvironmentsEnum]: string } = {
   mainnet: 'https://api.itheumcloud.com/datadexapi',
   testnet: ''
 };
+
+export const MAX_ITEMS = 50;
