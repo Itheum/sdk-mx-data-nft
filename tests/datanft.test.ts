@@ -1,5 +1,6 @@
 import { SignableMessage } from '@multiversx/sdk-core/out';
-import { DataNft } from '../src';
+import { DataNft, parseTokenIdentifier } from '../src';
+import { ErrInvalidTokenIdentifier } from '../src/errors';
 
 describe('Data NFT test', () => {
   test('#test not setting network config', async () => {
@@ -90,5 +91,21 @@ describe('Data NFT test', () => {
     });
 
     const owners = await dataNft.getOwners();
+  });
+
+  test('#parse token identifier', () => {
+    const tokenIdentifier = 'DATANFTFT3-d0978a';
+
+    expect(() => parseTokenIdentifier(tokenIdentifier)).toThrow(
+      ErrInvalidTokenIdentifier
+    );
+
+    const tokenIdentifier2 = 'DATANFTFT-e0b917-02';
+
+    const parsed = parseTokenIdentifier(tokenIdentifier2);
+
+    expect(parsed).toBeInstanceOf(
+      Object as unknown as { collection: string; nonce: String }
+    );
   });
 });

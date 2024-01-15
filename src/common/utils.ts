@@ -1,6 +1,11 @@
 import BigNumber from 'bignumber.js';
 import { DataNft } from '../datanft';
-import { ErrFetch, ErrMissingTrait, ErrMissingValueForTrait } from '../errors';
+import {
+  ErrFetch,
+  ErrInvalidTokenIdentifier,
+  ErrMissingTrait,
+  ErrMissingValueForTrait
+} from '../errors';
 import { NftEnumType, NftType, Offer } from '../interfaces';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
@@ -8,8 +13,34 @@ export function numberToPaddedHex(value: BigNumber.Value) {
   return zeroPadStringIfOddLength(hex);
 }
 
-export function createNftIdentifier(collection: string, nonce: number) {
+/**
+ * Creates a token identifier from a collection and a nonce
+ * @param collection The collection of the token
+ * @param nonce the nonce of the token
+ * @returns The token identifier in the format of ticker-randomString-nonce
+ */
+export function createTokenIdentifier(collection: string, nonce: number) {
   return `${collection}-${numberToPaddedHex(nonce)}`;
+}
+
+/**
+ * Creates the collection and nonce from a token identifier
+ * @param tokenIdentifier The token identifier in the format of ticker-randomString-nonce
+ * @returns The collection and nonce of the token
+ */
+export function parseTokenIdentifier(tokenIdentifier: string): {
+  collection: string;
+  nonce: number;
+} {
+  const splitTokenIdentifier: string[] = tokenIdentifier.split('-');
+
+  if (splitTokenIdentifier.length !== 3) {
+    throw new ErrInvalidTokenIdentifier();
+  }
+  return {
+    collection: `${splitTokenIdentifier[0]}-${splitTokenIdentifier[1]}`,
+    nonce: parseInt(splitTokenIdentifier[2], 16)
+  };
 }
 
 export function isPaddedHex(input: string) {

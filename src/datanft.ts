@@ -6,7 +6,7 @@ import {
 import minterAbi from './abis/datanftmint.abi.json';
 import {
   checkStatus,
-  createNftIdentifier,
+  createTokenIdentifier,
   numberToPaddedHex,
   parseDataNft,
   validateSpecificParamsViewData
@@ -86,7 +86,7 @@ export class DataNft {
     tokenIdentifier?: string;
   }): Promise<DataNft> {
     this.ensureNetworkConfigSet();
-    const identifier = createNftIdentifier(
+    const identifier = createTokenIdentifier(
       token.tokenIdentifier ||
         dataNftTokenIdentifier[this.env as EnvironmentsEnum],
       token.nonce
@@ -121,7 +121,7 @@ export class DataNft {
   ): Promise<DataNft[]> {
     this.ensureNetworkConfigSet();
     const identifiers = tokens.map(({ nonce, tokenIdentifier }) =>
-      createNftIdentifier(
+      createTokenIdentifier(
         tokenIdentifier || dataNftTokenIdentifier[this.env as EnvironmentsEnum],
         nonce
       )
@@ -239,7 +239,7 @@ export class DataNft {
     if (!this.tokenIdentifier && !this.nonce) {
       throw new ErrAttributeNotSet('tokenIdentifier, nonce');
     }
-    const identifier = createNftIdentifier(this.tokenIdentifier, this.nonce);
+    const identifier = createTokenIdentifier(this.tokenIdentifier, this.nonce);
 
     const response = await fetch(
       `${DataNft.apiConfiguration}/nfts/${identifier}/accounts`

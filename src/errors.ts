@@ -87,3 +87,9 @@ export class ErrTooManyItems extends Error {
     super(`Too many items. Max: ${MAX_ITEMS}`);
   }
 }
+
+export class ErrInvalidTokenIdentifier extends Error {
+  public constructor() {
+    super(`Invalid token identifier. Format: ticker-randomString-nonce`);
+  }
+}
