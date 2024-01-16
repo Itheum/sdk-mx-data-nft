@@ -328,7 +328,7 @@ export function validateSpecificParamsViewData(params: {
         params.mvxNativeAuthOrigins !== undefined &&
         Array.isArray(params.mvxNativeAuthOrigins) &&
         params.mvxNativeAuthOrigins.length > 0 &&
-        params.mvxNativeAuthOrigins.length < 5
+        params.mvxNativeAuthOrigins.length < 10
       ) {
         mvxNativeAuthOriginsIsValid = true;
       } else {
