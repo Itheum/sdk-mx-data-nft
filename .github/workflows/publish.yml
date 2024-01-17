@@ -7,26 +7,29 @@ permissions:
   contents: write
 
 jobs:
-  publish-npm:
+  release:
+    name: Release
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 16
-          registry-url: https://registry.npmjs.org/
 
-      - name: Create release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npx ci
+      - name: Install semantic-release extra plugins
+        run: npm install --save-dev @semantic-release/changelog @semantic-release/git
+      - name: Lint
+        run: npm run lint:fix
+      - name: Test
+        run: npm run test --if-present
+      - name: Build
+        run: npm run build
+      - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          RELEASE_TAG=v$(node -p "require('./package.json').version")
-          gh release create $RELEASE_TAG --target=$GITHUB_SHA --title="$RELEASE_TAG"
-
-      - run: npm ci
-      - run: npm test
-
-      - name: Publish to npmjs
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-        run: npm publish --access=public
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm config set access public && npx semantic-release
