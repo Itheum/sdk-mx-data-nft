@@ -1,5 +1,10 @@
 import { SignableMessage } from '@multiversx/sdk-core/out';
-import { DataNft, parseTokenIdentifier } from '../src';
+import {
+  DataNft,
+  EnvironmentsEnum,
+  marshalUrls,
+  parseTokenIdentifier
+} from '../src';
 import { ErrInvalidTokenIdentifier } from '../src/errors';
 
 describe('Data NFT test', () => {
@@ -107,5 +112,13 @@ describe('Data NFT test', () => {
     expect(parsed).toBeInstanceOf(
       Object as unknown as { collection: string; nonce: String }
     );
+  });
+
+  test('#override marhsal url', async () => {
+    DataNft.setNetworkConfig('mainnet');
+
+    const dataNft = await DataNft.createFromApi({ nonce: 5 });
+
+    expect(dataNft.dataMarshal).toBe(marshalUrls[EnvironmentsEnum.mainnet]);
   });
 });

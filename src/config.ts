@@ -67,4 +67,28 @@ export const imageService: { [key in EnvironmentsEnum]: string } = {
   testnet: ''
 };
 
+export const marshalUrls = {
+  devnet: 'https://api.itheumcloud-stg.com/datamarshalapi/router/v1',
+  mainnet: 'https://api.itheumcloud.com/datamarshalapi/router/v1',
+  testnet: ''
+};
+
+export const dataMarshalUrlOverride: {
+  [key in EnvironmentsEnum]: {
+    tokenIdentifier: string;
+    nonce: number;
+    url: string;
+  }[];
+} = {
+  devnet: [],
+  mainnet: [
+    {
+      tokenIdentifier: dataNftTokenIdentifier[EnvironmentsEnum.mainnet],
+      nonce: 5,
+      url: marshalUrls.mainnet
+    }
+  ],
+  testnet: []
+};
+
 export const MAX_ITEMS = 50;

@@ -7,6 +7,7 @@ import {
   ErrMissingValueForTrait
 } from '../errors';
 import { NftEnumType, NftType, Offer } from '../interfaces';
+import { EnvironmentsEnum, dataMarshalUrlOverride } from '../config';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
   let hex = new BigNumber(value).toString(16);
@@ -123,6 +124,31 @@ export async function checkTraitsUrl(traitsUrl: string) {
     if (!attribute.value) {
       throw new ErrMissingValueForTrait(attribute.trait_type);
     }
+  }
+}
+
+export function overrideMarshalUrl(
+  env: string,
+  tokenIdentifier: string,
+  nonce: number
+): string {
+  const overridUrlList: {
+    tokenIdentifier: string;
+    nonce: number;
+    url: string;
+  }[] = dataMarshalUrlOverride[env as EnvironmentsEnum];
+
+  if (overridUrlList) {
+    const override = overridUrlList.find(
+      (item) => item.tokenIdentifier === tokenIdentifier && item.nonce === nonce
+    );
+    if (override) {
+      return override.url;
+    } else {
+      return '';
+    }
+  } else {
+    return '';
   }
 }
 

@@ -8,6 +8,7 @@ import {
   checkStatus,
   createTokenIdentifier,
   numberToPaddedHex,
+  overrideMarshalUrl,
   parseDataNft,
   validateSpecificParamsViewData
 } from './common/utils';
@@ -57,6 +58,8 @@ export class DataNft {
    */
   constructor(init?: Partial<DataNft>) {
     Object.assign(this, init);
+    const url = overrideMarshalUrl(DataNft.env, this.collection, this.nonce);
+    this.dataMarshal = url === '' ? this.dataMarshal : url;
   }
 
   /**
