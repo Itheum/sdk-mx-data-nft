@@ -35,7 +35,7 @@ import BigNumber from 'bignumber.js';
 export class SftMinter extends Minter {
   /**
    * Creates a new instance of the `SftMinter` class, which can be used to interact with the Data NFT-FT minter smart contract
-   * @param env 'devnet' | 'devnet2' | 'mainnet' | 'testnet'
+   * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: string, timeout: number = 10000) {
