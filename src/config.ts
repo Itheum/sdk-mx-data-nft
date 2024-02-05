@@ -78,6 +78,7 @@ export const dataMarshalUrlOverride: {
     tokenIdentifier: string;
     nonce: number;
     url: string;
+    chainId: string;
   }[];
 } = {
   devnet: [],
@@ -85,7 +86,8 @@ export const dataMarshalUrlOverride: {
     {
       tokenIdentifier: dataNftTokenIdentifier[EnvironmentsEnum.mainnet],
       nonce: 5,
-      url: marshalUrls.mainnet
+      url: marshalUrls.mainnet,
+      chainId: '1'
     }
   ],
   testnet: []

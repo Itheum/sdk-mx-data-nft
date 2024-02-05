@@ -119,9 +119,19 @@ describe('Data NFT test', () => {
 
     const dataNft = await DataNft.createFromApi({ nonce: 5 });
 
-    expect(dataNft.dataMarshal).toBe(marshalUrls[EnvironmentsEnum.mainnet]);
-    expect(dataNft.originalDataMarshal).toBe(
-      marshalUrls[EnvironmentsEnum.devnet]
+    expect(dataNft.overrideDataMarshal).toBe(
+      marshalUrls[EnvironmentsEnum.mainnet]
     );
+    expect(dataNft.dataMarshal).toBe(marshalUrls[EnvironmentsEnum.devnet]);
+    expect(dataNft.overrideDataMarshalChainId).toBe('1');
+  });
+
+  test('#override marshal url should be empty', async () => {
+    DataNft.setNetworkConfig('mainnet');
+
+    const dataNft = await DataNft.createFromApi({ nonce: 1 });
+
+    expect(dataNft.overrideDataMarshal).toBe('');
+    expect(dataNft.overrideDataMarshalChainId).toBe('');
   });
 });

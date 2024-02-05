@@ -131,11 +131,12 @@ export function overrideMarshalUrl(
   env: string,
   tokenIdentifier: string,
   nonce: number
-): string {
+): { tokenIdentifier: string; nonce: number; url: string; chainId: string } {
   const overridUrlList: {
     tokenIdentifier: string;
     nonce: number;
     url: string;
+    chainId: string;
   }[] = dataMarshalUrlOverride[env as EnvironmentsEnum];
 
   if (overridUrlList) {
@@ -143,12 +144,12 @@ export function overrideMarshalUrl(
       (item) => item.tokenIdentifier === tokenIdentifier && item.nonce === nonce
     );
     if (override) {
-      return override.url;
+      return override;
     } else {
-      return '';
+      return { tokenIdentifier: '', nonce: 0, url: '', chainId: '' };
     }
   } else {
-    return '';
+    return { tokenIdentifier: '', nonce: 0, url: '', chainId: '' };
   }
 }
 

@@ -47,7 +47,8 @@ export class DataNft {
   readonly collection: string = '';
   readonly balance: BigNumber.Value = 0;
   readonly owner: string = ''; // works if tokenIdentifier is an NFT
-  readonly originalDataMarshal: string = '';
+  readonly overrideDataMarshal: string = '';
+  readonly overrideDataMarshalChainId: string = '';
 
   static networkConfiguration: Config;
   static apiConfiguration: string;
@@ -59,9 +60,13 @@ export class DataNft {
    */
   constructor(init?: Partial<DataNft>) {
     Object.assign(this, init);
-    this.originalDataMarshal = this.dataMarshal;
-    const url = overrideMarshalUrl(DataNft.env, this.collection, this.nonce);
-    this.dataMarshal = url === '' ? this.dataMarshal : url;
+    const override = overrideMarshalUrl(
+      DataNft.env,
+      this.collection,
+      this.nonce
+    );
+    this.overrideDataMarshal = override.url;
+    this.overrideDataMarshalChainId = override.chainId;
   }
 
   /**
@@ -485,14 +490,32 @@ export class DataNft {
         mvxNativeAuthOriginsToBase64
       ).toString('base64');
 
+      let chainId;
+
+      if (this.overrideDataMarshalChainId === '') {
+        chainId =
+          DataNft.networkConfiguration.chainID === 'D'
+            ? 'ED'
+            : DataNft.networkConfiguration.chainID;
+      } else if (this.overrideDataMarshalChainId === 'D') {
+        chainId = 'ED';
+      } else {
+        chainId = this.overrideDataMarshalChainId;
+      }
+
+      let dataMarshal;
+      if (this.overrideDataMarshal === '') {
+        dataMarshal = this.dataMarshal;
+      } else {
+        dataMarshal = this.overrideDataMarshal;
+      }
+
       // construct the api url
-      let url = `${this.dataMarshal}/access?NFTId=${
+      let url = `${dataMarshal}/access?NFTId=${
         this.collection
-      }-${numberToPaddedHex(this.nonce)}&chainId=${
-        DataNft.networkConfiguration.chainID == 'D'
-          ? 'ED'
-          : DataNft.networkConfiguration.chainID
-      }&mvxNativeAuthEnable=1&mvxNativeAuthMaxExpirySeconds=${
+      }-${numberToPaddedHex(
+        this.nonce
+      )}&chainId=${chainId}&mvxNativeAuthEnable=1&mvxNativeAuthMaxExpirySeconds=${
         p.mvxNativeAuthMaxExpirySeconds
       }&mvxNativeAuthOrigins=${mvxNativeAuthOriginsToBase64}`;
 
