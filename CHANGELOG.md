@@ -1,3 +1,10 @@
+## [2.6.2](https://github.com/Itheum/sdk-mx-data-nft/compare/v2.6.1...v2.6.2) (2024-02-05)
+
+
+### Bug Fixes
+
+* remove husky from package scripts ([462e3e7](https://github.com/Itheum/sdk-mx-data-nft/commit/462e3e703d6caab1217691b75925f4cb427da343))
+
 ## [2.6.1](https://github.com/Itheum/sdk-mx-data-nft/compare/v2.6.0...v2.6.1) (2024-02-05)
 
 
