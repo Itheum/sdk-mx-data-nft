@@ -12,8 +12,7 @@
     "lint": "tslint --project .",
     "lint:fix": "tslint --project . --fix",
     "build": "tsc -p tsconfig.json",
-    "prepare": "npm run build && husky install",
-    "postinstall": "husky install && npx husky add .husky/commit-msg 'npx --no-install commitlint --edit $1' && npx husky add .husky/pre-commit 'npm test'"
+    "prepare": "npm run build"
   },
   "author": "Itheum Protocol",
   "license": "GPL-3.0-only",
