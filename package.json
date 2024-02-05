@@ -1,6 +1,6 @@
 {
   "name": "@itheum/sdk-mx-data-nft",
-  "version": "2.6.0-semantic-release",
+  "version": "0.0.0-semantic-release",
   "description": "SDK for Itheum's Data NFT Technology on MultiversX Blockchain",
   "main": "out/index.js",
   "types": "out/index.d.js",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@commitlint/config-conventional": "18.4.4",
-    "commitlint": "^18.4.4",
+    "commitlint": "18.4.4",
     "husky": "8.0.3",
     "@types/jest": "29.5.11",
     "jest": "29.7.0",
