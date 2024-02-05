@@ -47,6 +47,7 @@ export class DataNft {
   readonly collection: string = '';
   readonly balance: BigNumber.Value = 0;
   readonly owner: string = ''; // works if tokenIdentifier is an NFT
+  readonly originalDataMarshal: string = '';
 
   static networkConfiguration: Config;
   static apiConfiguration: string;
@@ -58,6 +59,7 @@ export class DataNft {
    */
   constructor(init?: Partial<DataNft>) {
     Object.assign(this, init);
+    this.originalDataMarshal = this.dataMarshal;
     const url = overrideMarshalUrl(DataNft.env, this.collection, this.nonce);
     this.dataMarshal = url === '' ? this.dataMarshal : url;
   }
