@@ -1,5 +1,11 @@
 import { SignableMessage } from '@multiversx/sdk-core/out';
-import { DataNft } from '../src';
+import {
+  DataNft,
+  EnvironmentsEnum,
+  marshalUrls,
+  parseTokenIdentifier
+} from '../src';
+import { ErrInvalidTokenIdentifier } from '../src/errors';
 
 describe('Data NFT test', () => {
   test('#test not setting network config', async () => {
@@ -90,5 +96,42 @@ describe('Data NFT test', () => {
     });
 
     const owners = await dataNft.getOwners();
+  });
+
+  test('#parse token identifier', () => {
+    const tokenIdentifier = 'DATANFTFT3-d0978a';
+
+    expect(() => parseTokenIdentifier(tokenIdentifier)).toThrow(
+      ErrInvalidTokenIdentifier
+    );
+
+    const tokenIdentifier2 = 'DATANFTFT-e0b917-02';
+
+    const parsed = parseTokenIdentifier(tokenIdentifier2);
+
+    expect(parsed).toBeInstanceOf(
+      Object as unknown as { collection: string; nonce: String }
+    );
+  });
+
+  test('#override marhsal url', async () => {
+    DataNft.setNetworkConfig('mainnet');
+
+    const dataNft = await DataNft.createFromApi({ nonce: 5 });
+
+    expect(dataNft.overrideDataMarshal).toBe(
+      marshalUrls[EnvironmentsEnum.mainnet]
+    );
+    expect(dataNft.dataMarshal).toBe(marshalUrls[EnvironmentsEnum.devnet]);
+    expect(dataNft.overrideDataMarshalChainId).toBe('1');
+  });
+
+  test('#override marshal url should be empty', async () => {
+    DataNft.setNetworkConfig('mainnet');
+
+    const dataNft = await DataNft.createFromApi({ nonce: 1 });
+
+    expect(dataNft.overrideDataMarshal).toBe('');
+    expect(dataNft.overrideDataMarshalChainId).toBe('');
   });
 });

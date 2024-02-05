@@ -6,14 +6,16 @@ import {
 import minterAbi from './abis/datanftmint.abi.json';
 import {
   checkStatus,
-  createNftIdentifier,
+  createTokenIdentifier,
   numberToPaddedHex,
+  overrideMarshalUrl,
   parseDataNft,
   validateSpecificParamsViewData
 } from './common/utils';
 import {
   Config,
   EnvironmentsEnum,
+  MAX_ITEMS,
   apiConfiguration,
   dataNftTokenIdentifier,
   networkConfiguration
@@ -22,7 +24,8 @@ import {
   ErrAttributeNotSet,
   ErrDataNftCreate,
   ErrDecodeAttributes,
-  ErrNetworkConfig
+  ErrNetworkConfig,
+  ErrTooManyItems
 } from './errors';
 import { NftType, ViewDataReturnType } from './interfaces';
 import BigNumber from 'bignumber.js';
@@ -44,6 +47,8 @@ export class DataNft {
   readonly collection: string = '';
   readonly balance: BigNumber.Value = 0;
   readonly owner: string = ''; // works if tokenIdentifier is an NFT
+  readonly overrideDataMarshal: string = '';
+  readonly overrideDataMarshalChainId: string = '';
 
   static networkConfiguration: Config;
   static apiConfiguration: string;
@@ -55,6 +60,13 @@ export class DataNft {
    */
   constructor(init?: Partial<DataNft>) {
     Object.assign(this, init);
+    const override = overrideMarshalUrl(
+      DataNft.env,
+      this.collection,
+      this.nonce
+    );
+    this.overrideDataMarshal = override.url;
+    this.overrideDataMarshalChainId = override.chainId;
   }
 
   /**
@@ -84,7 +96,7 @@ export class DataNft {
     tokenIdentifier?: string;
   }): Promise<DataNft> {
     this.ensureNetworkConfigSet();
-    const identifier = createNftIdentifier(
+    const identifier = createTokenIdentifier(
       token.tokenIdentifier ||
         dataNftTokenIdentifier[this.env as EnvironmentsEnum],
       token.nonce
@@ -119,16 +131,18 @@ export class DataNft {
   ): Promise<DataNft[]> {
     this.ensureNetworkConfigSet();
     const identifiers = tokens.map(({ nonce, tokenIdentifier }) =>
-      createNftIdentifier(
+      createTokenIdentifier(
         tokenIdentifier || dataNftTokenIdentifier[this.env as EnvironmentsEnum],
         nonce
       )
     );
-
+    if (identifiers.length > MAX_ITEMS) {
+      throw new ErrTooManyItems();
+    }
     const response = await fetch(
       `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(
         ','
-      )}&withSupply=true`
+      )}&withSupply=true&size=${identifiers.length}`
     );
 
     checkStatus(response);
@@ -235,7 +249,7 @@ export class DataNft {
     if (!this.tokenIdentifier && !this.nonce) {
       throw new ErrAttributeNotSet('tokenIdentifier, nonce');
     }
-    const identifier = createNftIdentifier(this.tokenIdentifier, this.nonce);
+    const identifier = createTokenIdentifier(this.tokenIdentifier, this.nonce);
 
     const response = await fetch(
       `${DataNft.apiConfiguration}/nfts/${identifier}/accounts`
@@ -476,14 +490,32 @@ export class DataNft {
         mvxNativeAuthOriginsToBase64
       ).toString('base64');
 
+      let chainId;
+
+      if (this.overrideDataMarshalChainId === '') {
+        chainId =
+          DataNft.networkConfiguration.chainID === 'D'
+            ? 'ED'
+            : DataNft.networkConfiguration.chainID;
+      } else if (this.overrideDataMarshalChainId === 'D') {
+        chainId = 'ED';
+      } else {
+        chainId = this.overrideDataMarshalChainId;
+      }
+
+      let dataMarshal;
+      if (this.overrideDataMarshal === '') {
+        dataMarshal = this.dataMarshal;
+      } else {
+        dataMarshal = this.overrideDataMarshal;
+      }
+
       // construct the api url
-      let url = `${this.dataMarshal}/access?NFTId=${
+      let url = `${dataMarshal}/access?NFTId=${
         this.collection
-      }-${numberToPaddedHex(this.nonce)}&chainId=${
-        DataNft.networkConfiguration.chainID == 'D'
-          ? 'ED'
-          : DataNft.networkConfiguration.chainID
-      }&mvxNativeAuthEnable=1&mvxNativeAuthMaxExpirySeconds=${
+      }-${numberToPaddedHex(
+        this.nonce
+      )}&chainId=${chainId}&mvxNativeAuthEnable=1&mvxNativeAuthMaxExpirySeconds=${
         p.mvxNativeAuthMaxExpirySeconds
       }&mvxNativeAuthOrigins=${mvxNativeAuthOriginsToBase64}`;
 

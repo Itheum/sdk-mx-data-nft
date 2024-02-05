@@ -39,7 +39,7 @@ export abstract class Minter {
   ) {
     if (!(env in EnvironmentsEnum)) {
       throw new ErrNetworkConfig(
-        `Invalid environment: ${env}, Expected: 'devnet' | 'devnet2' | 'mainnet' | 'testnet'`
+        `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
       );
     }
     this.env = env;
