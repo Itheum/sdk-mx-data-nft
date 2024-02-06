@@ -11,6 +11,23 @@ This SDK is currently focused on interacting with the Itheum's Data NFT technolo
 - work on typescript code in the `/src` folder
 - handy tip: when developing locally, you can do integration tests by running `npm run prepare` and the `npm install --save ../sdk-mx-data-nft` in the host project
 
+### Dev Environment
+
+- create a '.husky' folder in the root of the project
+  Inside the folder:
+  - add a 'commit-msg' file with the following content:
+  ```bash
+  #!/usr/bin/env sh
+  . "$(dirname -- "$0")/_/husky.sh"
+  npx --no-install commitlint --edit $1
+  ```
+  - add a 'pre-commit' file with the following content:
+  ```bash
+  #!/usr/bin/env sh
+  . "$(dirname -- "$0")/_/husky.sh"
+  npm test
+  ```
+
 ### Dev Testing
 
 - Only simple dev testing added. First **Build** as below and then run `npm run test` and work on the test.mjs file for live reload
