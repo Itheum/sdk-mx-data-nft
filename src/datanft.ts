@@ -70,6 +70,13 @@ export class DataNft {
   }
 
   /**
+   * Update any attributes for DataNft
+   *
+   */
+  updateDataNft(init: Partial<DataNft>) {
+    Object.assign(this, init);
+  }
+  /**
    * Sets the network configuration for the DataNft class.
    * @param env 'devnet' | 'mainnet' | 'testnet'
    */
