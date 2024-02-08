@@ -198,12 +198,24 @@ export class DataNftMarket {
    * Retrieves an array of `Offer` objects in an arbitrary order.
    * @param from first index
    * @param to last index
+   * @param senderAddress the address of the sender (optional)
    */
-  async viewPagedOffers(from: number, to: number): Promise<Offer[]> {
-    const interaction = this.contract.methodsExplicit.viewPagedOffers([
+  async viewPagedOffers(
+    from: number,
+    to: number,
+    senderAddress?: string
+  ): Promise<Offer[]> {
+    let interaction = this.contract.methodsExplicit.viewPagedOffers([
       new U64Value(from),
       new U64Value(to)
     ]);
+    if (senderAddress) {
+      interaction = this.contract.methodsExplicit.viewPagedOffersByAddress([
+        new U64Value(from),
+        new U64Value(to),
+        new AddressValue(new Address(senderAddress))
+      ]);
+    }
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
     const endpointDefinition = interaction.getEndpoint();
@@ -223,10 +235,36 @@ export class DataNftMarket {
   }
 
   /**
+   *  Retrieves an `Offer` object based on the offer id
+   * @param offerId The id of the offer to be retrieved
+   */
+  async viewOffer(offerId: number): Promise<Offer> {
+    let interaction = this.contract.methodsExplicit.viewOffer([
+      new U64Value(offerId)
+    ]);
+
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const offer: Offer = parseOffer(returnValue);
+      return offer;
+    } else {
+      throw new ErrContractQuery('viewPagedOffers', returnCode.toString());
+    }
+  }
+
+  /**
    * Retrieves an array of `Offer` objects.
    */
-  async viewOffers(): Promise<Offer[]> {
-    const interaction = this.contract.methodsExplicit.getOffers();
+  async viewOffers(offerIds: number[]): Promise<Offer[]> {
+    const input = offerIds.map((id) => new U64Value(id));
+    const interaction = this.contract.methodsExplicit.viewOffers(input);
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
     const endpointDefinition = interaction.getEndpoint();
@@ -416,7 +454,7 @@ export class DataNftMarket {
    * @param senderAddress the address of the sender
    * @param offerId the id of the offer to be accepted
    * @param amount the amount of tokens to be bought
-   * @param price the price of the offer (must include the buyer fee)
+   * @param price the price of the offer for the total amount to be bought (must include the buyer fee)
    * @param paymentTokenIdentifier the identifier of the payment token (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum}))
    */
   acceptOfferWithESDT(
@@ -448,10 +486,48 @@ export class DataNftMarket {
   }
 
   /**
+   *  Creates a `acceptOffer` transaction with NFT/SFT tokens
+   *  @param senderAddress the address of the sender
+   *  @param offerId the id of the offer to be accepted
+   *  @param amount the amount of tokens to be bought
+   *  @param tokenIdentifier the identifier of the token for the payment
+   *  @param nonce the nonce of the token for the payment
+   *  @param paymentAmount the amount of the token for the payment
+   */
+
+  acceptOfferWithNFT(
+    senderAddress: IAddress,
+    offerId: number,
+    amount: BigNumber.Value,
+    tokenIdentifier: string,
+    nonce: number,
+    paymentAmount: BigNumber.Value
+  ): Transaction {
+    const offerEsdtTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('ESDTNFTTransfer'))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new BigUIntValue(paymentAmount))
+        .addArg(new AddressValue(this.contract.getAddress()))
+        .addArg(new StringValue('acceptOffer'))
+        .addArg(new U64Value(offerId))
+        .addArg(new BigUIntValue(amount))
+        .build(),
+      receiver: senderAddress,
+      sender: senderAddress,
+      gasLimit: 20000000,
+      chainID: this.chainID
+    });
+    return offerEsdtTx;
+  }
+
+  /**
    * Creates a `acceptOffer` transaction with EGLD
    * @param senderAddress the address of the sender
    * @param offerId the id of the offer to be accepted
-   * @param amount the amount of tokens to be bought
+   * @param amount the price of the offer for the total amount to be bought (must include the buyer fee)
    * @param price the price of the offer (must include the buyer fee)
    */
   acceptOfferWithEGLD(
