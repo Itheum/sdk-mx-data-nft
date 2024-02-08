@@ -27,10 +27,10 @@ import {
   ErrNetworkConfig,
   ErrTooManyItems
 } from './errors';
-import { NftType, ViewDataReturnType } from './interfaces';
+import { DataNftType, NftType, ViewDataReturnType } from './interfaces';
 import BigNumber from 'bignumber.js';
 
-export class DataNft {
+export class DataNft implements DataNftType {
   readonly tokenIdentifier: string = '';
   readonly nftImgUrl: string = '';
   readonly dataPreview: string = '';
