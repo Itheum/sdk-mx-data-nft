@@ -166,6 +166,7 @@ export function validateSpecificParamsViewData(params: {
   fwdHeaderMapLookup?: any;
   nestedIdxToStream?: number | undefined;
   _fwdHeaderMapLookupMustContainBearerAuthHeader?: boolean | undefined;
+  asDeputyOnAppointerAddr?: string | undefined;
   _mandatoryParamsList: string[]; // a pure JS fallback way to validate mandatory params, as typescript rules for mandatory can be bypassed by client app
 }): {
   allPassed: boolean;
@@ -390,6 +391,28 @@ export function validateSpecificParamsViewData(params: {
       }
     }
 
+    // asDeputyOnAppointerAddr test
+    let asDeputyOnAppointerAddrIsValid = true;
+
+    if (
+      params.asDeputyOnAppointerAddr !== undefined ||
+      params._mandatoryParamsList.includes('asDeputyOnAppointerAddr')
+    ) {
+      asDeputyOnAppointerAddrIsValid = false;
+
+      if (
+        params.asDeputyOnAppointerAddr !== undefined &&
+        typeof params.asDeputyOnAppointerAddr === 'string' &&
+        params.asDeputyOnAppointerAddr.trim() !== '' &&
+        params.asDeputyOnAppointerAddr.length > 10
+      ) {
+        asDeputyOnAppointerAddrIsValid = true;
+      } else {
+        validationMessages +=
+          '[asDeputyOnAppointerAddr needs to be a multiversx smart contract address in an string. e.g. erd1qqqqqqqqqqqqqpgqd2y9zvaehkn4arsjwxp8vs3rjmdwyffafsxsgjkdw8]';
+      }
+    }
+
     if (
       !signedMessageValid ||
       !signableMessageValid ||
@@ -399,7 +422,8 @@ export function validateSpecificParamsViewData(params: {
       !fwdHeaderMapLookupIsValid ||
       !mvxNativeAuthMaxExpirySecondsValid ||
       !mvxNativeAuthOriginsIsValid ||
-      !nestedIdxToStreamValid
+      !nestedIdxToStreamValid ||
+      !asDeputyOnAppointerAddrIsValid
     ) {
       allPassed = false;
     }
