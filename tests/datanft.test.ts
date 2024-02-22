@@ -133,5 +133,13 @@ describe('Data NFT test', () => {
 
     expect(dataNft.overrideDataMarshal).toBe('');
     expect(dataNft.overrideDataMarshalChainId).toBe('');
+
+    dataNft.updateDataNft({
+      overrideDataMarshal: 'overrideUrl',
+      overrideDataMarshalChainId: 'D'
+    });
+
+    expect(dataNft.overrideDataMarshal).toBe('overrideUrl');
+    expect(dataNft.overrideDataMarshalChainId).toBe('D');
   });
 });

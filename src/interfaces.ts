@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 export interface NftType {
   identifier: string;
   collection: string;
@@ -42,6 +44,27 @@ export interface NftType {
     fileType: string;
     fileSize: number;
   }[];
+}
+
+export interface DataNftType {
+  readonly tokenIdentifier: string;
+  readonly nftImgUrl: string;
+  readonly dataPreview: string;
+  readonly dataStream: string;
+  readonly dataMarshal: string;
+  readonly tokenName: string;
+  readonly creator: string;
+  readonly creationTime: Date;
+  readonly supply: number | BigNumber.Value;
+  readonly description: string;
+  readonly title: string;
+  readonly royalties: number;
+  readonly nonce: number;
+  readonly collection: string;
+  readonly balance: number | BigNumber.Value;
+  readonly owner: string;
+  readonly overrideDataMarshal: string;
+  readonly overrideDataMarshalChainId: string;
 }
 
 export enum NftEnumType {
