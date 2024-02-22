@@ -203,7 +203,7 @@ export class DataNftMarket {
   async viewPagedOffers(
     from: number,
     to: number,
-    senderAddress?: string
+    senderAddress?: IAddress
   ): Promise<Offer[]> {
     let interaction = this.contract.methodsExplicit.viewPagedOffers([
       new U64Value(from),
@@ -213,7 +213,7 @@ export class DataNftMarket {
       interaction = this.contract.methodsExplicit.viewPagedOffersByAddress([
         new U64Value(from),
         new U64Value(to),
-        new AddressValue(new Address(senderAddress))
+        new AddressValue(senderAddress)
       ]);
     }
     const query = interaction.buildQuery();
@@ -274,34 +274,8 @@ export class DataNftMarket {
     );
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      const offers: Offer[] = returnValue.map(
-        ([
-          index,
-          {
-            owner,
-            offered_token: {
-              token_identifier: offeredTokenIdentifier,
-              token_nonce: offeredTokenNonce,
-              amount: offeredTokenAmount
-            },
-            wanted_token: {
-              token_identifier: wantedTokenIdentifier,
-              token_nonce: wantedTokenNonce,
-              amount: wantedTokenAmount
-            },
-            quantity
-          }
-        ]: any) => ({
-          index: index.toNumber(),
-          owner: owner.bech32(),
-          offeredTokenIdentifier: offeredTokenIdentifier.toString(),
-          offeredTokenNonce: offeredTokenNonce.toString(),
-          offeredTokenAmount,
-          wantedTokenIdentifier: wantedTokenIdentifier.toString(),
-          wantedTokenNonce: wantedTokenNonce.toString(),
-          wantedTokenAmount,
-          quantity: quantity.toNumber()
-        })
+      const offers: Offer[] = returnValue.map((offer: any) =>
+        parseOffer(offer)
       );
       return offers;
     } else {
