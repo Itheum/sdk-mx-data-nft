@@ -141,6 +141,12 @@ export enum State {
   Active = 1
 }
 
+export enum PenaltyType {
+  Minimum = 0,
+  Custom = 1,
+  Maximum = 2
+}
+
 export interface Compensation {
   tokenIdentifier: string;
   nonce: number;

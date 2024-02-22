@@ -2,10 +2,12 @@ import {
   AbiRegistry,
   Address,
   AddressValue,
+  ContractCallPayloadBuilder,
   IAddress,
   ResultsParser,
   SmartContract,
   TokenIdentifierValue,
+  Transaction,
   U64Value
 } from '@multiversx/sdk-core/out';
 import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
@@ -17,7 +19,7 @@ import {
 } from './config';
 
 import bondContractAbi from './abis/core-mx-life-bonding-sc.abi.json';
-import { Bond, Compensation, State } from './interfaces';
+import { Bond, Compensation, PenaltyType, State } from './interfaces';
 import {
   parseBond,
   parseCompensation,
@@ -325,5 +327,221 @@ export class BondContract {
     } else {
       throw new ErrContractQuery('getCompensation', returnCode.toString());
     }
+  }
+
+  /**
+   * Builds a `setAdministrator` transaction
+   * @param senderAddress address of the sender (must be the owner of the contract)
+   * @param newAdministrator new administrator address
+   */
+  setAdministrator(
+    senderAddress: IAddress,
+    newAdministrator: IAddress
+  ): Transaction {
+    const setAdministratorTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setAdministrator')
+        .addArg(new AddressValue(newAdministrator))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 10_000_000,
+      chainID: this.chainID
+    });
+    return setAdministratorTx;
+  }
+
+  /**
+   * Builds a `sanction` transaction
+   * @param senderAddress address of the sender (must be the owner of the contract or the administrator)
+   * @param tokenIdentifier token identifier to sanction
+   * @param nonce nonce to sanction
+   * @param penalty penalty type
+   * @param customPenalty custom penalty amount (required if penalty is `Custom`)
+   */
+  sanction(
+    senderAddress: IAddress,
+    tokenIdentifier: string,
+    nonce: number,
+    penalty: PenaltyType,
+    customPenalty?: number
+  ): Transaction {
+    let data;
+    if (penalty === PenaltyType.Custom && customPenalty) {
+      data = new ContractCallPayloadBuilder()
+        .setFunction('sanction')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(penalty))
+        .addArg(new U64Value(customPenalty))
+        .build();
+    } else {
+      data = new ContractCallPayloadBuilder()
+        .setFunction('sanction')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(penalty))
+        .build();
+    }
+
+    const sanctionTx = new Transaction({
+      value: 0,
+      data,
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 30_000_000,
+      chainID: this.chainID
+    });
+    return sanctionTx;
+  }
+
+  /**
+   * Builds a `modifyBond` transaction
+   * @param senderAddress address of the sender (must be the owner of the contract or the administrator)
+   * @param tokenIdentifier token identifier to modify the bond for
+   * @param nonce nonce to modify the bond for
+   */
+  modifyBond(
+    senderAddress: IAddress,
+    tokenIdentifier: string,
+    nonce: number
+  ): Transaction {
+    const modifyBondTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('modifyBond')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 10_000_000,
+      chainID: this.chainID
+    });
+    return modifyBondTx;
+  }
+
+  /**
+   * Builds a `setContractState` transaction
+   * @param senderAddress address of the sender (must be the owner of the contract or the administrator)
+   * @param state state to set the contract to
+   */
+  setContractState(senderAddress: IAddress, state: State): Transaction {
+    let data;
+    if (state === State.Inactive) {
+      data = new ContractCallPayloadBuilder()
+        .setFunction('setContractStateInactive')
+        .build();
+    } else {
+      data = new ContractCallPayloadBuilder()
+        .setFunction('setContractStateActive')
+        .build();
+    }
+
+    const setContractStateTx = new Transaction({
+      value: 0,
+      data: data,
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 10_000_000,
+      chainID: this.chainID
+    });
+    return setContractStateTx;
+  }
+
+  setAcceptedCallers(senderAddress: IAddress, addresses: IAddress[]) {
+    throw new Error('Not implemented');
+  }
+
+  setBondToken(senderAddress: IAddress, tokenIdentifier: string) {
+    throw new Error('Not implemented');
+  }
+
+  setPeriodsBonds(
+    senderAddress: IAddress,
+    periods: number[],
+    bonds: BigNumber.Value[]
+  ) {
+    throw new Error('Not implemented');
+  }
+
+  setMinimumPenalty(senderAddress: IAddress, penalty: number) {
+    throw new Error('Not implemented');
+  }
+
+  setMaximumPenalty(senderAddress: IAddress, penalty: number) {
+    throw new Error('Not implemented');
+  }
+
+  setWithdrawPenalty(senderAddress: IAddress, penalty: number) {
+    throw new Error('Not implemented');
+  }
+
+  /**
+   * Builds a `withdraw` transaction
+   * @param senderAddress address of the sender
+   * @param tokenIdentifier token identifier to withdraw the bond for
+   * @param nonce nonce to withdraw the bond for
+   */
+  withdraw(
+    senderAddress: IAddress,
+    tokenIdentifier: string,
+    nonce: number
+  ): Transaction {
+    const withdrawTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('withdraw')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 10_000_000,
+      chainID: this.chainID
+    });
+    return withdrawTx;
+  }
+
+  /**
+   * Builds a `renew` transaction
+   * @param senderAddress address of the sender
+   * @param tokenIdentifier token identifier for the bond to renew
+   * @param nonce nonce for the bond to renew
+   * @param newlockPeriod new lock period for the bond
+   */
+  renew(
+    senderAddress: IAddress,
+    tokenIdentifier: string,
+    nonce: number,
+    newLockPeriod?: number
+  ): Transaction {
+    let data;
+    if (newLockPeriod) {
+      data = new ContractCallPayloadBuilder()
+        .setFunction('renew')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(newLockPeriod))
+        .build();
+    } else {
+      data = new ContractCallPayloadBuilder()
+        .setFunction('renew')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build();
+    }
+
+    const renewTx = new Transaction({
+      value: 0,
+      data,
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 10_000_000,
+      chainID: this.chainID
+    });
+    return renewTx;
   }
 }
