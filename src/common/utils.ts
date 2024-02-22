@@ -6,7 +6,7 @@ import {
   ErrMissingTrait,
   ErrMissingValueForTrait
 } from '../errors';
-import { NftEnumType, NftType, Offer } from '../interfaces';
+import { Bond, Compensation, NftEnumType, NftType, Offer } from '../interfaces';
 import { EnvironmentsEnum, dataMarshalUrlOverride } from '../config';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
@@ -71,6 +71,27 @@ export function parseOffer(value: any): Offer {
     wantedTokenNonce: value.wanted_token_nonce.toString(),
     wantedTokenAmount: value.wanted_token_amount.toFixed(0),
     quantity: value.quantity.toNumber()
+  };
+}
+
+export function parseBond(value: any): Bond {
+  return {
+    bondId: value.bond_id.toNumber(),
+    address: value.address.toString(),
+    tokenIdentifier: value.token_identifier.toString(),
+    nonce: value.nonce.toNumber(),
+    lockPeriod: value.lock_period.toNumber(),
+    bond_timestamp: value.bond_timestamp.toNumber(),
+    unbound_timestmap: value.unbound_timestmap.toNumber(),
+    bond_amount: value.bond_amount.toFixed(0)
+  };
+}
+
+export function parseCompensation(value: any): Compensation {
+  return {
+    tokenIdentifier: value.token_identifier.toString(),
+    nonce: value.nonce.toNumber(),
+    totalCompensationAmount: value.total_compensation_amount.toFixed(0)
   };
 }
 

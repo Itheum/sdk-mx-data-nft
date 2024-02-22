@@ -125,6 +125,23 @@ export interface Offer {
   quantity: number;
 }
 
+export interface Bond {
+  bondId: number;
+  address: string;
+  tokenIdentifier: string;
+  nonce: number;
+  lockPeriod: number; // days
+  bond_timestamp: number;
+  unbound_timestmap: number;
+  bond_amount: string;
+}
+
+export interface Compensation {
+  tokenIdentifier: string;
+  nonce: number;
+  totalCompensationAmount: string;
+}
+
 export interface ViewDataReturnType {
   data: any;
   contentType: string;
