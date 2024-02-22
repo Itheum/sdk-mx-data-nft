@@ -224,31 +224,6 @@ export abstract class Minter {
     return unpauseContractTx;
   }
 
-  /** Creates a set mint tax transaction for the contract
-   * @param senderAddress The address of the sender, must be the admin of the contract
-   * @param tokenIdentifier The token identifier of the token to set the mint tax
-   * @param tax The tax to set for the token
-   */
-  setMintTax(
-    senderAddress: IAddress,
-    tokenIdentifier: string,
-    tax: BigNumber.Value
-  ): Transaction {
-    const setMintTaxTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setAntiSpamTax'))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new BigUIntValue(tax))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 6000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return setMintTaxTx;
-  }
-
   /**
    *
    * @param senderAddress The address of the sender, must be the admin of the contract

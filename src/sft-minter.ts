@@ -53,12 +53,10 @@ export class SftMinter extends Minter {
    * @param taxToken the tax token to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
    */
   async viewMinterRequirements(
-    address: IAddress,
-    taxToken = itheumTokenIdentifier[this.env as EnvironmentsEnum]
+    address: IAddress
   ): Promise<SftMinterRequirements> {
     const interaction = this.contract.methodsExplicit.getUserDataOut([
-      new AddressValue(address),
-      new TokenIdentifierValue(taxToken)
+      new AddressValue(address)
     ]);
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
@@ -70,7 +68,6 @@ export class SftMinter extends Minter {
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
       const requirements: SftMinterRequirements = {
-        antiSpamTaxValue: returnValue.anti_spam_tax_value.toNumber(),
         contractPaused: returnValue.is_paused,
         maxRoyalties: returnValue.max_royalties.toNumber(),
         minRoyalties: returnValue.min_royalties.toNumber(),
@@ -127,19 +124,13 @@ export class SftMinter extends Minter {
    * @param senderAddress The address of the sender, must be the admin of the contract
    * @param collectionName The name of the NFT collection
    * @param tokenTicker The ticker of the NFT collection
-   * @param antiSpamTaxTokenIdentifier The token identifier of the anti spam token
-   * @param antiSpamTaxTokenAmount The amount of anti spam token to be used for minting as tax
    * @param mintLimit(seconds)- The mint limit between mints
-   * @param treasury_address The address of the treasury to collect the anti spam tax
    */
   initializeContract(
     senderAddress: IAddress,
     collectionName: string,
     tokenTicker: string,
-    antiSpamTaxTokenIdentifier: string,
-    antiSpamTaxTokenAmount: BigNumber.Value,
-    mintLimit: number,
-    treasury_address: IAddress
+    mintLimit: number
   ): Transaction {
     const initializeContractTx = new Transaction({
       value: 0,
@@ -147,10 +138,7 @@ export class SftMinter extends Minter {
         .setFunction(new ContractFunction('initializeContract'))
         .addArg(new StringValue(collectionName))
         .addArg(new StringValue(tokenTicker))
-        .addArg(new TokenIdentifierValue(antiSpamTaxTokenIdentifier))
-        .addArg(new BigUIntValue(antiSpamTaxTokenAmount))
         .addArg(new U64Value(mintLimit))
-        .addArg(new AddressValue(treasury_address))
         .build(),
       receiver: this.contract.getAddress(),
       gasLimit: 10000000,
@@ -158,29 +146,6 @@ export class SftMinter extends Minter {
       chainID: this.chainID
     });
     return initializeContractTx;
-  }
-
-  /**
-   *
-   * @param senderAddress The address of the sender, must be the admin of the contract
-   * @param treasuryAddress The address of the treasury to collect the anti spam tax
-   */
-  setTreasuryAddress(
-    senderAddress: IAddress,
-    treasuryAddress: IAddress
-  ): Transaction {
-    const setTreasuryAddressTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setTreasuryAddress'))
-        .addArg(new AddressValue(treasuryAddress))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return setTreasuryAddressTx;
   }
 
   /**
@@ -224,12 +189,12 @@ export class SftMinter extends Minter {
    * @param supply the supply of the Data NFT-FT. A number between 1 and 1000.
    * @param datasetTitle the title of the dataset. Between 10 and 60 alphanumeric characters.
    * @param datasetDescription the description of the dataset. Between 10 and 400 alphanumeric characters.
-   * @param antiSpamTax the anti spam tax to be set for the Data NFT-FT with decimals. Needs to be greater than 0 and should be obtained in real time via {@link viewMinterRequirements} prior to calling mint.
+   * @param lockPeriod the lock period for the bond in days
+   * @param bondAmount the amount of the bond
    * @param options [optional] below parameters are optional or required based on use case
    *                 - imageUrl: the URL of the image for the Data NFT
    *                 - traitsUrl: the URL of the traits for the Data NFT
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
-   *                 - antiSpamTokenIdentifier: the anti spam token identifier to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
    *
    */
   async mint(
@@ -242,22 +207,15 @@ export class SftMinter extends Minter {
     supply: number,
     datasetTitle: string,
     datasetDescription: string,
-    antiSpamTax: BigNumber.Value,
+    lockPeriod: number,
+    bondAmount: number,
     options?: {
       imageUrl?: string;
       traitsUrl?: string;
       nftStorageToken?: string;
-      antiSpamTokenIdentifier?: string;
     }
   ): Promise<Transaction> {
-    const {
-      imageUrl,
-      traitsUrl,
-      nftStorageToken,
-      antiSpamTokenIdentifier = itheumTokenIdentifier[
-        this.env as EnvironmentsEnum
-      ]
-    } = options ?? {};
+    const { imageUrl, traitsUrl, nftStorageToken } = options ?? {};
 
     // S: run any format specific validation
     const { allPassed, validationMessages } = validateSpecificParamsMint({
@@ -267,15 +225,13 @@ export class SftMinter extends Minter {
       supply,
       datasetTitle,
       datasetDescription,
-      antiSpamTax,
       _mandatoryParamsList: [
         'senderAddress',
         'tokenName',
         'royalties',
         'supply',
         'datasetTitle',
-        'datasetDescription',
-        'antiSpamTax'
+        'datasetDescription'
       ]
     });
 
@@ -339,45 +295,33 @@ export class SftMinter extends Minter {
       metadataOnIpfsUrl = traitsUrl;
     }
 
-    let data;
-    if (antiSpamTax > BigNumber(0)) {
-      data = new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTTransfer'))
-        .addArg(new TokenIdentifierValue(antiSpamTokenIdentifier))
-        .addArg(new BigUIntValue(antiSpamTax))
-        .addArg(new StringValue('mint'))
-        .addArg(new StringValue(tokenName))
-        .addArg(new StringValue(imageOnIpfsUrl))
-        .addArg(new StringValue(metadataOnIpfsUrl))
-        .addArg(new StringValue(dataMarshalUrl))
-        .addArg(new StringValue(dataNftStreamUrlEncrypted))
-        .addArg(new StringValue(dataPreviewUrl))
-        .addArg(new U64Value(royalties))
-        .addArg(new U64Value(supply))
-        .addArg(new StringValue(datasetTitle))
-        .addArg(new StringValue(datasetDescription))
-        .build();
-    } else {
-      data = new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('mint'))
-        .addArg(new StringValue(tokenName))
-        .addArg(new StringValue(imageOnIpfsUrl))
-        .addArg(new StringValue(metadataOnIpfsUrl))
-        .addArg(new StringValue(dataMarshalUrl))
-        .addArg(new StringValue(dataNftStreamUrlEncrypted))
-        .addArg(new StringValue(dataPreviewUrl))
-        .addArg(new U64Value(royalties))
-        .addArg(new U64Value(supply))
-        .addArg(new StringValue(datasetTitle))
-        .addArg(new StringValue(datasetDescription))
-        .build();
-    }
+    const data = new ContractCallPayloadBuilder()
+      .setFunction(new ContractFunction('ESDTTransfer'))
+      .addArg(
+        new TokenIdentifierValue(
+          itheumTokenIdentifier[this.env as EnvironmentsEnum]
+        )
+      )
+      .addArg(new BigUIntValue(bondAmount))
+      .addArg(new StringValue('mint'))
+      .addArg(new StringValue(tokenName))
+      .addArg(new StringValue(imageOnIpfsUrl))
+      .addArg(new StringValue(metadataOnIpfsUrl))
+      .addArg(new StringValue(dataMarshalUrl))
+      .addArg(new StringValue(dataNftStreamUrlEncrypted))
+      .addArg(new StringValue(dataPreviewUrl))
+      .addArg(new U64Value(royalties))
+      .addArg(new U64Value(supply))
+      .addArg(new StringValue(datasetTitle))
+      .addArg(new StringValue(datasetDescription))
+      .addArg(new U64Value(lockPeriod))
+      .build();
 
     const mintTx = new Transaction({
       data,
       sender: senderAddress,
       receiver: this.contract.getAddress(),
-      gasLimit: 60000000,
+      gasLimit: 80_000_000,
       chainID: this.chainID
     });
 

@@ -83,7 +83,6 @@ export interface MarketplaceRequirements {
 }
 
 export interface SftMinterRequirements {
-  antiSpamTaxValue: number;
   addressFrozen: boolean;
   frozenNonces: number[];
   contractPaused: boolean;
