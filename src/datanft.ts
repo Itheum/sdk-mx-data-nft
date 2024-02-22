@@ -302,6 +302,7 @@ export class DataNft implements DataNftType {
    * @param fwdHeaderKeys [optional] Forward only selected headers to the Origin Data Stream server. Has priority over fwdAllHeaders param. A comma separated lowercase string with less than 5 items. e.g. cookie,authorization
    * @param fwdHeaderMapLookup [optional] Used with fwdHeaderKeys to set a front-end client side lookup map of headers the SDK uses to setup the forward. e.g. { cookie : "xyz", authorization : "Bearer zxy" }. Note that these are case-sensitive and need to match fwdHeaderKeys exactly.
    * @param nestedIdxToStream [optional] If you are accessing a "nested stream", this is the index of the nested item you want drill into and fetch
+   * @param asDeputyOnAppointerAddr [optional] Put caller in the "deputy persona" of this deputy appointer address (which should be a smart contract that holds the Data NFT Id)
    */
   async viewData(p: {
     signedMessage: string;
@@ -313,6 +314,7 @@ export class DataNft implements DataNftType {
       [key: string]: any;
     };
     nestedIdxToStream?: number;
+    asDeputyOnAppointerAddr?: string;
   }): Promise<ViewDataReturnType> {
     DataNft.ensureNetworkConfigSet();
     if (!this.dataMarshal) {
@@ -334,6 +336,7 @@ export class DataNft implements DataNftType {
       fwdHeaderKeys: p.fwdHeaderKeys,
       fwdHeaderMapLookup: p.fwdHeaderMapLookup,
       nestedIdxToStream: p.nestedIdxToStream,
+      asDeputyOnAppointerAddr: p.asDeputyOnAppointerAddr,
       _mandatoryParamsList: ['signedMessage', 'signableMessage']
     });
 
@@ -409,6 +412,10 @@ export class DataNft implements DataNftType {
           });
         }
       }
+
+      if (typeof p.asDeputyOnAppointerAddr !== 'undefined') {
+        url += `&asDeputyOnAppointerAddr=${p.asDeputyOnAppointerAddr}`;
+      }
       // E: append optional params...
 
       const response = await fetch(url, fetchConfig);
@@ -451,6 +458,7 @@ export class DataNft implements DataNftType {
    * @param fwdAllHeaders [optional] Forward all request headers to the Origin Data Stream server.
    * @param stream [optional] Instead of auto-downloading if possible, request if data should always be streamed or not.i.e true=stream, false/undefined=default behavior
    * @param nestedIdxToStream [optional] If you are accessing a "nested stream", this is the index of the nested item you want drill into and fetch
+   * @param asDeputyOnAppointerAddr [optional] Put caller in the "deputy persona" of this deputy appointer address (which should be a smart contract that holds the Data NFT Id)
    */
   async viewDataViaMVXNativeAuth(p: {
     mvxNativeAuthOrigins: string[];
@@ -462,6 +470,7 @@ export class DataNft implements DataNftType {
     fwdAllHeaders?: boolean;
     stream?: boolean;
     nestedIdxToStream?: number;
+    asDeputyOnAppointerAddr?: string;
   }): Promise<ViewDataReturnType> {
     try {
       // S: run any format specific validation
@@ -473,6 +482,7 @@ export class DataNft implements DataNftType {
         fwdAllHeaders: p.fwdAllHeaders,
         stream: p.stream,
         nestedIdxToStream: p.nestedIdxToStream,
+        asDeputyOnAppointerAddr: p.asDeputyOnAppointerAddr,
         _fwdHeaderMapLookupMustContainBearerAuthHeader: true,
         _mandatoryParamsList: [
           'mvxNativeAuthOrigins',
@@ -569,6 +579,10 @@ export class DataNft implements DataNftType {
             }
           });
         }
+      }
+
+      if (typeof p.asDeputyOnAppointerAddr !== 'undefined') {
+        url += `&asDeputyOnAppointerAddr=${p.asDeputyOnAppointerAddr}`;
       }
       // E: append optional params...
 
