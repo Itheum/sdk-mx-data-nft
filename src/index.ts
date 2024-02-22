@@ -5,4 +5,5 @@ export * from './marketplace';
 export * from './minter';
 export * from './nft-minter';
 export * from './sft-minter';
+export * from './bond';
 export { parseTokenIdentifier, createTokenIdentifier } from './common/utils';

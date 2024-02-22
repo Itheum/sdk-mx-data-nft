@@ -83,7 +83,6 @@ export interface MarketplaceRequirements {
 }
 
 export interface SftMinterRequirements {
-  antiSpamTaxValue: number;
   addressFrozen: boolean;
   frozenNonces: number[];
   contractPaused: boolean;
@@ -123,6 +122,34 @@ export interface Offer {
   wantedTokenNonce: number;
   wantedTokenAmount: string;
   quantity: number;
+}
+
+export interface Bond {
+  bondId: number;
+  address: string;
+  tokenIdentifier: string;
+  nonce: number;
+  lockPeriod: number; // days
+  bond_timestamp: number;
+  unbound_timestamp: number;
+  bond_amount: string;
+}
+
+export enum State {
+  Inactive = 0,
+  Active = 1
+}
+
+export enum PenaltyType {
+  Minimum = 0,
+  Custom = 1,
+  Maximum = 2
+}
+
+export interface Compensation {
+  tokenIdentifier: string;
+  nonce: number;
+  totalCompensationAmount: string;
 }
 
 export interface ViewDataReturnType {

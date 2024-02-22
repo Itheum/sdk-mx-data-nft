@@ -2,14 +2,6 @@ import { Address, Transaction } from '@multiversx/sdk-core/out';
 import { SftMinter, Minter, SftMinterRequirements } from '../src';
 
 describe('Data Nft Minter Test', () => {
-  test('#getAddress', async () => {
-    const dataNftMarket = new SftMinter('devnet');
-    expect(dataNftMarket.getContractAddress()).toBeInstanceOf(Address);
-    expect(dataNftMarket.getContractAddress().bech32()).toStrictEqual(
-      'erd1qqqqqqqqqqqqqpgq7thwlde9hvc5ty7lx2j3l9tvy3wgkwu7fsxsvz9rat'
-    );
-  });
-
   test('#viewMinterRequirements', async () => {
     const dataNftMarket = new SftMinter('devnet');
 

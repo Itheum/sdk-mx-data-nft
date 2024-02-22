@@ -44,13 +44,13 @@ export const marketPlaceContractAddress: { [key in EnvironmentsEnum]: string } =
   };
 
 export const minterContractAddress: { [key in EnvironmentsEnum]: string } = {
-  devnet: 'erd1qqqqqqqqqqqqqpgq7thwlde9hvc5ty7lx2j3l9tvy3wgkwu7fsxsvz9rat',
+  devnet: 'erd1qqqqqqqqqqqqqpgq69lkfnnzgvqpjzze690rl4lmqtmvnccsw3wqhvsacl',
   mainnet: 'erd1qqqqqqqqqqqqqpgqmuzgkurn657afd3r2aldqy2snsknwvrhc77q3lj8l6',
   testnet: ''
 };
 
 export const bondContractAddress: { [key in EnvironmentsEnum]: string } = {
-  devnet: 'erd1qqqqqqqqqqqqqpgq5j9uzn3sede83tqc32jkurxzle4hntzgw3wqjvcj9q',
+  devnet: 'erd1qqqqqqqqqqqqqpgqwufw9acp0lnl4ljugq0zttu0jw2hx4zcw3wqm0ghg0',
   mainnet: '',
   testnet: ''
 };

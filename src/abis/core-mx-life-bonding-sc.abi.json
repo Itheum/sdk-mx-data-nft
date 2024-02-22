@@ -49,7 +49,7 @@
                 },
                 {
                     "name": "lock_period",
-                    "type": "u16"
+                    "type": "u64"
                 }
             ],
             "outputs": []
@@ -83,7 +83,7 @@
                 },
                 {
                     "name": "new_lock_period",
-                    "type": "optional<u16>",
+                    "type": "optional<u64>",
                     "multi_arg": true
                 }
             ],
@@ -116,7 +116,7 @@
             "inputs": [],
             "outputs": [
                 {
-                    "type": "variadic<u16>",
+                    "type": "variadic<u64>",
                     "multi_result": true
                 }
             ]
@@ -127,7 +127,7 @@
             "inputs": [
                 {
                     "name": "lock_period",
-                    "type": "u16"
+                    "type": "u64"
                 }
             ],
             "outputs": [
@@ -277,6 +277,16 @@
             ]
         },
         {
+            "name": "getLockPeriodsBonds",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "tuple<List<u64>,List<BigUint>>"
+                }
+            ]
+        },
+        {
             "name": "sanction",
             "mutability": "mutable",
             "inputs": [
@@ -356,7 +366,7 @@
             "inputs": [
                 {
                     "name": "args",
-                    "type": "variadic<multi<u16,BigUint>>",
+                    "type": "variadic<multi<u64,BigUint>>",
                     "multi_arg": true
                 }
             ],
@@ -452,7 +462,7 @@
                 },
                 {
                     "name": "lock_period",
-                    "type": "u16"
+                    "type": "u64"
                 },
                 {
                     "name": "bond_timestamp",
