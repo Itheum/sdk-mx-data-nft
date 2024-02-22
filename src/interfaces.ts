@@ -132,8 +132,13 @@ export interface Bond {
   nonce: number;
   lockPeriod: number; // days
   bond_timestamp: number;
-  unbound_timestmap: number;
+  unbound_timestamp: number;
   bond_amount: string;
+}
+
+export enum State {
+  Inactive = 0,
+  Active = 1
 }
 
 export interface Compensation {

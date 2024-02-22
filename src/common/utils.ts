@@ -82,7 +82,7 @@ export function parseBond(value: any): Bond {
     nonce: value.nonce.toNumber(),
     lockPeriod: value.lock_period.toNumber(),
     bond_timestamp: value.bond_timestamp.toNumber(),
-    unbound_timestmap: value.unbound_timestmap.toNumber(),
+    unbound_timestamp: value.unbound_timestamp.toNumber(),
     bond_amount: value.bond_amount.toFixed(0)
   };
 }
@@ -91,7 +91,7 @@ export function parseCompensation(value: any): Compensation {
   return {
     tokenIdentifier: value.token_identifier.toString(),
     nonce: value.nonce.toNumber(),
-    totalCompensationAmount: value.total_compensation_amount.toFixed(0)
+    totalCompensationAmount: value.total_compenstation_amount.toFixed(0)
   };
 }
 
