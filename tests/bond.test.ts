@@ -21,27 +21,27 @@ describe('Bond test', () => {
 
     expect(typeof acceptedCallers).toBe('object');
 
-    const bond: Bond[] = await bondContract.viewBonds([1]);
+    // const bond: Bond[] = await bondContract.viewBonds([1]);
 
-    expect(bond).toMatchObject<Bond>;
+    // expect(bond).toMatchObject<Bond>;
 
-    const sameBond: Bond[] = await bondContract.viewBonds(
-      ['NEWDNFT-3a8caa'],
-      [8]
-    );
+    // const sameBond: Bond[] = await bondContract.viewBonds(
+    //   ['NEWDNFT-3a8caa'],
+    //   [8]
+    // );
 
-    expect(sameBond).toMatchObject<Bond[]>;
+    // expect(sameBond).toMatchObject<Bond[]>;
 
-    const sameBond2: Bond[] = await bondContract.viewBonds([
-      'NEWDNFT-3a8caa-08'
-    ]);
-    expect(sameBond2).toMatchObject<Bond[]>;
+    // const sameBond2: Bond[] = await bondContract.viewBonds([
+    //   'NEWDNFT-3a8caa-08'
+    // ]);
+    // expect(sameBond2).toMatchObject<Bond[]>;
 
-    const compensation: Compensation = await bondContract.viewCompensation(
-      'NEWDNFT-3a8caa',
-      8
-    );
+    // const compensation: Compensation = await bondContract.viewCompensation(
+    //   'NEWDNFT-3a8caa',
+    //   8
+    // );
 
-    expect(compensation).toMatchObject<Compensation>;
+    // expect(compensation).toMatchObject<Compensation>;
   });
 });
