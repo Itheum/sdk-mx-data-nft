@@ -1,0 +1,42 @@
+name: Determine Next Release Version
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize]
+
+jobs:
+  determine-release-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Determine next release version
+        id: determine_version
+        run: |
+          NEXT_VERSION=$(npx semantic-release --dry-run | grep 'The next release version is' | sed -E 's/.* ([[:digit:].]+)$/\1/')
+          echo "::set-output name=next_version::$NEXT_VERSION"
+
+      - name: Post comment on PR
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { context, github } = require('@actions/github');
+            const version = context.payload.inputs.version;
+            const prNumber = context.payload.pull_request.number;
+            const repo = context.repo;
+            const comment = `Suggested next semantic release version: ${version}`;
+            github.issues.createComment({...repo, issue_number: prNumber, body: comment});
+        env:
+          version: ${{ steps.determine_version.outputs.next_version }}
