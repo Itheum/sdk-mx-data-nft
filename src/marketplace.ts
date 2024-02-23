@@ -451,7 +451,7 @@ export class DataNftMarket {
       value: 0,
       data: data,
       receiver: this.contract.getAddress(),
-      gasLimit: 12000000,
+      gasLimit: 20_000_000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -491,7 +491,7 @@ export class DataNftMarket {
         .build(),
       receiver: senderAddress,
       sender: senderAddress,
-      gasLimit: 20000000,
+      gasLimit: 20_000_000,
       chainID: this.chainID
     });
     return offerEsdtTx;
@@ -520,7 +520,7 @@ export class DataNftMarket {
       value: price,
       data: data,
       receiver: this.contract.getAddress(),
-      gasLimit: 12000000,
+      gasLimit: 20_000_000,
       sender: senderAddress,
       chainID: this.chainID
     });

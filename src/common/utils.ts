@@ -20,7 +20,10 @@ export function numberToPaddedHex(value: BigNumber.Value) {
  * @param nonce the nonce of the token
  * @returns The token identifier in the format of ticker-randomString-nonce
  */
-export function createTokenIdentifier(collection: string, nonce: number) {
+export function createTokenIdentifier(
+  collection: string,
+  nonce: BigNumber.Value
+) {
   return `${collection}-${numberToPaddedHex(nonce)}`;
 }
 
@@ -31,7 +34,7 @@ export function createTokenIdentifier(collection: string, nonce: number) {
  */
 export function parseTokenIdentifier(tokenIdentifier: string): {
   collection: string;
-  nonce: number;
+  nonce: BigNumber.Value;
 } {
   const splitTokenIdentifier: string[] = tokenIdentifier.split('-');
 

@@ -117,10 +117,10 @@ export interface Offer {
   owner: string;
   offeredTokenIdentifier: string;
   offeredTokenNonce: number;
-  offeredTokenAmount: string;
+  offeredTokenAmount: BigNumber.Value;
   wantedTokenIdentifier: string;
   wantedTokenNonce: number;
-  wantedTokenAmount: string;
+  wantedTokenAmount: BigNumber.Value;
   quantity: number;
 }
 
@@ -132,7 +132,7 @@ export interface Bond {
   lockPeriod: number; // days
   bond_timestamp: number;
   unbound_timestamp: number;
-  bond_amount: string;
+  bond_amount: BigNumber.Value;
 }
 
 export enum State {
