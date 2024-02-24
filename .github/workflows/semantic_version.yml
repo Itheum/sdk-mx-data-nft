@@ -1,0 +1,46 @@
+name: Determine Next Release Version and bump version
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  get-next-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run semantic release dry-run
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          OUTPUT=$(unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci)
+          VERSION=$(echo "$OUTPUT" | grep -o "The next release version is [0-9]*\.[0-9]*\.[0-9]*" | awk '{print $6}')
+          echo "::set-output name=version::$VERSION"
+
+      - name: Use the version
+        run: echo "The version is ${{ steps.semantic.outputs.version }}"
+
+      - name: Update package.json with new version
+        run: |
+          sed -i 's/"version": "[^"]*"/"version": "${{ steps.semantic.outputs.version }}"/' package.json
+
+      - name: Commit version update
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add package.json
+          git commit -m "chore: update package.json version to ${{ steps.semantic.outputs.version }}"
+          git push
