@@ -53,10 +53,12 @@ export class SftMinter extends Minter {
    * @param taxToken the tax token to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
    */
   async viewMinterRequirements(
-    address: IAddress
+    address: IAddress,
+    taxToken = itheumTokenIdentifier[this.env as EnvironmentsEnum]
   ): Promise<SftMinterRequirements> {
     const interaction = this.contract.methodsExplicit.getUserDataOut([
-      new AddressValue(address)
+      new AddressValue(address),
+      new TokenIdentifierValue(taxToken)
     ]);
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
@@ -68,6 +70,7 @@ export class SftMinter extends Minter {
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
       const requirements: SftMinterRequirements = {
+        antiSpamTaxValue: returnValue.anti_spam_tax_value.toNumber(),
         contractPaused: returnValue.is_paused,
         maxRoyalties: returnValue.max_royalties.toNumber(),
         minRoyalties: returnValue.min_royalties.toNumber(),
@@ -124,13 +127,19 @@ export class SftMinter extends Minter {
    * @param senderAddress The address of the sender, must be the admin of the contract
    * @param collectionName The name of the NFT collection
    * @param tokenTicker The ticker of the NFT collection
+   * @param antiSpamTaxTokenIdentifier The token identifier of the anti spam token
+   * @param antiSpamTaxTokenAmount The amount of anti spam token to be used for minting as tax
    * @param mintLimit(seconds)- The mint limit between mints
+   * @param treasury_address The address of the treasury to collect the anti spam tax
    */
   initializeContract(
     senderAddress: IAddress,
     collectionName: string,
     tokenTicker: string,
-    mintLimit: number
+    antiSpamTaxTokenIdentifier: string,
+    antiSpamTaxTokenAmount: BigNumber.Value,
+    mintLimit: number,
+    treasury_address: IAddress
   ): Transaction {
     const initializeContractTx = new Transaction({
       value: 0,
@@ -138,7 +147,10 @@ export class SftMinter extends Minter {
         .setFunction(new ContractFunction('initializeContract'))
         .addArg(new StringValue(collectionName))
         .addArg(new StringValue(tokenTicker))
+        .addArg(new TokenIdentifierValue(antiSpamTaxTokenIdentifier))
+        .addArg(new BigUIntValue(antiSpamTaxTokenAmount))
         .addArg(new U64Value(mintLimit))
+        .addArg(new AddressValue(treasury_address))
         .build(),
       receiver: this.contract.getAddress(),
       gasLimit: 10000000,
@@ -149,7 +161,30 @@ export class SftMinter extends Minter {
   }
 
   /**
-   *
+   * Creates a `setTreasuryAddress` transaction
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param treasuryAddress The address of the treasury to collect the anti spam tax
+   */
+  setTreasuryAddress(
+    senderAddress: IAddress,
+    treasuryAddress: IAddress
+  ): Transaction {
+    const setTreasuryAddressTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setTreasuryAddress'))
+        .addArg(new AddressValue(treasuryAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setTreasuryAddressTx;
+  }
+
+  /**
+   * Creates a `setAntiSpamTax` transaction
    * @param senderAddress The address of the sender, must be the admin of the contract
    * @param maxSupply The maximum supply that can be minted
    */
@@ -190,7 +225,7 @@ export class SftMinter extends Minter {
    * @param datasetTitle the title of the dataset. Between 10 and 60 alphanumeric characters.
    * @param datasetDescription the description of the dataset. Between 10 and 400 alphanumeric characters.
    * @param lockPeriod the lock period for the bond in days
-   * @param bondAmount the amount of the bond
+   * @param amountToSend the amount of the bond + anti spam tax (if anti spam tax > 0) to be sent
    * @param options [optional] below parameters are optional or required based on use case
    *                 - imageUrl: the URL of the image for the Data NFT
    *                 - traitsUrl: the URL of the traits for the Data NFT
@@ -208,7 +243,7 @@ export class SftMinter extends Minter {
     datasetTitle: string,
     datasetDescription: string,
     lockPeriod: number,
-    bondAmount: number,
+    amountToSend: number,
     options?: {
       imageUrl?: string;
       traitsUrl?: string;
@@ -302,7 +337,7 @@ export class SftMinter extends Minter {
           itheumTokenIdentifier[this.env as EnvironmentsEnum]
         )
       )
-      .addArg(new BigUIntValue(bondAmount))
+      .addArg(new BigUIntValue(amountToSend))
       .addArg(new StringValue('mint'))
       .addArg(new StringValue(tokenName))
       .addArg(new StringValue(imageOnIpfsUrl))
