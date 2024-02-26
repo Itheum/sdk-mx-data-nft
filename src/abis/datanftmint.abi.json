@@ -45,8 +45,20 @@
                     "type": "bytes"
                 },
                 {
+                    "name": "anti_spam_tax_token",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "anti_spam_tax_value",
+                    "type": "BigUint"
+                },
+                {
                     "name": "mint_time_limit",
                     "type": "u64"
+                },
+                {
+                    "name": "treasury_address",
+                    "type": "Address"
                 }
             ],
             "outputs": []
@@ -126,6 +138,18 @@
             "outputs": []
         },
         {
+            "name": "setTreasuryAddress",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "setIsPaused",
             "mutability": "mutable",
             "inputs": [
@@ -143,6 +167,21 @@
                 {
                     "name": "is_enabled",
                     "type": "bool"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setAntiSpamTax",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_id",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "tax",
+                    "type": "BigUint"
                 }
             ],
             "outputs": []
@@ -274,6 +313,16 @@
             ]
         },
         {
+            "name": "getTreasuryAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
             "name": "getWithdrawalAddress",
             "mutability": "readonly",
             "inputs": [],
@@ -287,6 +336,21 @@
             "name": "getMintedTokens",
             "mutability": "readonly",
             "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "getAntiSpamTax",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                }
+            ],
             "outputs": [
                 {
                     "type": "BigUint"
@@ -447,7 +511,7 @@
             ]
         },
         {
-            "name": "getBondContractAddress",
+            "name": "getAdministrator",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [
@@ -457,7 +521,7 @@
             ]
         },
         {
-            "name": "getAdministrator",
+            "name": "getBondContractAddress",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [
@@ -473,6 +537,10 @@
                 {
                     "name": "address",
                     "type": "Address"
+                },
+                {
+                    "name": "tax_token",
+                    "type": "EgldOrEsdtTokenIdentifier"
                 }
             ],
             "outputs": [
@@ -867,6 +935,16 @@
             ]
         },
         {
+            "identifier": "setBondContractAddress",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
             "identifier": "withdrawTokens",
             "inputs": [
                 {
@@ -926,6 +1004,10 @@
         "UserDataOut": {
             "type": "struct",
             "fields": [
+                {
+                    "name": "anti_spam_tax_value",
+                    "type": "BigUint"
+                },
                 {
                     "name": "is_paused",
                     "type": "bool"
