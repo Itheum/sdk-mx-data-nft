@@ -1,13 +1,12 @@
-name: Determine Next Release Version
+name: Determine Next Release Version and bump version
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
-    types: [opened, synchronize]
+      - develop
 
 jobs:
-  determine-release-version:
+  get-next-version:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -21,22 +20,40 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Determine next release version
-        id: determine_version
-        run: |
-          NEXT_VERSION=$(npx semantic-release --dry-run | grep 'The next release version is' | sed -E 's/.* ([[:digit:].]+)$/\1/')
-          echo "::set-output name=next_version::$NEXT_VERSION"
-
-      - name: Post comment on PR
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { context, github } = require('@actions/github');
-            const version = context.payload.inputs.version;
-            const prNumber = context.payload.pull_request.number;
-            const repo = context.repo;
-            const comment = `Suggested next semantic release version: ${version}`;
-            github.issues.createComment({...repo, issue_number: prNumber, body: comment});
+      - name: Run semantic release dry-run
+        id: semantic
         env:
-          version: ${{ steps.determine_version.outputs.next_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          OUTPUT=$(unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci)
+          VERSION=$(echo "$OUTPUT" | grep -o "The next release version is [0-9]*\.[0-9]*\.[0-9]*" | awk '{print $6}')
+          echo "::set-output name=version::$VERSION"
+
+      - name: Use the version
+        run: echo "The version is ${{ steps.semantic.outputs.version }}"
+
+      - name: Check if version needs to be updated
+        id: check_version
+        run: |
+          current_version=$(jq -r '.version' package.json)
+          new_version="${{ steps.semantic.outputs.version }}"
+          if [ "$current_version" != "$new_version" ]; then
+            echo "::set-output name=version_updated::true"
+          else
+            echo "::set-output name=version_updated::false"
+          fi
+
+      - name: Update package.json with new version
+        if: steps.check_version.outputs.version_updated == 'true'
+        run: |
+          sed -i 's/"version": "[^"]*"/"version": "${{ steps.semantic.outputs.version }}"/' package.json
+
+      - name: Commit version update
+        if: steps.check_version.outputs.version_updated == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add package.json
+          git commit -m "chore: update package.json version to ${{ steps.semantic.outputs.version }}"
+          git push
