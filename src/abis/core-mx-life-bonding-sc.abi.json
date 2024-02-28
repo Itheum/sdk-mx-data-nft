@@ -80,11 +80,30 @@
                 {
                     "name": "nonce",
                     "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "proof",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "claimRefund",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
                 },
                 {
-                    "name": "new_lock_period",
-                    "type": "optional<u64>",
-                    "multi_arg": true
+                    "name": "nonce",
+                    "type": "u64"
                 }
             ],
             "outputs": []
@@ -167,25 +186,6 @@
             ]
         },
         {
-            "name": "getCompensations",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "Compensation"
-                }
-            ]
-        },
-        {
             "name": "getBond",
             "mutability": "readonly",
             "inputs": [
@@ -205,6 +205,60 @@
             "mutability": "readonly",
             "inputs": [
                 {
+                    "name": "compensation_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "Compensation"
+                }
+            ]
+        },
+        {
+            "name": "getCompensations",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "input",
+                    "type": "variadic<multi<TokenIdentifier,u64>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<Compensation>"
+                }
+            ]
+        },
+        {
+            "name": "getPagedCompensations",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "start_index",
+                    "type": "u64"
+                },
+                {
+                    "name": "end_index",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<Compensation>"
+                }
+            ]
+        },
+        {
+            "name": "getAddressRefundForCompensation",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
                     "name": "token_identifier",
                     "type": "TokenIdentifier"
                 },
@@ -215,7 +269,7 @@
             ],
             "outputs": [
                 {
-                    "type": "Compensation"
+                    "type": "Option<tuple<Compensation,Option<Refund>>>"
                 }
             ]
         },
@@ -277,6 +331,35 @@
             ]
         },
         {
+            "name": "getPagedBonds",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "start_index",
+                    "type": "u64"
+                },
+                {
+                    "name": "end_index",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<Bond>"
+                }
+            ]
+        },
+        {
+            "name": "getBondsLen",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
             "name": "getLockPeriodsBonds",
             "mutability": "readonly",
             "inputs": [],
@@ -285,6 +368,25 @@
                     "type": "tuple<List<u64>,List<BigUint>>"
                 }
             ]
+        },
+        {
+            "name": "initiateRefund",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "timestamp",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
         },
         {
             "name": "sanction",
@@ -350,6 +452,18 @@
             "outputs": []
         },
         {
+            "name": "removeAcceptedCallers",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "callers",
+                    "type": "variadic<Address>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "setBondToken",
             "mutability": "mutable",
             "inputs": [
@@ -367,6 +481,18 @@
                 {
                     "name": "args",
                     "type": "variadic<multi<u64,BigUint>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removePeriodsBonds",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "lock_periods",
+                    "type": "variadic<u64>",
                     "multi_arg": true
                 }
             ],
@@ -482,6 +608,10 @@
             "type": "struct",
             "fields": [
                 {
+                    "name": "compensation_id",
+                    "type": "u64"
+                },
+                {
                     "name": "token_identifier",
                     "type": "TokenIdentifier"
                 },
@@ -490,7 +620,32 @@
                     "type": "u64"
                 },
                 {
-                    "name": "total_compenstation_amount",
+                    "name": "accumulated_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "proof_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "end_date",
+                    "type": "u64"
+                }
+            ]
+        },
+        "EsdtTokenPayment": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "token_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "amount",
                     "type": "BigUint"
                 }
             ]
@@ -509,6 +664,23 @@
                 {
                     "name": "Maximum",
                     "discriminant": 2
+                }
+            ]
+        },
+        "Refund": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "proof_of_refund",
+                    "type": "EsdtTokenPayment"
+                },
+                {
+                    "name": "compensation_id",
+                    "type": "u64"
                 }
             ]
         },

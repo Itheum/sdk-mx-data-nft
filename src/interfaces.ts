@@ -136,6 +136,25 @@ export interface Bond {
   bondAmount: BigNumber.Value;
 }
 
+export interface Refund {
+  compensationId: number;
+  address: string;
+  proofOfRefund: {
+    tokenIdentifier: string;
+    nonce: number;
+    amount: BigNumber.Value;
+  };
+}
+
+export interface Compensation {
+  compensationId: number;
+  tokenIdentifier: string;
+  nonce: number;
+  accumulatedAmount: BigNumber.Value;
+  proofAmount: BigNumber.Value;
+  endDate: number;
+}
+
 export enum State {
   Inactive = 0,
   Active = 1
@@ -145,12 +164,6 @@ export enum PenaltyType {
   Minimum = 0,
   Custom = 1,
   Maximum = 2
-}
-
-export interface Compensation {
-  tokenIdentifier: string;
-  nonce: number;
-  totalCompensationAmount: string;
 }
 
 export interface ViewDataReturnType {

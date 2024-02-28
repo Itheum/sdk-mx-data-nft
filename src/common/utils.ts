@@ -6,7 +6,14 @@ import {
   ErrMissingTrait,
   ErrMissingValueForTrait
 } from '../errors';
-import { Bond, Compensation, NftEnumType, NftType, Offer } from '../interfaces';
+import {
+  Bond,
+  Compensation,
+  NftEnumType,
+  NftType,
+  Offer,
+  Refund
+} from '../interfaces';
 import { EnvironmentsEnum, dataMarshalUrlOverride } from '../config';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
@@ -92,9 +99,24 @@ export function parseBond(value: any): Bond {
 
 export function parseCompensation(value: any): Compensation {
   return {
+    compensationId: value.compensation_id.toNumber(),
     tokenIdentifier: value.token_identifier.toString(),
     nonce: value.nonce.toNumber(),
-    totalCompensationAmount: value.total_compenstation_amount.toFixed(0)
+    accumulatedAmount: value.accumulate_amount.toFixed(0),
+    proofAmount: value.proof_amount.toFixed(0),
+    endDate: value.end_date.toNumber()
+  };
+}
+
+export function parseRefund(value: any): Refund {
+  return {
+    compensationId: value.compensation_id.toNumber(),
+    address: value.address.toString(),
+    proofOfRefund: {
+      tokenIdentifier: value.proof_of_refund.token_identifier.toString(),
+      nonce: value.proof_of_refund.token_nonce.toNumber(),
+      amount: value.proof_of_refund.amount.toFixed(0)
+    }
   };
 }
 
