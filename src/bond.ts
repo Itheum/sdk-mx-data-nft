@@ -503,6 +503,10 @@ export class BondContract extends Contract {
     throw new Error('Not implemented');
   }
 
+  removeAcceptedCallers(senderAddress: IAddress, addresses: IAddress[]) {
+    throw new Error('Not implemented');
+  }
+
   setBondToken(senderAddress: IAddress, tokenIdentifier: string) {
     throw new Error('Not implemented');
   }
@@ -515,6 +519,10 @@ export class BondContract extends Contract {
     throw new Error('Not implemented');
   }
 
+  removePeriodsBonds(senderAddress: IAddress, periods: number[]) {
+    throw new Error('Not implemented');
+  }
+
   setMinimumPenalty(senderAddress: IAddress, penalty: number) {
     throw new Error('Not implemented');
   }
@@ -524,6 +532,15 @@ export class BondContract extends Contract {
   }
 
   setWithdrawPenalty(senderAddress: IAddress, penalty: number) {
+    throw new Error('Not implemented');
+  }
+
+  initiateRefund(
+    senderAddress: IAddress,
+    tokenIdentifier: string,
+    nonce: number,
+    timestamp: number
+  ) {
     throw new Error('Not implemented');
   }
 
