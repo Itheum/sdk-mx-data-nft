@@ -26,39 +26,21 @@ import {
   parseTokenIdentifier
 } from './common/utils';
 import BigNumber from 'bignumber.js';
+import { Contract } from './contract';
 
-export class BondContract {
-  readonly contract: SmartContract;
-  readonly chainID: string;
-  readonly networkProvider: ApiNetworkProvider;
-  readonly env: string;
-
+export class BondContract extends Contract {
   /**
    * Creates a new instance of the DataNftMarket which can be used to interact with the marketplace smart contract
    * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: string, timeout: number = 10000) {
-    if (!(env in EnvironmentsEnum)) {
-      throw new ErrNetworkConfig(
-        `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
-      );
-    }
-    this.env = env;
-    const networkConfig = networkConfiguration[env as EnvironmentsEnum];
-    this.chainID = networkConfig.chainID;
-    this.networkProvider = new ApiNetworkProvider(
-      networkConfig.networkProvider,
-      {
-        timeout: timeout
-      }
+    super(
+      env,
+      new Address(bondContractAddress[env as EnvironmentsEnum]),
+      bondContractAbi,
+      timeout
     );
-    const contractAddress = bondContractAddress[env as EnvironmentsEnum];
-
-    this.contract = new SmartContract({
-      address: new Address(contractAddress),
-      abi: AbiRegistry.create(bondContractAbi)
-    });
   }
 
   /**
