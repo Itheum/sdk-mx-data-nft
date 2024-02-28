@@ -130,10 +130,10 @@ export interface Bond {
   address: string;
   tokenIdentifier: string;
   nonce: number;
-  lockPeriod: number; // days
-  bond_timestamp: number;
-  unbound_timestamp: number;
-  bond_amount: BigNumber.Value;
+  lockPeriod: number; // seconds
+  bondTimestamp: number;
+  unboundTimestamp: number;
+  bondAmount: BigNumber.Value;
 }
 
 export enum State {
