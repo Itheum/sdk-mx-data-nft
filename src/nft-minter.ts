@@ -17,16 +17,13 @@ import {
   dataNFTDataStreamAdvertise,
   storeToIpfs
 } from './common/mint-utils';
-import {
-  checkTraitsUrl,
-  checkUrlIsUp,
-  validateSpecificParamsMint
-} from './common/utils';
+import { checkTraitsUrl, checkUrlIsUp } from './common/utils';
 import { EnvironmentsEnum, itheumTokenIdentifier } from './config';
 import { ErrArgumentNotSet, ErrContractQuery } from './errors';
 import { ContractConfiguration, NftMinterRequirements } from './interfaces';
 import { Minter } from './minter';
 import BigNumber from 'bignumber.js';
+import { Validator, validateResults } from './common/validator';
 
 export class NftMinter extends Minter {
   /**
@@ -188,27 +185,6 @@ export class NftMinter extends Minter {
       antiSpamTokenIdentifier,
       antiSpamTax
     } = options ?? {};
-
-    // S: run any format specific validation
-    const { allPassed, validationMessages } = validateSpecificParamsMint({
-      senderAddress,
-      tokenName,
-      royalties,
-      datasetTitle,
-      datasetDescription,
-      _mandatoryParamsList: [
-        'senderAddress',
-        'tokenName',
-        'royalties',
-        'datasetTitle',
-        'datasetDescription'
-      ]
-    });
-
-    if (!allPassed) {
-      throw new Error(`Params have validation issues = ${validationMessages}`);
-    }
-    // E: run any format specific validation...
 
     // deep validate all mandatory URLs
     try {

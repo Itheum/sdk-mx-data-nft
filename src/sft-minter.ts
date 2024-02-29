@@ -17,11 +17,7 @@ import {
   dataNFTDataStreamAdvertise,
   storeToIpfs
 } from './common/mint-utils';
-import {
-  checkTraitsUrl,
-  checkUrlIsUp,
-  validateSpecificParamsMint
-} from './common/utils';
+import { checkTraitsUrl, checkUrlIsUp } from './common/utils';
 import {
   EnvironmentsEnum,
   itheumTokenIdentifier,
@@ -31,6 +27,7 @@ import { ErrArgumentNotSet, ErrContractQuery } from './errors';
 import { SftMinterRequirements } from './interfaces';
 import { Minter } from './minter';
 import BigNumber from 'bignumber.js';
+import { Validator, validateResults } from './common/validator';
 
 export class SftMinter extends Minter {
   /**
@@ -252,28 +249,47 @@ export class SftMinter extends Minter {
   ): Promise<Transaction> {
     const { imageUrl, traitsUrl, nftStorageToken } = options ?? {};
 
-    // S: run any format specific validation
-    const { allPassed, validationMessages } = validateSpecificParamsMint({
-      senderAddress,
-      tokenName,
-      royalties,
-      supply,
-      datasetTitle,
-      datasetDescription,
-      _mandatoryParamsList: [
-        'senderAddress',
-        'tokenName',
-        'royalties',
-        'supply',
-        'datasetTitle',
-        'datasetDescription'
-      ]
-    });
+    const tokenNameValidator = new Validator()
+      .notEmpty()
+      .alphanumeric()
+      .minLength(3)
+      .maxLength(20)
+      .validate(tokenName);
 
-    if (!allPassed) {
-      throw new Error(`Params have validation issues = ${validationMessages}`);
-    }
-    // E: run any format specific validation...
+    const datasetTitleValidator = new Validator()
+      .notEmpty()
+      .alphanumeric()
+      .minLength(10)
+      .maxLength(60)
+      .validate(datasetTitle);
+
+    const datasetDescriptionValidator = new Validator()
+      .notEmpty()
+      .minLength(10)
+      .maxLength(400)
+      .validate(datasetDescription);
+
+    const royaltiesValidator = new Validator()
+      .notEmpty()
+      .numeric()
+      .minValue(0)
+      .maxValue(5000)
+      .validate(royalties);
+
+    const supplyValidator = new Validator()
+      .notEmpty()
+      .numeric()
+      .minValue(1)
+      .maxValue(1000)
+      .validate(supply);
+
+    validateResults([
+      tokenNameValidator,
+      datasetTitleValidator,
+      datasetDescriptionValidator,
+      royaltiesValidator,
+      supplyValidator
+    ]);
 
     // deep validate all mandatory URLs
     try {
