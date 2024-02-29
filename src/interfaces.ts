@@ -134,6 +134,7 @@ export interface Bond {
   bondTimestamp: number;
   unboundTimestamp: number;
   bondAmount: BigNumber.Value;
+  remainingAmount: BigNumber.Value;
 }
 
 export interface Refund {

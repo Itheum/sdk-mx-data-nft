@@ -93,7 +93,8 @@ export function parseBond(value: any): Bond {
     lockPeriod: value.lock_period.toNumber(),
     bondTimestamp: value.bond_timestamp.toNumber(),
     unboundTimestamp: value.unbound_timestamp.toNumber(),
-    bondAmount: value.bond_amount.toFixed(0)
+    bondAmount: value.bond_amount.toFixed(0),
+    remainingAmount: value.remaining_amount.toFixed(0)
   };
 }
 
