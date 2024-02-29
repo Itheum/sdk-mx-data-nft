@@ -186,6 +186,22 @@
             ]
         },
         {
+            "name": "getCompensationBlacklist",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "compensation_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<Address>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
             "name": "getBond",
             "mutability": "readonly",
             "inputs": [
@@ -368,6 +384,38 @@
                     "type": "tuple<List<u64>,List<BigUint>>"
                 }
             ]
+        },
+        {
+            "name": "setBlacklist",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "compensation_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "addresses",
+                    "type": "variadic<Address>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeBlacklist",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "compensation_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "addresses",
+                    "type": "variadic<Address>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
         },
         {
             "name": "initiateRefund",

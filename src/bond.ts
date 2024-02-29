@@ -107,6 +107,34 @@ export class BondContract extends Contract {
   }
 
   /**
+   * Returns a list of addresses that are blacklisted from claiming compensations
+   * @param compensationId compensaton id to query
+   * @returns
+   */
+  async viewCompensationBlacklist(compensationId: number): Promise<string[]> {
+    const interaction = this.contract.methodsExplicit.getCompensationBlacklist([
+      new U64Value(compensationId)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return firstValue
+        ?.valueOf()
+        .map((address: any) => new Address(address).bech32());
+    } else {
+      throw new ErrContractQuery(
+        'viewCompensationBlacklist',
+        returnCode.toString()
+      );
+    }
+  }
+
+  /**
    * Returns the contract lock periods and bond amounts
    */
   async viewLockPeriodsWithBonds(): Promise<
@@ -500,6 +528,14 @@ export class BondContract extends Contract {
   }
 
   setAcceptedCallers(senderAddress: IAddress, addresses: IAddress[]) {
+    throw new Error('Not implemented');
+  }
+
+  setBlacklist(senderAddress: IAddress, addresses: IAddress[]) {
+    throw new Error('Not implemented');
+  }
+
+  removeBlacklist(senderAddress: IAddress, addresses: IAddress[]) {
     throw new Error('Not implemented');
   }
 
