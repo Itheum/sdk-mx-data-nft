@@ -262,10 +262,9 @@ export class SftMinter extends Minter {
 
     const datasetTitleValidator = new StringValidator()
       .notEmpty()
-      .alphanumeric()
       .minLength(10)
       .maxLength(60)
-      .validate(datasetTitle);
+      .validate(datasetTitle.trim());
 
     const datasetDescriptionValidator = new StringValidator()
       .notEmpty()
