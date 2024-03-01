@@ -23,7 +23,6 @@ import { ErrArgumentNotSet, ErrContractQuery } from './errors';
 import { ContractConfiguration, NftMinterRequirements } from './interfaces';
 import { Minter } from './minter';
 import BigNumber from 'bignumber.js';
-import { Validator, validateResults } from './common/validator';
 
 export class NftMinter extends Minter {
   /**

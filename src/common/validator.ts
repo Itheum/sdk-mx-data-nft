@@ -3,8 +3,9 @@ export type Result<T> = { ok: true; value: T } | { ok: false; message: string };
 interface IValidator<T> {
   validate(value: unknown): Result<T>;
 }
-
-export function validateResults<T>(results: Result<T>[]): void {
+export function validateResults(
+  results: (Result<string> | Result<number>)[]
+): void {
   const errors: string[] = [];
 
   results.forEach((result, index) => {
@@ -23,12 +24,14 @@ type StringRule =
   | { type: 'notEqual'; value: string }
   | { type: 'minLength'; min: number }
   | { type: 'maxLength'; max: number }
-  | { type: 'alphanumeric' }
-  | { type: 'numeric' }
-  | { type: 'minValue'; value: number }
-  | { type: 'maxValue'; value: number };
+  | { type: 'alphanumeric' };
 
-export class Validator implements IValidator<string> {
+type NumericRule =
+  | { type: 'minValue'; value: number }
+  | { type: 'maxValue'; value: number }
+  | { type: 'integer' };
+
+export class StringValidator implements IValidator<string> {
   private rules: StringRule[];
 
   constructor(rules: StringRule[] = []) {
@@ -39,52 +42,57 @@ export class Validator implements IValidator<string> {
     this.rules.push(rule);
   }
 
-  equals(value: string): Validator {
+  equals(value: string): StringValidator {
     this.addRule({ type: 'equal', value });
     return this;
   }
 
-  notEquals(value: string): Validator {
+  notEquals(value: string): StringValidator {
     this.addRule({ type: 'notEqual', value });
     return this;
   }
 
-  minLength(min: number): Validator {
+  minLength(min: number): StringValidator {
     this.addRule({ type: 'minLength', min });
     return this;
   }
 
-  maxLength(max: number): Validator {
+  maxLength(max: number): StringValidator {
     this.addRule({ type: 'maxLength', max });
     return this;
   }
 
-  notEmpty(): Validator {
-    this.addRule({ type: 'minLength', min: 1 });
-    return this;
-  }
-
-  alphanumeric(): Validator {
+  alphanumeric(): StringValidator {
     this.addRule({ type: 'alphanumeric' });
     return this;
   }
 
-  numeric(): Validator {
-    this.addRule({ type: 'numeric' });
+  notEmpty(): StringValidator {
+    this.addRule({ type: 'minLength', min: 1 });
     return this;
   }
 
-  minValue(value: number): Validator {
-    this.addRule({ type: 'minValue', value });
-    return this;
+  validate(value: unknown): Result<string> {
+    if (typeof value !== 'string') {
+      return {
+        ok: false,
+        message: `Validator expected a string but received ${typeof value}.`
+      };
+    }
+
+    let result: Result<string> = { ok: true, value };
+
+    for (const rule of this.rules) {
+      result = this.checkStringRule(rule, value);
+      if (!result.ok) {
+        break;
+      }
+    }
+
+    return result;
   }
 
-  maxValue(value: number): Validator {
-    this.addRule({ type: 'maxValue', value });
-    return this;
-  }
-
-  private checkRule(rule: StringRule, value: string): Result<string> {
+  private checkStringRule(rule: StringRule, value: string): Result<string> {
     switch (rule.type) {
       case 'equal':
         return rule.value !== value
@@ -123,13 +131,62 @@ export class Validator implements IValidator<string> {
               message: 'Value must contain only alphanumeric characters.'
             };
 
-      case 'numeric':
-        return /^[0-9]+$/.test(value)
-          ? { ok: true, value }
-          : { ok: false, message: 'Value must be numeric.' };
+      default:
+        return { ok: true, value };
+    }
+  }
+}
 
+export class NumericValidator implements IValidator<number> {
+  private rules: NumericRule[];
+
+  constructor(rules: NumericRule[] = []) {
+    this.rules = rules;
+  }
+
+  private addRule(rule: NumericRule): void {
+    this.rules.push(rule);
+  }
+
+  minValue(value: number): NumericValidator {
+    this.addRule({ type: 'minValue', value });
+    return this;
+  }
+
+  maxValue(value: number): NumericValidator {
+    this.addRule({ type: 'maxValue', value });
+    return this;
+  }
+
+  integer(): NumericValidator {
+    this.addRule({ type: 'integer' });
+    return this;
+  }
+
+  validate(value: unknown): Result<number> {
+    if (typeof value !== 'number' || isNaN(value)) {
+      return {
+        ok: false,
+        message: `Validator expected a number but received ${typeof value}.`
+      };
+    }
+
+    let result: Result<number> = { ok: true, value };
+
+    for (const rule of this.rules) {
+      result = this.checkNumericRule(rule, value);
+      if (!result.ok) {
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  private checkNumericRule(rule: NumericRule, value: number): Result<number> {
+    switch (rule.type) {
       case 'minValue':
-        return parseInt(value) < rule.value
+        return value < rule.value
           ? {
               ok: false,
               message: `Value must be greater than or equal to ${rule.value}.`
@@ -137,44 +194,18 @@ export class Validator implements IValidator<string> {
           : { ok: true, value };
 
       case 'maxValue':
-        return parseInt(value) > rule.value
+        return value > rule.value
           ? {
               ok: false,
               message: `Value must be less than or equal to ${rule.value}.`
             }
           : { ok: true, value };
-
+      case 'integer':
+        return value % 1 !== 0
+          ? { ok: false, message: 'Value must be an integer.' }
+          : { ok: true, value };
       default:
         return { ok: true, value };
     }
-  }
-
-  validate(value: unknown): Result<string> {
-    if (value === null) {
-      return {
-        ok: false,
-        message: 'Validator expected a string but received null.'
-      };
-    } else if (value === undefined) {
-      return {
-        ok: false,
-        message: 'Validator expected a string but received undefined.'
-      };
-    } else if (typeof value !== 'string') {
-      return {
-        ok: false,
-        message: `Validator expected a string but received ${typeof value}.`
-      };
-    }
-
-    for (let rule of this.rules) {
-      const result = this.checkRule(rule, value);
-
-      if (!result.ok) {
-        return result;
-      }
-    }
-
-    return { ok: true, value };
   }
 }

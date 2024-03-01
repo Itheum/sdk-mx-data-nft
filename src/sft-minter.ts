@@ -27,7 +27,11 @@ import { ErrArgumentNotSet, ErrContractQuery } from './errors';
 import { SftMinterRequirements } from './interfaces';
 import { Minter } from './minter';
 import BigNumber from 'bignumber.js';
-import { Validator, validateResults } from './common/validator';
+import {
+  NumericValidator,
+  StringValidator,
+  validateResults
+} from './common/validator';
 
 export class SftMinter extends Minter {
   /**
@@ -249,36 +253,34 @@ export class SftMinter extends Minter {
   ): Promise<Transaction> {
     const { imageUrl, traitsUrl, nftStorageToken } = options ?? {};
 
-    const tokenNameValidator = new Validator()
+    const tokenNameValidator = new StringValidator()
       .notEmpty()
       .alphanumeric()
       .minLength(3)
       .maxLength(20)
       .validate(tokenName);
 
-    const datasetTitleValidator = new Validator()
+    const datasetTitleValidator = new StringValidator()
       .notEmpty()
       .alphanumeric()
       .minLength(10)
       .maxLength(60)
       .validate(datasetTitle);
 
-    const datasetDescriptionValidator = new Validator()
+    const datasetDescriptionValidator = new StringValidator()
       .notEmpty()
       .minLength(10)
       .maxLength(400)
       .validate(datasetDescription);
 
-    const royaltiesValidator = new Validator()
-      .notEmpty()
-      .numeric()
+    const royaltiesValidator = new NumericValidator()
+      .integer()
       .minValue(0)
       .maxValue(5000)
       .validate(royalties);
 
-    const supplyValidator = new Validator()
-      .notEmpty()
-      .numeric()
+    const supplyValidator = new NumericValidator()
+      .integer()
       .minValue(1)
       .maxValue(1000)
       .validate(supply);
