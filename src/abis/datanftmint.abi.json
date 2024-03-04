@@ -118,7 +118,7 @@
                     "type": "bytes"
                 },
                 {
-                    "name": "lock_period",
+                    "name": "lock_period_sec",
                     "type": "u64"
                 }
             ],
@@ -919,6 +919,11 @@
                 },
                 {
                     "name": "price",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "bond_amount",
                     "type": "BigUint",
                     "indexed": true
                 }
