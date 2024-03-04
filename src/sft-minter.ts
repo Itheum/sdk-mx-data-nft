@@ -275,13 +275,11 @@ export class SftMinter extends Minter {
     const royaltiesValidator = new NumericValidator()
       .integer()
       .minValue(0)
-      .maxValue(5000)
       .validate(royalties);
 
     const supplyValidator = new NumericValidator()
       .integer()
       .minValue(1)
-      .maxValue(1000)
       .validate(supply);
 
     validateResults([
