@@ -23,12 +23,9 @@ import {
 } from './config';
 import { ErrContractQuery, ErrNetworkConfig } from './errors';
 import BigNumber from 'bignumber.js';
+import { Contract } from './contract';
 
-export abstract class Minter {
-  readonly contract: SmartContract;
-  readonly chainID: string;
-  readonly networkProvider: ApiNetworkProvider;
-  readonly env: string;
+export abstract class Minter extends Contract {
   readonly imageServiceUrl: string;
 
   protected constructor(
@@ -37,25 +34,8 @@ export abstract class Minter {
     abiFile: any,
     timeout: number = 10000
   ) {
-    if (!(env in EnvironmentsEnum)) {
-      throw new ErrNetworkConfig(
-        `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
-      );
-    }
-    this.env = env;
-    const networkConfig = networkConfiguration[env as EnvironmentsEnum];
+    super(env, contractAddress, abiFile, timeout);
     this.imageServiceUrl = imageService[env as EnvironmentsEnum];
-    this.chainID = networkConfig.chainID;
-    this.networkProvider = new ApiNetworkProvider(
-      networkConfig.networkProvider,
-      {
-        timeout: timeout
-      }
-    );
-    this.contract = new SmartContract({
-      address: contractAddress,
-      abi: AbiRegistry.create(abiFile)
-    });
   }
 
   /**

@@ -9,6 +9,12 @@ export class ErrNetworkConfig extends Error {
   }
 }
 
+export class ErrContractAddressNotSet extends Error {
+  public constructor(env: string, message?: string) {
+    super(message || 'Contract address is not deployed on ' + env);
+  }
+}
+
 export class ErrArgumentNotSet extends Error {
   public constructor(argument: string, message?: string) {
     super(`Argument "${argument}" is not set. ${message}`);

@@ -210,7 +210,7 @@ export class DataNftMarket {
       new U64Value(to)
     ]);
     if (senderAddress) {
-      interaction = this.contract.methodsExplicit.viewPagedOffersByAddress([
+      interaction = this.contract.methodsExplicit.viewPagedOffers([
         new U64Value(from),
         new U64Value(to),
         new AddressValue(senderAddress)
@@ -561,11 +561,13 @@ export class DataNftMarket {
    * Creates a `cancelOffer` transaction
    * @param senderAddress the address of the sender
    * @param offerId the id of the offer to be cancelled
+   * @param quantity the quantity of the offer to be cancelled
    * @param sendFundsBackToOwner default `true`, if `false` the offer will be cancelled, but the funds will be kept in the contract until withdrawal
    */
   cancelOffer(
     senderAddress: IAddress,
     offerId: number,
+    quantity: number,
     sendFundsBackToOwner = true
   ): Transaction {
     const cancelTx = new Transaction({
@@ -573,6 +575,7 @@ export class DataNftMarket {
       data: new ContractCallPayloadBuilder()
         .setFunction(new ContractFunction('cancelOffer'))
         .addArg(new U64Value(offerId))
+        .addArg(new U64Value(quantity))
         .addArg(new BooleanValue(sendFundsBackToOwner))
         .build(),
       receiver: this.contract.getAddress(),

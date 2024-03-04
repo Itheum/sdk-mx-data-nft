@@ -1,7 +1,15 @@
 import { BondContract, Compensation, State } from '../src';
 import { Bond } from '../src';
+import { ErrContractAddressNotSet } from '../src/errors';
 
 describe('Bond test', () => {
+  test('#test no deploy', () => {
+    try {
+      const bondContract = new BondContract('testnet');
+    } catch (e: any) {
+      expect(e.message).toBe('Contract address is not deployed on testnet');
+    }
+  });
   test('#test view methods', async () => {
     const bondContract = new BondContract('devnet');
 

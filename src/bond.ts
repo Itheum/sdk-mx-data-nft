@@ -1,64 +1,42 @@
 import {
-  AbiRegistry,
   Address,
   AddressValue,
+  BigUIntValue,
   ContractCallPayloadBuilder,
+  ContractFunction,
   IAddress,
   ResultsParser,
-  SmartContract,
   TokenIdentifierValue,
   Transaction,
   U64Value
 } from '@multiversx/sdk-core/out';
-import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
-import { ErrContractQuery, ErrNetworkConfig } from './errors';
-import {
-  EnvironmentsEnum,
-  bondContractAddress,
-  networkConfiguration
-} from './config';
+import { EnvironmentsEnum, bondContractAddress } from './config';
+import { ErrContractQuery } from './errors';
 
+import BigNumber from 'bignumber.js';
 import bondContractAbi from './abis/core-mx-life-bonding-sc.abi.json';
-import { Bond, Compensation, PenaltyType, State } from './interfaces';
 import {
   parseBond,
   parseCompensation,
+  parseRefund,
   parseTokenIdentifier
 } from './common/utils';
-import BigNumber from 'bignumber.js';
+import { Contract } from './contract';
+import { Bond, Compensation, PenaltyType, State } from './interfaces';
 
-export class BondContract {
-  readonly contract: SmartContract;
-  readonly chainID: string;
-  readonly networkProvider: ApiNetworkProvider;
-  readonly env: string;
-
+export class BondContract extends Contract {
   /**
    * Creates a new instance of the DataNftMarket which can be used to interact with the marketplace smart contract
    * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
    */
   constructor(env: string, timeout: number = 10000) {
-    if (!(env in EnvironmentsEnum)) {
-      throw new ErrNetworkConfig(
-        `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
-      );
-    }
-    this.env = env;
-    const networkConfig = networkConfiguration[env as EnvironmentsEnum];
-    this.chainID = networkConfig.chainID;
-    this.networkProvider = new ApiNetworkProvider(
-      networkConfig.networkProvider,
-      {
-        timeout: timeout
-      }
+    super(
+      env,
+      new Address(bondContractAddress[env as EnvironmentsEnum]),
+      bondContractAbi,
+      timeout
     );
-    const contractAddress = bondContractAddress[env as EnvironmentsEnum];
-
-    this.contract = new SmartContract({
-      address: new Address(contractAddress),
-      abi: AbiRegistry.create(bondContractAbi)
-    });
   }
 
   /**
@@ -129,6 +107,34 @@ export class BondContract {
   }
 
   /**
+   * Returns a list of addresses that are blacklisted from claiming compensations
+   * @param compensationId compensaton id to query
+   * @returns
+   */
+  async viewCompensationBlacklist(compensationId: number): Promise<string[]> {
+    const interaction = this.contract.methodsExplicit.getCompensationBlacklist([
+      new U64Value(compensationId)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return firstValue
+        ?.valueOf()
+        .map((address: any) => new Address(address).bech32());
+    } else {
+      throw new ErrContractQuery(
+        'viewCompensationBlacklist',
+        returnCode.toString()
+      );
+    }
+  }
+
+  /**
    * Returns the contract lock periods and bond amounts
    */
   async viewLockPeriodsWithBonds(): Promise<
@@ -183,6 +189,95 @@ export class BondContract {
   }
 
   /**
+   * Returns a `Compensation` object for the given compensation id
+   * @param compensationId compensation id to query
+   */
+  async viewCompensation(compensationId: number) {
+    throw new Error('Not implemented');
+  }
+
+  /**
+   * Returns a `Compensation` object array for the given tokens
+   * @param tokens tokens to query
+   */
+  async viewCompensations(
+    tokens: { tokenIdentifier: string; nonce: number }[]
+  ) {
+    let combinedArray = [];
+    for (const token of tokens) {
+      combinedArray.push(new TokenIdentifierValue(token.tokenIdentifier));
+      combinedArray.push(new U64Value(token.nonce));
+    }
+    const interaction =
+      this.contract.methodsExplicit.getCompensations(combinedArray);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const compensations: Compensation[] = returnValue.map(
+        (compensation: Compensation) => parseCompensation(compensation)
+      );
+      return compensations;
+    } else {
+      throw new ErrContractQuery('viewCompensations', returnCode.toString());
+    }
+  }
+
+  /**
+   * Returns an Optional `Compensation` and `Refund` object for the given address and compensation id
+   * @param address address to query
+   * @param compensationId compensation id to query
+   */
+  async viewAddressRefund(address: IAddress, compensationId: number) {
+    const interaction = this.contract.methodsExplicit.getAddressRefund([
+      new AddressValue(address),
+      new U64Value(compensationId)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      if (returnValue) {
+        const [compensation, refund] = returnValue;
+        const parsedCompensation = parseCompensation(compensation);
+        const parsedRefund = refund ? parseRefund(refund) : null;
+        return { compensation: parsedCompensation, refund: parsedRefund };
+      } else {
+        return null;
+      }
+    } else {
+      throw new ErrContractQuery('viewAddressRefund', returnCode.toString());
+    }
+  }
+
+  /**
+   * Returns a `Compensation` object array for the given indexes
+   * @param start_index index to start
+   * @param end_index index to end
+   */
+  async viewPagedCompensations(startIndex: number, endIndex: number) {
+    throw new Error('Not implemented');
+  }
+
+  /**
+   * Returns a `Bond` object for the given bondId
+   * @param bondId bond id to query
+   */
+  async viewBond(bondId: number) {
+    throw new Error('Not implemented');
+  }
+
+  /**
    * Returns a `Bond` object array for the given address
    * @param address address to query
    */
@@ -225,6 +320,15 @@ export class BondContract {
     } else {
       throw new ErrContractQuery('viewAllBonds', returnCode.toString());
     }
+  }
+
+  /**
+   * Returns a `Bond` object array for the given indexes
+   * @param start_index index to start
+   * @param end_index index to end
+   */
+  async viewPagedBonds(startIndex: number, endIndex: number) {
+    throw new Error('Not implemented');
   }
 
   /**
@@ -299,33 +403,6 @@ export class BondContract {
       return bonds;
     } else {
       throw new ErrContractQuery('viewBonds', returnCode.toString());
-    }
-  }
-  /**
-   * Returns a `Compensation` object for the given tokenIdentifier and nonce
-   * @param tokenIdentifier token identifier to query
-   * @param nonce nonce to query
-   */
-  async viewCompensation(
-    tokenIdentifier: string,
-    nonce: number
-  ): Promise<Compensation> {
-    const interaction = this.contract.methodsExplicit.getCompensation([
-      new TokenIdentifierValue(tokenIdentifier),
-      new U64Value(nonce)
-    ]);
-    const query = interaction.buildQuery();
-    const queryResponse = await this.networkProvider.queryContract(query);
-    const endpointDefinition = interaction.getEndpoint();
-    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
-      queryResponse,
-      endpointDefinition
-    );
-    if (returnCode.isSuccess()) {
-      const compensation = parseCompensation(firstValue?.valueOf());
-      return compensation;
-    } else {
-      throw new ErrContractQuery('getCompensation', returnCode.toString());
     }
   }
 
@@ -454,6 +531,18 @@ export class BondContract {
     throw new Error('Not implemented');
   }
 
+  setBlacklist(senderAddress: IAddress, addresses: IAddress[]) {
+    throw new Error('Not implemented');
+  }
+
+  removeBlacklist(senderAddress: IAddress, addresses: IAddress[]) {
+    throw new Error('Not implemented');
+  }
+
+  removeAcceptedCallers(senderAddress: IAddress, addresses: IAddress[]) {
+    throw new Error('Not implemented');
+  }
+
   setBondToken(senderAddress: IAddress, tokenIdentifier: string) {
     throw new Error('Not implemented');
   }
@@ -463,6 +552,10 @@ export class BondContract {
     periods: number[],
     bonds: BigNumber.Value[]
   ) {
+    throw new Error('Not implemented');
+  }
+
+  removePeriodsBonds(senderAddress: IAddress, periods: number[]) {
     throw new Error('Not implemented');
   }
 
@@ -476,6 +569,163 @@ export class BondContract {
 
   setWithdrawPenalty(senderAddress: IAddress, penalty: number) {
     throw new Error('Not implemented');
+  }
+
+  initiateRefund(
+    senderAddress: IAddress,
+    tokenIdentifier: string,
+    nonce: number,
+    timestamp: number
+  ) {
+    throw new Error('Not implemented');
+  }
+
+  /**
+   * Builds a `bond` transaction with ESDT transfer
+   * @param senderAddress the address of the sender
+   * @param originalCaller  the address of the original caller
+   * @param tokenIdentifier the token identifier of the NFT/SFT
+   * @param nonce the token identifier nonce
+   * @param lockPeriod the lock period for the bond
+   * @param payment the payment for the bond (tokenIdentifier and amount)
+   */
+  bondWithESDT(
+    senderAddress: IAddress,
+    originalCaller: IAddress,
+    tokenIdentifier: string,
+    nonce: number,
+    lockPeriod: number,
+    payment: {
+      tokenIdentifier: string;
+      amount: BigNumber.Value;
+    }
+  ): Transaction {
+    const bondTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('ESDTTransfer'))
+        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
+        .addArg(new BigUIntValue(payment.amount))
+        .setFunction('bond')
+        .addArg(new AddressValue(originalCaller))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(lockPeriod))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 40_000_000,
+      chainID: this.chainID
+    });
+    return bondTx;
+  }
+
+  /**
+   * Builds a `bond` transaction with NFT/SFT transfer
+   * @param senderAddress the address of the sender
+   * @param originalCaller  the address of the original caller
+   * @param tokenIdentifier the token identifier of the NFT/SFT
+   * @param nonce the token identifier nonce
+   * @param lockPeriod the lock period for the bond
+   * @param payment the payment for the bond (tokenIdentifier, nonce and amount)
+   */
+  bondWithNFT(
+    senderAddress: IAddress,
+    originalCaller: IAddress,
+    tokenIdentifier: string,
+    nonce: number,
+    lockPeriod: number,
+    payment: {
+      tokenIdentifier: string;
+      nonce: number;
+      amount: BigNumber.Value;
+    }
+  ): Transaction {
+    const bondTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('ESDTNFTTransfer'))
+        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
+        .addArg(new U64Value(payment.nonce))
+        .addArg(new BigUIntValue(payment.amount))
+        .setFunction('bond')
+        .addArg(new AddressValue(originalCaller))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(lockPeriod))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 40_000_000,
+      chainID: this.chainID
+    });
+    return bondTx;
+  }
+
+  /**
+   * Builds a `bond` transaction with EGLD transfer
+   * @param senderAddress the address of the sender
+   * @param originalCaller  the address of the original caller
+   * @param tokenIdentifier the token identifier of the NFT/SFT
+   * @param nonce the token identifier nonce
+   * @param lockPeriod the lock period for the bond
+   * @param payment the payment for the bond (tokenIdentifier, nonce and amount)
+   */
+  bondWithEGLD(
+    senderAddress: IAddress,
+    originalCaller: IAddress,
+    tokenIdentifier: string,
+    nonce: number,
+    lockPeriod: number,
+    payment: BigNumber.Value
+  ): Transaction {
+    const bondTx = new Transaction({
+      value: payment,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('bond')
+        .addArg(new AddressValue(originalCaller))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(lockPeriod))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 40_000_000,
+      chainID: this.chainID
+    });
+    return bondTx;
+  }
+
+  /**
+   * Builds a `bond` transaction with no payment
+   * @param senderAddress the address of the sender
+   * @param originalCaller  the address of the original caller
+   * @param tokenIdentifier the token identifier of the NFT/SFT
+   * @param nonce the token identifier nonce
+   * @param lockPeriod the lock period for the bond
+   */
+  bondWithNoPayment(
+    senderAddress: IAddress,
+    originalCaller: IAddress,
+    tokenIdentifier: string,
+    nonce: number,
+    lockPeriod: number
+  ): Transaction {
+    const bondTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('bond')
+        .addArg(new AddressValue(originalCaller))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(lockPeriod))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 40_000_000,
+      chainID: this.chainID
+    });
+    return bondTx;
   }
 
   /**
@@ -515,24 +765,13 @@ export class BondContract {
   renew(
     senderAddress: IAddress,
     tokenIdentifier: string,
-    nonce: number,
-    newLockPeriod?: number
+    nonce: number
   ): Transaction {
-    let data;
-    if (newLockPeriod) {
-      data = new ContractCallPayloadBuilder()
-        .setFunction('renew')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new U64Value(newLockPeriod))
-        .build();
-    } else {
-      data = new ContractCallPayloadBuilder()
-        .setFunction('renew')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .build();
-    }
+    const data = new ContractCallPayloadBuilder()
+      .setFunction('renew')
+      .addArg(new TokenIdentifierValue(tokenIdentifier))
+      .addArg(new U64Value(nonce))
+      .build();
 
     const renewTx = new Transaction({
       value: 0,
@@ -543,5 +782,62 @@ export class BondContract {
       chainID: this.chainID
     });
     return renewTx;
+  }
+
+  /**
+   * Builds a `proof` transaction
+   * @param senderAddress the address of the sender
+   * @param payment the payment (NFT/SFT) to prove
+   * @returns
+   */
+  proof(
+    senderAddress: IAddress,
+    payment: { tokenIdentifier: string; nonce: number; amount: BigNumber.Value }
+  ): Transaction {
+    const data = new ContractCallPayloadBuilder()
+      .setFunction(new ContractFunction('ESDTNFTTransfer'))
+      .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
+      .addArg(new U64Value(payment.nonce))
+      .addArg(new BigUIntValue(payment.amount))
+      .setFunction('proof')
+      .build();
+
+    const proofTx = new Transaction({
+      value: 0,
+      data,
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 40_000_000,
+      chainID: this.chainID
+    });
+    return proofTx;
+  }
+
+  /**
+   * Builds a `claimRefund` transaction
+   * @param senderAddress address of the sender
+   * @param tokenIdentifier token identifier of the proven ownership NFT/SFT
+   * @param nonce nonce of the proven ownership NFT/SFT
+   */
+  claimRefund(
+    senderAddress: IAddress,
+    tokenIdentifier: string,
+    nonce: number
+  ): Transaction {
+    const data = new ContractCallPayloadBuilder()
+      .setFunction('claimRefund')
+      .addArg(new TokenIdentifierValue(tokenIdentifier))
+      .addArg(new U64Value(nonce))
+      .build();
+
+    const claimRefundTx = new Transaction({
+      value: 0,
+      data,
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 10_000_000,
+      chainID: this.chainID
+    });
+    return claimRefundTx;
   }
 }
