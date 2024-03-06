@@ -376,6 +376,16 @@
             ]
         },
         {
+            "name": "getCompensationsLen",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
             "name": "getLockPeriodsBonds",
             "mutability": "readonly",
             "inputs": [],
