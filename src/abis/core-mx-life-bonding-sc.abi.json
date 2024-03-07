@@ -622,6 +622,352 @@
             ]
         }
     ],
+    "events": [
+        {
+            "identifier": "minimum_penalty_event",
+            "inputs": [
+                {
+                    "name": "value",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "maximum_penalty_event",
+            "inputs": [
+                {
+                    "name": "value",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "withdraw_penalty_event",
+            "inputs": [
+                {
+                    "name": "value",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "contract_state_event",
+            "inputs": [
+                {
+                    "name": "state",
+                    "type": "State",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "bond_event",
+            "inputs": [
+                {
+                    "name": "bond",
+                    "type": "Bond",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "compensation_event",
+            "inputs": [
+                {
+                    "name": "compensation",
+                    "type": "Compensation",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "withdraw_event",
+            "inputs": [
+                {
+                    "name": "bond_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "caller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "withdraw_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "penalty_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "renew_event",
+            "inputs": [
+                {
+                    "name": "bond_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "caller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "unbound_timestmap",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "proof_event",
+            "inputs": [
+                {
+                    "name": "compensation_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "proof_amount",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "identifier": "claim_refund_event",
+            "inputs": [
+                {
+                    "name": "compensation_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "caller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "refund_token_identifier",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "refund_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "refund_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "add_to_blacklist_event",
+            "inputs": [
+                {
+                    "name": "compensation_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "addresses",
+                    "type": "variadic<Address>",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "remove_from_blacklist_event",
+            "inputs": [
+                {
+                    "name": "compensation_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "addresses",
+                    "type": "variadic<Address>",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "initiate_refund_event",
+            "inputs": [
+                {
+                    "name": "compensation_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "timestamp",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "sanction_event",
+            "inputs": [
+                {
+                    "name": "bond_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "compensation_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "penalty_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "modify_bond_event",
+            "inputs": [
+                {
+                    "name": "bond_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "unbound_timestamp",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "set_accepted_callers_event",
+            "inputs": [
+                {
+                    "name": "callers",
+                    "type": "variadic<Address>",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "remove_accepted_callers_event",
+            "inputs": [
+                {
+                    "name": "callers",
+                    "type": "variadic<Address>",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "set_bond_token_event",
+            "inputs": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "set_period_and_bond_event",
+            "inputs": [
+                {
+                    "name": "period",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "bond",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "remove_period_and_bond_event",
+            "inputs": [
+                {
+                    "name": "period",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "bond",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "set_administrator_event",
+            "inputs": [
+                {
+                    "name": "administrator",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        }
+    ],
     "esdtAttributes": [],
     "hasCallback": false,
     "types": {
