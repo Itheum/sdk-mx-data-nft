@@ -323,6 +323,47 @@ export class BondContract extends Contract {
   }
 
   /**
+   * Returns the total number of bonds
+   */
+  async viewTotalBonds(): Promise<number> {
+    const interaction = this.contract.methodsExplicit.getBondsLen([]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return firstValue?.valueOf().toNumber();
+    } else {
+      throw new ErrContractQuery('viewTotalBonds', returnCode.toString());
+    }
+  }
+
+  /**
+   * Returns the total number of compensations
+   */
+  async viewTotalCompensations(): Promise<number> {
+    const interaction = this.contract.methodsExplicit.getCompensationsLen([]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return firstValue?.valueOf().toNumber();
+    } else {
+      throw new ErrContractQuery(
+        'viewTotalCompensations',
+        returnCode.toString()
+      );
+    }
+  }
+
+  /**
    * Returns a `Bond` object array for the given indexes
    * @param start_index index to start
    * @param end_index index to end
