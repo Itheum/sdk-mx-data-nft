@@ -282,7 +282,7 @@ export class BondContract extends Contract {
    * @param end_index index to end
    */
   async viewPagedCompensations(startIndex: number, endIndex: number) {
-    const interaction = this.contract.methodsExplicit.viewPagedCompensations([
+    const interaction = this.contract.methodsExplicit.getPagedCompensations([
       new U64Value(startIndex),
       new U64Value(endIndex)
     ]);
