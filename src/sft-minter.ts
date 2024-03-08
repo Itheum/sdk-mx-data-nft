@@ -292,6 +292,7 @@ export class SftMinter extends Minter {
 
     // deep validate all mandatory URLs
     try {
+      await checkUrlIsUp(dataPreviewUrl, [200]);
       await checkUrlIsUp(dataMarshalUrl + '/health-check', [200]);
     } catch (error) {
       throw error;
