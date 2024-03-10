@@ -33,7 +33,6 @@ describe('Bond test', () => {
 
     const bond: Bond[] = await bondContract.viewBonds([1]);
     expect(bond).toMatchObject<Bond>;
-    console.log('bond', bond);
     const sameBond: Bond[] = await bondContract.viewBonds(
       [tokenIdentifier],
       [76]
