@@ -49,6 +49,11 @@ describe('Bond test', () => {
     expect(singleBond).toMatchObject<Bond>;
     expect(singleBond).toStrictEqual(sameBond2[0]);
 
+    const pagedBonds: Bond[] = await bondContract.viewPagedBonds(0, 2);
+    expect(pagedBonds).toMatchObject<Bond[]>;
+    expect(pagedBonds.length).toBe(3);
+    expect(pagedBonds[0]).toStrictEqual(singleBond);
+
     const compensation: Compensation = await bondContract.viewCompensation(1);
     expect(compensation).toMatchObject<Compensation>;
 

@@ -423,7 +423,24 @@ export class BondContract extends Contract {
    * @param end_index index to end
    */
   async viewPagedBonds(startIndex: number, endIndex: number) {
-    throw new Error('Not implemented');
+    const interaction = this.contract.methodsExplicit.getPagedBonds([
+      new U64Value(startIndex),
+      new U64Value(endIndex)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const bonds: Bond[] = returnValue.map((bond: any) => parseBond(bond));
+      return bonds;
+    } else {
+      throw new ErrContractQuery('viewPagedBonds', returnCode.toString());
+    }
   }
 
   /**
@@ -624,9 +641,9 @@ export class BondContract extends Contract {
   }
 
   /**
-   *Builds a transaction to blacklist addresses.
+   *Builds a `setAcceptedCallers` transaction to add accepted callers for the `bond` endpoint.
    * @param senderAddress - The address of the sender.
-   * @param addresses - An array of addresses to be removed from the blacklist.
+   * @param addresses - An array of addresses to be added as accepted callers for `bond` endpoint.
    */
   setAcceptedCallers(senderAddress: IAddress, addresses: IAddress[]) {
     const inputAddresses = addresses.map(
@@ -635,7 +652,7 @@ export class BondContract extends Contract {
     const tx = new Transaction({
       value: 0,
       data: new ContractCallPayloadBuilder()
-        .setFunction('setBlacklist')
+        .setFunction('setAcceptedCallers')
         .setArgs(inputAddresses)
         .build(),
       receiver: this.contract.getAddress(),
@@ -647,11 +664,15 @@ export class BondContract extends Contract {
   }
 
   /**
-   *Builds a transaction to blacklist addresses.
+   *Builds a `setBlacklist` transaction to blacklist addresses.
    * @param senderAddress - The address of the sender.
-   * @param addresses - An array of addresses to be removed from the blacklist.
+   * @param addresses - An array of addresses to be added to the blacklist..
    */
-  setBlacklist(senderAddress: IAddress, addresses: IAddress[]) {
+  setBlacklist(
+    senderAddress: IAddress,
+    compensationId: number,
+    addresses: IAddress[]
+  ) {
     const inputAddresses = addresses.map(
       (address) => new AddressValue(address)
     );
@@ -659,6 +680,7 @@ export class BondContract extends Contract {
       value: 0,
       data: new ContractCallPayloadBuilder()
         .setFunction('setBlacklist')
+        .addArg(new U64Value(compensationId))
         .setArgs(inputAddresses)
         .build(),
       receiver: this.contract.getAddress(),
@@ -670,7 +692,7 @@ export class BondContract extends Contract {
   }
 
   /**
-   *Builds a transaction to remove addresses from the blacklist.
+   *Builds a `removeBlacklist` transaction to remove addresses from the blacklist.
    * @param senderAddress - The address of the sender.
    * @param compensationId compensaton id to check if exists
    * @param addresses - An array of addresses to be removed from the blacklist.
@@ -699,7 +721,7 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a transaction to remove the accepted callers from the sender's address.
+   * Builds a `removeAcceptedCallers` transaction to remove the accepted callers.
    * @param senderAddress - The address of the sender.
    * @param addresses - The addresses to be removed.
    */
@@ -722,7 +744,7 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a transaction to set the bond token.
+   * Builds a `setBondToken` transaction to set the bond token.
    * @param senderAddress - The address of the sender.
    * @param tokenIdentifier - The identifier of the token.
    */
@@ -742,7 +764,7 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a transaction to set the periods and bonds for a sender address.
+   * Builds a `setPeriodsBonds` transaction to set the periods and bonds.
    * @param senderAddress - The address of the sender.
    * @param periods - An array of periods.
    * @param bonds - An array of bond values.
@@ -773,14 +795,14 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `removeBonds` transaction to remove the bonds for each of the specified periods.
+   * Builds a `removePeriodsBonds` transaction to remove the bonds for each of the specified periods.
    * @param senderAddress The address of the sender.
    * @param periods An array of periods for which the bonds should be removed.
    */
   removePeriodsBonds(senderAddress: IAddress, periods: number[]) {
     const inputPeriods = periods.map((period) => new U64Value(period));
 
-    const removeBondsTx = new Transaction({
+    const removePeriodsBondsTx = new Transaction({
       value: 0,
       data: new ContractCallPayloadBuilder()
         .setFunction('removePeriodsBonds')
@@ -791,11 +813,11 @@ export class BondContract extends Contract {
       gasLimit: 20_000_000,
       chainID: this.chainID
     });
-    return removeBondsTx;
+    return removePeriodsBondsTx;
   }
 
   /**
-   * Builds a transaction to set the minimum penalty for a sender address.
+  Builds a `setMinimumPenalty` transaction to set the minimum penalty
    * @param senderAddress - The address of the sender.
    * @param penalty - The minimum penalty value.
    */
@@ -815,7 +837,7 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a transaction to set the maximum penalty for a sender address.
+   * Builds a `setMaximumPenalty` transaction to set the maximum penalty.
    * @param senderAddress - The address of the sender.
    * @param penalty - The maximum penalty value.
    */
@@ -835,7 +857,7 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a transaction to set the withdraw penalty for a given sender address.
+   * Builds a `setWithdrawPenalty` transaction to set the withdraw penalty.
    * @param senderAddress - The address of the sender.
    * @param penalty - The penalty value to be set.
    */
@@ -859,7 +881,7 @@ export class BondContract extends Contract {
    * @param senderAddress - the address of the sender.
    * @param tokenIdentifier - the identifier of the NFT/SFT.
    * @param nonce -  the token identifier nonce.
-   * @param timestamp - the timestamp value.
+   * @param timestamp - the end timestamp for the proof period for a refund
    */
   initiateRefund(
     senderAddress: IAddress,
