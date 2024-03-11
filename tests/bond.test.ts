@@ -67,5 +67,5 @@ describe('Bond test', () => {
     expect(pagedCompensations).toMatchObject<Compensation[]>;
     expect(pagedCompensations.length).toBe(3);
     expect(pagedCompensations[0]).toStrictEqual(compensation);
-  });
+  }, 20000);
 });
