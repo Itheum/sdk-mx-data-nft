@@ -14,7 +14,6 @@ dist
 .idea/workspace.xml
 .rpt2_cache
 .yalc
-.husky
 out
 
 # misc

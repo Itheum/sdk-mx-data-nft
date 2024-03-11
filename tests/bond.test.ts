@@ -1,8 +1,14 @@
-import { BondContract, Compensation, State } from '../src';
+import {
+  BondContract,
+  Compensation,
+  State,
+  createTokenIdentifier,
+  dataNftTokenIdentifier
+} from '../src';
 import { Bond } from '../src';
-import { ErrContractAddressNotSet } from '../src/errors';
 
 describe('Bond test', () => {
+  const tokenIdentifier = dataNftTokenIdentifier.devnet;
   test('#test no deploy', () => {
     try {
       const bondContract = new BondContract('testnet');
@@ -14,42 +20,52 @@ describe('Bond test', () => {
     const bondContract = new BondContract('devnet');
 
     const bondPaymentToken = await bondContract.viewBondPaymentToken();
-
     expect(typeof bondPaymentToken).toBe('string');
 
     const lockPeriodsWithBonds = await bondContract.viewLockPeriodsWithBonds();
-
     expect(typeof lockPeriodsWithBonds).toBe('object');
 
     const contractState = await bondContract.viewContractState();
-
     expect(Object.values(State).includes(contractState)).toBe(true);
 
     const acceptedCallers = await bondContract.viewAcceptedCallers();
-
     expect(typeof acceptedCallers).toBe('object');
 
-    // const bond: Bond[] = await bondContract.viewBonds([1]);
+    const bond: Bond[] = await bondContract.viewBonds([1]);
+    expect(bond).toMatchObject<Bond>;
+    const sameBond: Bond[] = await bondContract.viewBonds(
+      [tokenIdentifier],
+      [76]
+    );
+    expect(sameBond).toMatchObject<Bond[]>;
+    const sameBond2: Bond[] = await bondContract.viewBonds([
+      createTokenIdentifier(tokenIdentifier, 76)
+    ]);
+    expect(sameBond2).toMatchObject<Bond[]>;
+    expect(sameBond).toStrictEqual(sameBond2);
 
-    // expect(bond).toMatchObject<Bond>;
+    const singleBond: Bond = await bondContract.viewBond(1);
+    expect(singleBond).toMatchObject<Bond>;
+    expect(singleBond).toStrictEqual(sameBond2[0]);
 
-    // const sameBond: Bond[] = await bondContract.viewBonds(
-    //   ['NEWDNFT-3a8caa'],
-    //   [8]
-    // );
+    const pagedBonds: Bond[] = await bondContract.viewPagedBonds(0, 2);
+    expect(pagedBonds).toMatchObject<Bond[]>;
+    expect(pagedBonds.length).toBe(3);
+    expect(pagedBonds[0]).toStrictEqual(singleBond);
 
-    // expect(sameBond).toMatchObject<Bond[]>;
+    const compensation: Compensation = await bondContract.viewCompensation(1);
+    expect(compensation).toMatchObject<Compensation>;
 
-    // const sameBond2: Bond[] = await bondContract.viewBonds([
-    //   'NEWDNFT-3a8caa-08'
-    // ]);
-    // expect(sameBond2).toMatchObject<Bond[]>;
+    const compensations: Compensation[] = await bondContract.viewCompensations([
+      { tokenIdentifier: tokenIdentifier, nonce: 76 }
+    ]);
+    expect(compensations).toMatchObject<Compensation[]>;
+    expect(compensations[0]).toStrictEqual(compensation);
 
-    // const compensation: Compensation = await bondContract.viewCompensation(
-    //   'NEWDNFT-3a8caa',
-    //   8
-    // );
-
-    // expect(compensation).toMatchObject<Compensation>;
-  });
+    const pagedCompensations: Compensation[] =
+      await bondContract.viewPagedCompensations(0, 2);
+    expect(pagedCompensations).toMatchObject<Compensation[]>;
+    expect(pagedCompensations.length).toBe(3);
+    expect(pagedCompensations[0]).toStrictEqual(compensation);
+  }, 20000);
 });

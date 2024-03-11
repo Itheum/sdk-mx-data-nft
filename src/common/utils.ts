@@ -103,7 +103,7 @@ export function parseCompensation(value: any): Compensation {
     compensationId: value.compensation_id.toNumber(),
     tokenIdentifier: value.token_identifier.toString(),
     nonce: value.nonce.toNumber(),
-    accumulatedAmount: value.accumulate_amount.toFixed(0),
+    accumulatedAmount: value.accumulated_amount.toFixed(0),
     proofAmount: value.proof_amount.toFixed(0),
     endDate: value.end_date.toNumber()
   };

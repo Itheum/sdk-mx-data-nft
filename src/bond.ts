@@ -8,9 +8,14 @@ import {
   ResultsParser,
   TokenIdentifierValue,
   Transaction,
+  TypedValue,
   U64Value
 } from '@multiversx/sdk-core/out';
-import { EnvironmentsEnum, bondContractAddress } from './config';
+import {
+  EnvironmentsEnum,
+  bondContractAddress,
+  itheumTokenIdentifier
+} from './config';
 import { ErrContractQuery } from './errors';
 
 import BigNumber from 'bignumber.js';
@@ -109,7 +114,6 @@ export class BondContract extends Contract {
   /**
    * Returns a list of addresses that are blacklisted from claiming compensations
    * @param compensationId compensaton id to query
-   * @returns
    */
   async viewCompensationBlacklist(compensationId: number): Promise<string[]> {
     const interaction = this.contract.methodsExplicit.getCompensationBlacklist([
@@ -193,7 +197,23 @@ export class BondContract extends Contract {
    * @param compensationId compensation id to query
    */
   async viewCompensation(compensationId: number) {
-    throw new Error('Not implemented');
+    const interaction = this.contract.methodsExplicit.getCompensation([
+      new U64Value(compensationId)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const compensation: Compensation = parseCompensation(returnValue);
+      return compensation;
+    } else {
+      throw new ErrContractQuery('viewCompensation', returnCode.toString());
+    }
   }
 
   /**
@@ -266,7 +286,29 @@ export class BondContract extends Contract {
    * @param end_index index to end
    */
   async viewPagedCompensations(startIndex: number, endIndex: number) {
-    throw new Error('Not implemented');
+    const interaction = this.contract.methodsExplicit.getPagedCompensations([
+      new U64Value(startIndex),
+      new U64Value(endIndex)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const compensations: Compensation[] = returnValue.map(
+        (compensation: Compensation) => parseCompensation(compensation)
+      );
+      return compensations;
+    } else {
+      throw new ErrContractQuery(
+        'viewPagedCompensations',
+        returnCode.toString()
+      );
+    }
   }
 
   /**
@@ -274,7 +316,23 @@ export class BondContract extends Contract {
    * @param bondId bond id to query
    */
   async viewBond(bondId: number) {
-    throw new Error('Not implemented');
+    const interaction = this.contract.methodsExplicit.getBond([
+      new U64Value(bondId)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const bond: Bond = parseBond(returnValue);
+      return bond;
+    } else {
+      throw new ErrContractQuery('viewBond', returnCode.toString());
+    }
   }
 
   /**
@@ -369,28 +427,46 @@ export class BondContract extends Contract {
    * @param end_index index to end
    */
   async viewPagedBonds(startIndex: number, endIndex: number) {
-    throw new Error('Not implemented');
+    const interaction = this.contract.methodsExplicit.getPagedBonds([
+      new U64Value(startIndex),
+      new U64Value(endIndex)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const bonds: Bond[] = returnValue.map((bond: any) => parseBond(bond));
+      return bonds;
+    } else {
+      throw new ErrContractQuery('viewPagedBonds', returnCode.toString());
+    }
   }
 
   /**
-   * Returns a `Bond` object array for the given bondIds.
-   * @param bondIds Bond ids to query.
+   * Returns a `Bond` object array for the given bondIds
+   * @param bondIds Bond ids to query
    */
   async viewBonds(bondIds: number[]): Promise<Bond[]>;
   /**
-   * Returns a `Bond` object array for the given full tokenIdentifier.
-   * @param fullTokenIdentifier Full tokenIdentifier to query.
+   * Returns a `Bond` object array for the given full tokenIdentifier
+   * @param fullTokenIdentifier Full tokenIdentifier to query
    */
   async viewBonds(fullTokenIdentifiers: string[]): Promise<Bond[]>;
   /**
-   * Returns a `Bond` object array for the given tokenIdentifiers and nonces.
-   * @param tokenIdentifier Token identifiers array to query.
-   * @param nonce Nonce array to query.
+   * Returns a `Bond` object array for the given tokenIdentifiers and nonces
+   * @param tokenIdentifier Token identifiers array to query
+   * @param nonce Nonce array to query
    */
   async viewBonds(
     tokenIdentifiers: string[],
     nonces: number[]
   ): Promise<Bond[]>;
+
   async viewBonds(arg1: number[] | string[], arg2?: number[]): Promise<Bond[]> {
     let interaction;
 
@@ -568,57 +644,273 @@ export class BondContract extends Contract {
     return setContractStateTx;
   }
 
+  /**
+   *Builds a `setAcceptedCallers` transaction to add accepted callers for the `bond` endpoint
+   * @param senderAddress the address of the sender
+   * @param addresses an array of addresses to be added as accepted callers for `bond` endpoint
+   */
   setAcceptedCallers(senderAddress: IAddress, addresses: IAddress[]) {
-    throw new Error('Not implemented');
+    const inputAddresses = addresses.map(
+      (address) => new AddressValue(address)
+    );
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setAcceptedCallers')
+        .setArgs(inputAddresses)
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
-  setBlacklist(senderAddress: IAddress, addresses: IAddress[]) {
-    throw new Error('Not implemented');
+  /**
+   *Builds a `setBlacklist` transaction to blacklist addresses
+   * @param senderAddress the address of the sender
+   * @param compensationid the compensation id to add the blacklist
+   * @param addresses an array of addresses to be added to the blacklist
+   */
+  setBlacklist(
+    senderAddress: IAddress,
+    compensationId: number,
+    addresses: IAddress[]
+  ) {
+    const inputAddresses = addresses.map(
+      (address) => new AddressValue(address)
+    );
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setBlacklist')
+        .addArg(new U64Value(compensationId))
+        .setArgs(inputAddresses)
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
-  removeBlacklist(senderAddress: IAddress, addresses: IAddress[]) {
-    throw new Error('Not implemented');
+  /**
+   *Builds a `removeBlacklist` transaction to remove addresses from the blacklist
+   * @param senderAddress the address of the sender
+   * @param compensationId the compensation id to remove the blacklist from
+   * @param addresses an array of addresses to be removed from the blacklist
+   */
+  removeBlacklist(
+    senderAddress: IAddress,
+    compensationId: number,
+    addresses: IAddress[]
+  ) {
+    const toBeRemovedAddresses = addresses.map(
+      (address) => new AddressValue(address)
+    );
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('removeBlacklist')
+        .addArg(new U64Value(compensationId))
+        .setArgs(toBeRemovedAddresses)
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
+  /**
+   * Builds a `removeAcceptedCallers` transaction to remove the accepted callers
+   * @param senderAddress the address of the sender
+   * @param addresses the addresses to be removed
+   */
   removeAcceptedCallers(senderAddress: IAddress, addresses: IAddress[]) {
-    throw new Error('Not implemented');
+    const inputAddresses = addresses.map(
+      (address) => new AddressValue(address)
+    );
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('removeAcceptedCallers')
+        .setArgs(inputAddresses)
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
-  setBondToken(senderAddress: IAddress, tokenIdentifier: string) {
-    throw new Error('Not implemented');
+  /**
+   * Builds a `setBondToken` transaction to set the bond token
+   * @param senderAddress the address of the sender
+   * @param tokenIdentifier the token identifier. If not provided, the default token identifier based on the {@link EnvironmentsEnum}
+   */
+  setBondToken(
+    senderAddress: IAddress,
+    tokenIdentifier = itheumTokenIdentifier[this.env as EnvironmentsEnum]
+  ) {
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setBondToken')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
+  /**
+   * Builds a `setPeriodsBonds` transaction to set the periods and bonds
+   * @param senderAddress the address of the sender
+   * @param periods an array of periods
+   * @param bonds an array of bond values
+   */
   setPeriodsBonds(
     senderAddress: IAddress,
     periods: number[],
     bonds: BigNumber.Value[]
   ) {
-    throw new Error('Not implemented');
+    let combinedArray: TypedValue[] = [];
+    periods.map((period, index) => {
+      combinedArray.push(new U64Value(period));
+      combinedArray.push(new BigUIntValue(bonds[index]));
+    });
+
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setPeriodsBonds')
+        .setArgs(combinedArray)
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
+  /**
+   * Builds a `removePeriodsBonds` transaction to remove the bonds for each of the specified periods
+   * @param senderAddress the address of the sender
+   * @param periods an array of periods for which the bonds should be removed
+   */
   removePeriodsBonds(senderAddress: IAddress, periods: number[]) {
-    throw new Error('Not implemented');
+    const inputPeriods = periods.map((period) => new U64Value(period));
+
+    const removePeriodsBondsTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('removePeriodsBonds')
+        .setArgs(inputPeriods)
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return removePeriodsBondsTx;
   }
 
+  /**
+  Builds a `setMinimumPenalty` transaction to set the minimum penalty
+   * @param senderAddress the address of the sender
+   * @param penalty the minimum penalty value to be set
+   */
   setMinimumPenalty(senderAddress: IAddress, penalty: number) {
-    throw new Error('Not implemented');
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setMinimumPenalty')
+        .addArg(new U64Value(penalty))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
+  /**
+   * Builds a `setMaximumPenalty` transaction to set the maximum penalty
+   * @param senderAddress the address of the sender
+   * @param penalty the maximum penalty value to be set
+   */
   setMaximumPenalty(senderAddress: IAddress, penalty: number) {
-    throw new Error('Not implemented');
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setMaximumPenalty')
+        .addArg(new U64Value(penalty))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
+  /**
+   * Builds a `setWithdrawPenalty` transaction to set the withdraw penalty
+   * @param senderAddress the address of the sender
+   * @param penalty the withdraw penalty value to be set
+   */
   setWithdrawPenalty(senderAddress: IAddress, penalty: number) {
-    throw new Error('Not implemented');
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setWithdrawPenalty')
+        .addArg(new U64Value(penalty))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
+  /**
+   * Builds a `refund` transaction
+   * @param senderAddress the address of the sender
+   * @param tokenIdentifier the identifier of the NFT/SFT
+   * @param nonce the token identifier nonce
+   * @param timestamp the end timestamp for the proof period for a refund
+   */
   initiateRefund(
     senderAddress: IAddress,
     tokenIdentifier: string,
     nonce: number,
     timestamp: number
   ) {
-    throw new Error('Not implemented');
+    const refundTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('initiateRefund')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .addArg(new U64Value(timestamp))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return refundTx;
   }
 
   /**
