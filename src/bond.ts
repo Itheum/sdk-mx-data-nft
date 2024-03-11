@@ -11,7 +11,11 @@ import {
   TypedValue,
   U64Value
 } from '@multiversx/sdk-core/out';
-import { EnvironmentsEnum, bondContractAddress } from './config';
+import {
+  EnvironmentsEnum,
+  bondContractAddress,
+  itheumTokenIdentifier
+} from './config';
 import { ErrContractQuery } from './errors';
 
 import BigNumber from 'bignumber.js';
@@ -444,19 +448,19 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Returns a `Bond` object array for the given bondIds.
-   * @param bondIds Bond ids to query.
+   * Returns a `Bond` object array for the given bondIds
+   * @param bondIds Bond ids to query
    */
   async viewBonds(bondIds: number[]): Promise<Bond[]>;
   /**
-   * Returns a `Bond` object array for the given full tokenIdentifier.
-   * @param fullTokenIdentifier Full tokenIdentifier to query.
+   * Returns a `Bond` object array for the given full tokenIdentifier
+   * @param fullTokenIdentifier Full tokenIdentifier to query
    */
   async viewBonds(fullTokenIdentifiers: string[]): Promise<Bond[]>;
   /**
-   * Returns a `Bond` object array for the given tokenIdentifiers and nonces.
-   * @param tokenIdentifier Token identifiers array to query.
-   * @param nonce Nonce array to query.
+   * Returns a `Bond` object array for the given tokenIdentifiers and nonces
+   * @param tokenIdentifier Token identifiers array to query
+   * @param nonce Nonce array to query
    */
   async viewBonds(
     tokenIdentifiers: string[],
@@ -641,9 +645,9 @@ export class BondContract extends Contract {
   }
 
   /**
-   *Builds a `setAcceptedCallers` transaction to add accepted callers for the `bond` endpoint.
-   * @param senderAddress - The address of the sender.
-   * @param addresses - An array of addresses to be added as accepted callers for `bond` endpoint.
+   *Builds a `setAcceptedCallers` transaction to add accepted callers for the `bond` endpoint
+   * @param senderAddress the address of the sender
+   * @param addresses an array of addresses to be added as accepted callers for `bond` endpoint
    */
   setAcceptedCallers(senderAddress: IAddress, addresses: IAddress[]) {
     const inputAddresses = addresses.map(
@@ -664,9 +668,10 @@ export class BondContract extends Contract {
   }
 
   /**
-   *Builds a `setBlacklist` transaction to blacklist addresses.
-   * @param senderAddress - The address of the sender.
-   * @param addresses - An array of addresses to be added to the blacklist..
+   *Builds a `setBlacklist` transaction to blacklist addresses
+   * @param senderAddress the address of the sender
+   * @param compensationid the compensation id to add the blacklist
+   * @param addresses an array of addresses to be added to the blacklist
    */
   setBlacklist(
     senderAddress: IAddress,
@@ -692,10 +697,10 @@ export class BondContract extends Contract {
   }
 
   /**
-   *Builds a `removeBlacklist` transaction to remove addresses from the blacklist.
-   * @param senderAddress - The address of the sender.
-   * @param compensationId compensaton id to check if exists
-   * @param addresses - An array of addresses to be removed from the blacklist.
+   *Builds a `removeBlacklist` transaction to remove addresses from the blacklist
+   * @param senderAddress the address of the sender
+   * @param compensationId the compensation id to remove the blacklist from
+   * @param addresses an array of addresses to be removed from the blacklist
    */
   removeBlacklist(
     senderAddress: IAddress,
@@ -721,9 +726,9 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `removeAcceptedCallers` transaction to remove the accepted callers.
-   * @param senderAddress - The address of the sender.
-   * @param addresses - The addresses to be removed.
+   * Builds a `removeAcceptedCallers` transaction to remove the accepted callers
+   * @param senderAddress the address of the sender
+   * @param addresses the addresses to be removed
    */
   removeAcceptedCallers(senderAddress: IAddress, addresses: IAddress[]) {
     const inputAddresses = addresses.map(
@@ -744,11 +749,14 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `setBondToken` transaction to set the bond token.
-   * @param senderAddress - The address of the sender.
-   * @param tokenIdentifier - The identifier of the token.
+   * Builds a `setBondToken` transaction to set the bond token
+   * @param senderAddress the address of the sender
+   * @param tokenIdentifier the token identifier. If not provided, the default token identifier based on the {@link EnvironmentsEnum}
    */
-  setBondToken(senderAddress: IAddress, tokenIdentifier: string) {
+  setBondToken(
+    senderAddress: IAddress,
+    tokenIdentifier = itheumTokenIdentifier[this.env as EnvironmentsEnum]
+  ) {
     const tx = new Transaction({
       value: 0,
       data: new ContractCallPayloadBuilder()
@@ -764,10 +772,10 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `setPeriodsBonds` transaction to set the periods and bonds.
-   * @param senderAddress - The address of the sender.
-   * @param periods - An array of periods.
-   * @param bonds - An array of bond values.
+   * Builds a `setPeriodsBonds` transaction to set the periods and bonds
+   * @param senderAddress the address of the sender
+   * @param periods an array of periods
+   * @param bonds an array of bond values
    */
   setPeriodsBonds(
     senderAddress: IAddress,
@@ -795,9 +803,9 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `removePeriodsBonds` transaction to remove the bonds for each of the specified periods.
-   * @param senderAddress The address of the sender.
-   * @param periods An array of periods for which the bonds should be removed.
+   * Builds a `removePeriodsBonds` transaction to remove the bonds for each of the specified periods
+   * @param senderAddress the address of the sender
+   * @param periods an array of periods for which the bonds should be removed
    */
   removePeriodsBonds(senderAddress: IAddress, periods: number[]) {
     const inputPeriods = periods.map((period) => new U64Value(period));
@@ -818,8 +826,8 @@ export class BondContract extends Contract {
 
   /**
   Builds a `setMinimumPenalty` transaction to set the minimum penalty
-   * @param senderAddress - The address of the sender.
-   * @param penalty - The minimum penalty value.
+   * @param senderAddress the address of the sender
+   * @param penalty the minimum penalty value to be set
    */
   setMinimumPenalty(senderAddress: IAddress, penalty: number) {
     const tx = new Transaction({
@@ -837,9 +845,9 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `setMaximumPenalty` transaction to set the maximum penalty.
-   * @param senderAddress - The address of the sender.
-   * @param penalty - The maximum penalty value.
+   * Builds a `setMaximumPenalty` transaction to set the maximum penalty
+   * @param senderAddress the address of the sender
+   * @param penalty the maximum penalty value to be set
    */
   setMaximumPenalty(senderAddress: IAddress, penalty: number) {
     const tx = new Transaction({
@@ -857,9 +865,9 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `setWithdrawPenalty` transaction to set the withdraw penalty.
-   * @param senderAddress - The address of the sender.
-   * @param penalty - The penalty value to be set.
+   * Builds a `setWithdrawPenalty` transaction to set the withdraw penalty
+   * @param senderAddress the address of the sender
+   * @param penalty the withdraw penalty value to be set
    */
   setWithdrawPenalty(senderAddress: IAddress, penalty: number) {
     const tx = new Transaction({
@@ -877,11 +885,11 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `refund` transaction.
-   * @param senderAddress - the address of the sender.
-   * @param tokenIdentifier - the identifier of the NFT/SFT.
-   * @param nonce -  the token identifier nonce.
-   * @param timestamp - the end timestamp for the proof period for a refund
+   * Builds a `refund` transaction
+   * @param senderAddress the address of the sender
+   * @param tokenIdentifier the identifier of the NFT/SFT
+   * @param nonce the token identifier nonce
+   * @param timestamp the end timestamp for the proof period for a refund
    */
   initiateRefund(
     senderAddress: IAddress,
