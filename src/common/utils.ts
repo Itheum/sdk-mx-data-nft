@@ -8,11 +8,14 @@ import {
 } from '../errors';
 import {
   Bond,
+  BondConfiguration,
   Compensation,
+  ContractConfiguration,
   NftEnumType,
   NftType,
   Offer,
-  Refund
+  Refund,
+  State
 } from '../interfaces';
 import { EnvironmentsEnum, dataMarshalUrlOverride } from '../config';
 
@@ -95,6 +98,30 @@ export function parseBond(value: any): Bond {
     unboundTimestamp: value.unbound_timestamp.toNumber(),
     bondAmount: value.bond_amount.toFixed(0),
     remainingAmount: value.remaining_amount.toFixed(0)
+  };
+}
+
+export function parseBondConfiguration(value: any): BondConfiguration {
+  const lockPeriods: BigNumber[] = value.lock_periods;
+  const bondAmounts: BigNumber[] = value.bond_amounts;
+
+  // Construct array of objects containing lock period and bond amount
+  const result: { lockPeriod: number; amount: BigNumber.Value }[] = [];
+  for (let i = 0; i < lockPeriods.length; i++) {
+    const lockPeriod = lockPeriods[i].toNumber();
+    const bondAmount = bondAmounts[i].toFixed(0);
+    result.push({ lockPeriod: lockPeriod, amount: bondAmount });
+  }
+  return {
+    contractState: value.contract_state.name as State,
+    bondPaymentTokenIdentifier: value.bond_payment_token_identifier.toString(),
+    lockPeriodsWithBonds: result,
+    minimumPenalty: value.minimum_penalty.toNumber(),
+    maximumPenalty: value.maximum_penalty.toNumber(),
+    withdrawPenalty: value.withdraw_penalty.toNumber(),
+    acceptedCallers: value.accepted_callers.map((address: any) =>
+      address.toString()
+    )
   };
 }
 

@@ -396,6 +396,16 @@
             ]
         },
         {
+            "name": "getContractConfiguration",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "ContractConfiguration"
+                }
+            ]
+        },
+        {
             "name": "setBlacklist",
             "mutability": "mutable",
             "inputs": [
@@ -1038,6 +1048,43 @@
                 {
                     "name": "end_date",
                     "type": "u64"
+                }
+            ]
+        },
+        "ContractConfiguration": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "contract_state",
+                    "type": "State"
+                },
+                {
+                    "name": "bond_payment_token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "lock_periods",
+                    "type": "List<u64>"
+                },
+                {
+                    "name": "bond_amounts",
+                    "type": "List<BigUint>"
+                },
+                {
+                    "name": "minimum_penalty",
+                    "type": "u64"
+                },
+                {
+                    "name": "maximum_penalty",
+                    "type": "u64"
+                },
+                {
+                    "name": "withdraw_penalty",
+                    "type": "u64"
+                },
+                {
+                    "name": "accepted_callers",
+                    "type": "List<Address>"
                 }
             ]
         },

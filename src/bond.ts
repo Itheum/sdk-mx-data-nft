@@ -9,7 +9,8 @@ import {
   TokenIdentifierValue,
   Transaction,
   TypedValue,
-  U64Value
+  U64Value,
+  VariadicValue
 } from '@multiversx/sdk-core/out';
 import {
   EnvironmentsEnum,
@@ -22,12 +23,19 @@ import BigNumber from 'bignumber.js';
 import bondContractAbi from './abis/core-mx-life-bonding-sc.abi.json';
 import {
   parseBond,
+  parseBondConfiguration,
   parseCompensation,
   parseRefund,
   parseTokenIdentifier
 } from './common/utils';
 import { Contract } from './contract';
-import { Bond, Compensation, PenaltyType, State } from './interfaces';
+import {
+  Bond,
+  BondConfiguration,
+  Compensation,
+  PenaltyType,
+  State
+} from './interfaces';
 
 export class BondContract extends Contract {
   /**
@@ -68,6 +76,33 @@ export class BondContract extends Contract {
       return stateValue.name as State;
     } else {
       throw new ErrContractQuery('viewContractState', returnCode.toString());
+    }
+  }
+
+  /**
+   * Returns the `bond` contract configuration
+   */
+  async viewContractConfiguration(): Promise<BondConfiguration> {
+    const interaction = this.contract.methodsExplicit.getContractConfiguration(
+      []
+    );
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const firstValueAsVariadic = firstValue as VariadicValue;
+      const returnValue = firstValueAsVariadic?.valueOf();
+      const bondConfiguration = parseBondConfiguration(returnValue);
+      return bondConfiguration;
+    } else {
+      throw new ErrContractQuery(
+        'viewContractConfiguration',
+        returnCode.toString()
+      );
     }
   }
 
@@ -142,7 +177,7 @@ export class BondContract extends Contract {
    * Returns the contract lock periods and bond amounts
    */
   async viewLockPeriodsWithBonds(): Promise<
-    { lockPeriod: string; amount: string }[]
+    { lockPeriod: number; amount: BigNumber.Value }[]
   > {
     const interaction = this.contract.methodsExplicit.getLockPeriodsBonds([]);
     const query = interaction.buildQuery();
@@ -157,10 +192,10 @@ export class BondContract extends Contract {
       const bondAmounts: BigNumber[] = firstValue?.valueOf().field1;
 
       // Construct array of objects containing lock period and bond amount
-      const result: { lockPeriod: string; amount: string }[] = [];
+      const result: { lockPeriod: number; amount: BigNumber.Value }[] = [];
       for (let i = 0; i < lockPeriods.length; i++) {
-        const lockPeriod = lockPeriods[i].toString();
-        const bondAmount = bondAmounts[i].toString();
+        const lockPeriod = lockPeriods[i].toNumber();
+        const bondAmount = bondAmounts[i];
         result.push({ lockPeriod: lockPeriod, amount: bondAmount });
       }
 
