@@ -21,7 +21,7 @@ describe('Bond test', () => {
   test('#view bond configuration', async () => {
     const bondContract = new BondContract('devnet');
     const bondConfiguration = await bondContract.viewContractConfiguration();
-    console.log(bondConfiguration);
+
     expect(bondConfiguration).toMatchObject<BondConfiguration>;
   });
   test('#test view methods', async () => {
