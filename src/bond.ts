@@ -1116,7 +1116,7 @@ export class BondContract extends Contract {
         .build(),
       receiver: this.contract.getAddress(),
       sender: senderAddress,
-      gasLimit: 10_000_000,
+      gasLimit: 50_000_000,
       chainID: this.chainID
     });
     return withdrawTx;
