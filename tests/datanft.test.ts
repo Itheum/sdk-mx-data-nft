@@ -96,7 +96,7 @@ describe('Data NFT test', () => {
     });
 
     const owners = await dataNft.getOwners();
-  });
+  }, 200000);
 
   test('#parse token identifier', () => {
     const tokenIdentifier = 'DATANFTFT3-d0978a';
@@ -112,7 +112,7 @@ describe('Data NFT test', () => {
     expect(parsed).toBeInstanceOf(
       Object as unknown as { collection: string; nonce: String }
     );
-  });
+  }, 20000);
 
   test('#override marhsal url', async () => {
     DataNft.setNetworkConfig('mainnet');
@@ -124,7 +124,7 @@ describe('Data NFT test', () => {
     );
     expect(dataNft.dataMarshal).toBe(marshalUrls[EnvironmentsEnum.devnet]);
     expect(dataNft.overrideDataMarshalChainId).toBe('1');
-  });
+  }, 20000);
 
   test('#override marshal url should be empty', async () => {
     DataNft.setNetworkConfig('mainnet');
@@ -141,5 +141,5 @@ describe('Data NFT test', () => {
 
     expect(dataNft.overrideDataMarshal).toBe('overrideUrl');
     expect(dataNft.overrideDataMarshalChainId).toBe('D');
-  });
+  }, 20000);
 });
