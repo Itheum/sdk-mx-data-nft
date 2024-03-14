@@ -1113,7 +1113,6 @@ export class BondContract extends Contract {
         .setFunction('withdraw')
         .addArg(new TokenIdentifierValue(tokenIdentifier))
         .addArg(new U64Value(nonce))
-        .addArg(new U64Value(nonce))
         .build(),
       receiver: this.contract.getAddress(),
       sender: senderAddress,
