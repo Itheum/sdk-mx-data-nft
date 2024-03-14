@@ -12,7 +12,7 @@
     "lint": "tslint --project .",
     "lint:fix": "tslint --project . --fix",
     "build": "tsc -p tsconfig.json",
-    "prepare": "npm run build"
+    "prepare": "husky"
   },
   "author": "Itheum Protocol",
   "license": "GPL-3.0-only",
