@@ -807,12 +807,12 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `setPeriodsBonds` transaction to set the periods and bonds
+   * Builds a `addPeriodsBonds` transaction to set the periods and bonds
    * @param senderAddress the address of the sender
    * @param periods an array of periods
    * @param bonds an array of bond values
    */
-  setPeriodsBonds(
+  addPeriodsBonds(
     senderAddress: IAddress,
     periods: number[],
     bonds: BigNumber.Value[]
@@ -826,7 +826,7 @@ export class BondContract extends Contract {
     const tx = new Transaction({
       value: 0,
       data: new ContractCallPayloadBuilder()
-        .setFunction('setPeriodsBonds')
+        .setFunction('addPeriodsBonds')
         .setArgs(combinedArray)
         .build(),
       receiver: this.contract.getAddress(),

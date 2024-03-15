@@ -48,7 +48,7 @@
                     "type": "u64"
                 },
                 {
-                    "name": "lock_period",
+                    "name": "lock_period_seconds",
                     "type": "u64"
                 }
             ],
@@ -107,83 +107,6 @@
                 }
             ],
             "outputs": []
-        },
-        {
-            "name": "getAcceptedCallers",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "variadic<Address>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getBondPaymentToken",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "TokenIdentifier"
-                }
-            ]
-        },
-        {
-            "name": "getLockPeriods",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "variadic<u64>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getLockPeriodBondAmount",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "lock_period",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
-            "name": "getMinimumPenalty",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "u64"
-                }
-            ]
-        },
-        {
-            "name": "getMaximumPenalty",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "u64"
-                }
-            ]
-        },
-        {
-            "name": "getWithdrawPenalty",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "u64"
-                }
-            ]
         },
         {
             "name": "getCompensationBlacklist",
@@ -543,7 +466,7 @@
             "outputs": []
         },
         {
-            "name": "setPeriodsBonds",
+            "name": "addPeriodsBonds",
             "mutability": "mutable",
             "inputs": [
                 {
@@ -628,6 +551,83 @@
             "outputs": [
                 {
                     "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getAcceptedCallers",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<Address>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getBondPaymentToken",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "TokenIdentifier"
+                }
+            ]
+        },
+        {
+            "name": "getLockPeriods",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<u64>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getLockPeriodBondAmount",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "lock_period",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "getMinimumPenalty",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getMaximumPenalty",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getWithdrawPenalty",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
                 }
             ]
         }
