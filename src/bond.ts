@@ -814,13 +814,15 @@ export class BondContract extends Contract {
    */
   addPeriodsBonds(
     senderAddress: IAddress,
-    periods: number[],
-    bonds: BigNumber.Value[]
+    lockPeriodsWithBonds: {
+      lockPeriod: number;
+      amount: BigNumber.Value;
+    }[]
   ) {
     let combinedArray: TypedValue[] = [];
-    periods.map((period, index) => {
-      combinedArray.push(new U64Value(period));
-      combinedArray.push(new BigUIntValue(bonds[index]));
+    lockPeriodsWithBonds.map((lockPeriodWithBond) => {
+      combinedArray.push(new U64Value(lockPeriodWithBond.lockPeriod));
+      combinedArray.push(new BigUIntValue(lockPeriodWithBond.amount));
     });
 
     const tx = new Transaction({
