@@ -1,6 +1,6 @@
 {
   "name": "@itheum/sdk-mx-data-nft",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.2",
   "description": "SDK for Itheum's Data NFT Technology on MultiversX Blockchain",
   "main": "out/index.js",
   "types": "out/index.d.js",
@@ -12,7 +12,7 @@
     "lint": "tslint --project .",
     "lint:fix": "tslint --project . --fix",
     "build": "tsc -p tsconfig.json",
-    "prepare": "husky"
+    "prepare": "npm run build && husky"
   },
   "author": "Itheum Protocol",
   "license": "GPL-3.0-only",
