@@ -807,6 +807,35 @@ export class BondContract extends Contract {
   }
 
   /**
+   * Builds a `initiateBond` transaction to "whitelist" an address for being able to bond for a specific Data NFT
+   * @param senderAddress the address of the sender
+   * @param address the address to be whitelisted
+   * @param tokenIdentifier the token identifier
+   * @param nonce the token identifier nonce
+   */
+  initiateBond(
+    senderAddress: IAddress,
+    address: IAddress,
+    tokenIdentifier: string,
+    nonce: number
+  ): Transaction {
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('initiateBond')
+        .addArg(new AddressValue(address))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
+  }
+
+  /**
    * Builds a `addPeriodsBonds` transaction to set the periods and bonds
    * @param senderAddress the address of the sender
    * @param periods an array of periods

@@ -329,6 +329,25 @@
             ]
         },
         {
+            "name": "initiateBond",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "setBlacklist",
             "mutability": "mutable",
             "inputs": [
