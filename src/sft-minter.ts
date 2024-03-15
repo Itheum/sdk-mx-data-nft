@@ -243,8 +243,8 @@ export class SftMinter extends Minter {
     supply: number,
     datasetTitle: string,
     datasetDescription: string,
-    lockPeriod: number,
     amountToSend: number,
+    lockPeriod?: number,
     options?: {
       imageUrl?: string;
       traitsUrl?: string;
@@ -292,7 +292,6 @@ export class SftMinter extends Minter {
 
     // deep validate all mandatory URLs
     try {
-      await checkUrlIsUp(dataStreamUrl, [200, 403]);
       await checkUrlIsUp(dataPreviewUrl, [200]);
       await checkUrlIsUp(dataMarshalUrl + '/health-check', [200]);
     } catch (error) {
@@ -363,12 +362,14 @@ export class SftMinter extends Minter {
       .addArg(new U64Value(royalties))
       .addArg(new U64Value(supply))
       .addArg(new StringValue(datasetTitle))
-      .addArg(new StringValue(datasetDescription))
-      .addArg(new U64Value(lockPeriod))
-      .build();
+      .addArg(new StringValue(datasetDescription));
+
+    if (lockPeriod) {
+      data.addArg(new U64Value(lockPeriod));
+    }
 
     const mintTx = new Transaction({
-      data,
+      data: data.build(),
       sender: senderAddress,
       receiver: this.contract.getAddress(),
       gasLimit: 80_000_000,

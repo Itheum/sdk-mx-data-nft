@@ -1,4 +1,5 @@
 import {
+  BondConfiguration,
   BondContract,
   Compensation,
   State,
@@ -15,6 +16,13 @@ describe('Bond test', () => {
     } catch (e: any) {
       expect(e.message).toBe('Contract address is not deployed on testnet');
     }
+  });
+
+  test('#view bond configuration', async () => {
+    const bondContract = new BondContract('devnet');
+    const bondConfiguration = await bondContract.viewContractConfiguration();
+
+    expect(bondConfiguration).toMatchObject<BondConfiguration>;
   });
   test('#test view methods', async () => {
     const bondContract = new BondContract('devnet');

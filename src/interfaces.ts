@@ -137,6 +137,16 @@ export interface Bond {
   remainingAmount: BigNumber.Value;
 }
 
+export interface BondConfiguration {
+  contractState: State;
+  bondPaymentTokenIdentifier: string;
+  lockPeriodsWithBonds: { lockPeriod: number; amount: BigNumber.Value }[];
+  minimumPenalty: number;
+  maximumPenalty: number;
+  withdrawPenalty: number;
+  acceptedCallers: string[];
+}
+
 export interface Refund {
   compensationId: number;
   address: string;

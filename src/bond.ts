@@ -9,7 +9,8 @@ import {
   TokenIdentifierValue,
   Transaction,
   TypedValue,
-  U64Value
+  U64Value,
+  VariadicValue
 } from '@multiversx/sdk-core/out';
 import {
   EnvironmentsEnum,
@@ -22,12 +23,19 @@ import BigNumber from 'bignumber.js';
 import bondContractAbi from './abis/core-mx-life-bonding-sc.abi.json';
 import {
   parseBond,
+  parseBondConfiguration,
   parseCompensation,
   parseRefund,
   parseTokenIdentifier
 } from './common/utils';
 import { Contract } from './contract';
-import { Bond, Compensation, PenaltyType, State } from './interfaces';
+import {
+  Bond,
+  BondConfiguration,
+  Compensation,
+  PenaltyType,
+  State
+} from './interfaces';
 
 export class BondContract extends Contract {
   /**
@@ -68,6 +76,33 @@ export class BondContract extends Contract {
       return stateValue.name as State;
     } else {
       throw new ErrContractQuery('viewContractState', returnCode.toString());
+    }
+  }
+
+  /**
+   * Returns the `bond` contract configuration
+   */
+  async viewContractConfiguration(): Promise<BondConfiguration> {
+    const interaction = this.contract.methodsExplicit.getContractConfiguration(
+      []
+    );
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const firstValueAsVariadic = firstValue as VariadicValue;
+      const returnValue = firstValueAsVariadic?.valueOf();
+      const bondConfiguration = parseBondConfiguration(returnValue);
+      return bondConfiguration;
+    } else {
+      throw new ErrContractQuery(
+        'viewContractConfiguration',
+        returnCode.toString()
+      );
     }
   }
 
@@ -142,7 +177,7 @@ export class BondContract extends Contract {
    * Returns the contract lock periods and bond amounts
    */
   async viewLockPeriodsWithBonds(): Promise<
-    { lockPeriod: string; amount: string }[]
+    { lockPeriod: number; amount: BigNumber.Value }[]
   > {
     const interaction = this.contract.methodsExplicit.getLockPeriodsBonds([]);
     const query = interaction.buildQuery();
@@ -157,10 +192,10 @@ export class BondContract extends Contract {
       const bondAmounts: BigNumber[] = firstValue?.valueOf().field1;
 
       // Construct array of objects containing lock period and bond amount
-      const result: { lockPeriod: string; amount: string }[] = [];
+      const result: { lockPeriod: number; amount: BigNumber.Value }[] = [];
       for (let i = 0; i < lockPeriods.length; i++) {
-        const lockPeriod = lockPeriods[i].toString();
-        const bondAmount = bondAmounts[i].toString();
+        const lockPeriod = lockPeriods[i].toNumber();
+        const bondAmount = bondAmounts[i];
         result.push({ lockPeriod: lockPeriod, amount: bondAmount });
       }
 
@@ -772,26 +807,57 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Builds a `setPeriodsBonds` transaction to set the periods and bonds
+   * Builds a `initiateBond` transaction to "whitelist" an address for being able to bond for a specific Data NFT
+   * @param senderAddress the address of the sender
+   * @param address the address to be whitelisted
+   * @param tokenIdentifier the token identifier
+   * @param nonce the token identifier nonce
+   */
+  initiateBond(
+    senderAddress: IAddress,
+    address: IAddress,
+    tokenIdentifier: string,
+    nonce: number
+  ): Transaction {
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('initiateBond')
+        .addArg(new AddressValue(address))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
+  }
+
+  /**
+   * Builds a `addPeriodsBonds` transaction to set the periods and bonds
    * @param senderAddress the address of the sender
    * @param periods an array of periods
    * @param bonds an array of bond values
    */
-  setPeriodsBonds(
+  addPeriodsBonds(
     senderAddress: IAddress,
-    periods: number[],
-    bonds: BigNumber.Value[]
+    lockPeriodsWithBonds: {
+      lockPeriod: number;
+      amount: BigNumber.Value;
+    }[]
   ) {
     let combinedArray: TypedValue[] = [];
-    periods.map((period, index) => {
-      combinedArray.push(new U64Value(period));
-      combinedArray.push(new BigUIntValue(bonds[index]));
+    lockPeriodsWithBonds.map((lockPeriodWithBond) => {
+      combinedArray.push(new U64Value(lockPeriodWithBond.lockPeriod));
+      combinedArray.push(new BigUIntValue(lockPeriodWithBond.amount));
     });
 
     const tx = new Transaction({
       value: 0,
       data: new ContractCallPayloadBuilder()
-        .setFunction('setPeriodsBonds')
+        .setFunction('addPeriodsBonds')
         .setArgs(combinedArray)
         .build(),
       receiver: this.contract.getAddress(),
@@ -1078,11 +1144,10 @@ export class BondContract extends Contract {
         .setFunction('withdraw')
         .addArg(new TokenIdentifierValue(tokenIdentifier))
         .addArg(new U64Value(nonce))
-        .addArg(new U64Value(nonce))
         .build(),
       receiver: this.contract.getAddress(),
       sender: senderAddress,
-      gasLimit: 10_000_000,
+      gasLimit: 50_000_000,
       chainID: this.chainID
     });
     return withdrawTx;

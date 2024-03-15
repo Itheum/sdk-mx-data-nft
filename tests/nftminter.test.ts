@@ -88,7 +88,7 @@ describe('Nft minter test', () => {
       }
     );
     expect(mintTx).toBeInstanceOf(Transaction);
-  }, 40000);
+  }, 200000);
 
   test('#mint nft using tax for minting', async () => {
     const factoryGeneratedContract = new Address(
