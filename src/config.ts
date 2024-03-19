@@ -50,7 +50,7 @@ export const minterContractAddress: { [key in EnvironmentsEnum]: string } = {
 };
 
 export const bondContractAddress: { [key in EnvironmentsEnum]: string } = {
-  devnet: 'erd1qqqqqqqqqqqqqpgq32ucarnv5glrv6y340t7pl5svq9snwrm8ypsfhjqls',
+  devnet: 'erd1qqqqqqqqqqqqqpgq4xqxlq8p8zenrq4f0htgcwjzdlwmrhwdfsxsmavcuq',
   mainnet: '',
   testnet: ''
 };
