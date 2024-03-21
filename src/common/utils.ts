@@ -154,22 +154,22 @@ export function parseDataNft(value: NftType): DataNft {
   try {
     attributes = DataNft.decodeAttributes(value.attributes);
   } catch (error: any) {
-    attributes = {
-      dataPreview: value.metadata?.itheum_data_preview_url ?? '',
-      dataStream: value.metadata?.itheum_data_stream_url ?? '',
-      dataMarshal: value.metadata?.itheum_data_marshal_url ?? '',
-      creator: value.metadata?.itheum_creator ?? '',
-      creationTime: undefined,
-      description: '',
-      isDataNFTPH: true,
-      title: value.name
-    };
     try {
+      attributes = {
+        dataPreview: value.metadata?.itheum_data_preview_url ?? '',
+        dataStream: value.metadata?.itheum_data_stream_url ?? '',
+        dataMarshal: value.metadata?.itheum_data_marshal_url ?? '',
+        creator: value.metadata?.itheum_creator ?? '',
+        creationTime: undefined,
+        description: '',
+        isDataNFTPH: true,
+        title: value.name
+      };
     } catch (error: any) {
       throw new ErrParseNft(error.message);
     }
   }
-  return new DataNft({
+  const returnValue = {
     tokenIdentifier: value.identifier,
     nftImgUrl: value.url ?? '',
     tokenName: value.name,
@@ -183,8 +183,9 @@ export function parseDataNft(value: NftType): DataNft {
     collection: value.collection,
     balance: value.balance ? Number(value.balance) : 0,
     owner: value.owner ? value.owner : '',
-    ...DataNft.decodeAttributes(value.attributes)
-  });
+    ...attributes
+  };
+  return new DataNft(returnValue);
 }
 
 export async function checkTraitsUrl(traitsUrl: string) {
