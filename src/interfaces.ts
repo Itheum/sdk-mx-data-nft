@@ -36,6 +36,10 @@ export interface NftType {
     fileType?: string;
     fileUri?: string;
     fileName?: string;
+    itheum_data_preview_url?: string;
+    itheum_data_stream_url?: string;
+    itheum_data_marshal_url?: string;
+    itheum_creator?: string;
   };
   media?: {
     url: string;

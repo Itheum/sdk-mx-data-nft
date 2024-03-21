@@ -52,6 +52,12 @@ export class ErrDecodeAttributes extends Error {
   }
 }
 
+export class ErrParseNft extends Error {
+  public constructor(message?: string) {
+    super(`Failed to parse NFT: ${message}`);
+  }
+}
+
 export class ErrAttributeNotSet extends Error {
   public constructor(attribute: string) {
     super(`Attribute "${attribute}" is not set`);

@@ -4,7 +4,8 @@ import {
   ErrFetch,
   ErrInvalidTokenIdentifier,
   ErrMissingTrait,
-  ErrMissingValueForTrait
+  ErrMissingValueForTrait,
+  ErrParseNft
 } from '../errors';
 import {
   Bond,
@@ -149,6 +150,25 @@ export function parseRefund(value: any): Refund {
 }
 
 export function parseDataNft(value: NftType): DataNft {
+  let attributes;
+  try {
+    attributes = DataNft.decodeAttributes(value.attributes);
+  } catch (error: any) {
+    attributes = {
+      dataPreview: value.metadata?.itheum_data_preview_url ?? '',
+      dataStream: value.metadata?.itheum_data_stream_url ?? '',
+      dataMarshal: value.metadata?.itheum_data_marshal_url ?? '',
+      creator: value.metadata?.itheum_creator ?? '',
+      creationTime: undefined,
+      description: '',
+      isDataNFTPH: true,
+      title: value.name
+    };
+    try {
+    } catch (error: any) {
+      throw new ErrParseNft(error.message);
+    }
+  }
   return new DataNft({
     tokenIdentifier: value.identifier,
     nftImgUrl: value.url ?? '',
