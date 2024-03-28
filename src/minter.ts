@@ -23,12 +23,9 @@ import {
 } from './config';
 import { ErrContractQuery, ErrNetworkConfig } from './errors';
 import BigNumber from 'bignumber.js';
+import { Contract } from './contract';
 
-export abstract class Minter {
-  readonly contract: SmartContract;
-  readonly chainID: string;
-  readonly networkProvider: ApiNetworkProvider;
-  readonly env: string;
+export abstract class Minter extends Contract {
   readonly imageServiceUrl: string;
 
   protected constructor(
@@ -37,25 +34,8 @@ export abstract class Minter {
     abiFile: any,
     timeout: number = 10000
   ) {
-    if (!(env in EnvironmentsEnum)) {
-      throw new ErrNetworkConfig(
-        `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
-      );
-    }
-    this.env = env;
-    const networkConfig = networkConfiguration[env as EnvironmentsEnum];
+    super(env, contractAddress, abiFile, timeout);
     this.imageServiceUrl = imageService[env as EnvironmentsEnum];
-    this.chainID = networkConfig.chainID;
-    this.networkProvider = new ApiNetworkProvider(
-      networkConfig.networkProvider,
-      {
-        timeout: timeout
-      }
-    );
-    this.contract = new SmartContract({
-      address: contractAddress,
-      abi: AbiRegistry.create(abiFile)
-    });
   }
 
   /**
@@ -222,31 +202,6 @@ export abstract class Minter {
     });
 
     return unpauseContractTx;
-  }
-
-  /** Creates a set mint tax transaction for the contract
-   * @param senderAddress The address of the sender, must be the admin of the contract
-   * @param tokenIdentifier The token identifier of the token to set the mint tax
-   * @param tax The tax to set for the token
-   */
-  setMintTax(
-    senderAddress: IAddress,
-    tokenIdentifier: string,
-    tax: BigNumber.Value
-  ): Transaction {
-    const setMintTaxTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setAntiSpamTax'))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new BigUIntValue(tax))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 6000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return setMintTaxTx;
   }
 
   /**

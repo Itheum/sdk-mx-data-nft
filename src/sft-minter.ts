@@ -17,11 +17,7 @@ import {
   dataNFTDataStreamAdvertise,
   storeToIpfs
 } from './common/mint-utils';
-import {
-  checkTraitsUrl,
-  checkUrlIsUp,
-  validateSpecificParamsMint
-} from './common/utils';
+import { checkTraitsUrl, checkUrlIsUp } from './common/utils';
 import {
   EnvironmentsEnum,
   itheumTokenIdentifier,
@@ -31,6 +27,11 @@ import { ErrArgumentNotSet, ErrContractQuery } from './errors';
 import { SftMinterRequirements } from './interfaces';
 import { Minter } from './minter';
 import BigNumber from 'bignumber.js';
+import {
+  NumericValidator,
+  StringValidator,
+  validateResults
+} from './common/validator';
 
 export class SftMinter extends Minter {
   /**
@@ -161,7 +162,7 @@ export class SftMinter extends Minter {
   }
 
   /**
-   *
+   * Creates a `setTreasuryAddress` transaction
    * @param senderAddress The address of the sender, must be the admin of the contract
    * @param treasuryAddress The address of the treasury to collect the anti spam tax
    */
@@ -184,7 +185,7 @@ export class SftMinter extends Minter {
   }
 
   /**
-   *
+   * Creates a `setAntiSpamTax` transaction
    * @param senderAddress The address of the sender, must be the admin of the contract
    * @param maxSupply The maximum supply that can be minted
    */
@@ -224,12 +225,12 @@ export class SftMinter extends Minter {
    * @param supply the supply of the Data NFT-FT. A number between 1 and 1000.
    * @param datasetTitle the title of the dataset. Between 10 and 60 alphanumeric characters.
    * @param datasetDescription the description of the dataset. Between 10 and 400 alphanumeric characters.
-   * @param antiSpamTax the anti spam tax to be set for the Data NFT-FT with decimals. Needs to be greater than 0 and should be obtained in real time via {@link viewMinterRequirements} prior to calling mint.
+   * @param lockPeriod the lock period for the bond in days
+   * @param amountToSend the amount of the bond + anti spam tax (if anti spam tax > 0) to be sent
    * @param options [optional] below parameters are optional or required based on use case
    *                 - imageUrl: the URL of the image for the Data NFT
    *                 - traitsUrl: the URL of the traits for the Data NFT
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
-   *                 - antiSpamTokenIdentifier: the anti spam token identifier to be used for the minting (default = `ITHEUM` token identifier based on the  {@link EnvironmentsEnum})
    *
    */
   async mint(
@@ -242,51 +243,55 @@ export class SftMinter extends Minter {
     supply: number,
     datasetTitle: string,
     datasetDescription: string,
-    antiSpamTax: BigNumber.Value,
+    amountToSend: number,
+    lockPeriod?: number,
     options?: {
       imageUrl?: string;
       traitsUrl?: string;
       nftStorageToken?: string;
-      antiSpamTokenIdentifier?: string;
     }
   ): Promise<Transaction> {
-    const {
-      imageUrl,
-      traitsUrl,
-      nftStorageToken,
-      antiSpamTokenIdentifier = itheumTokenIdentifier[
-        this.env as EnvironmentsEnum
-      ]
-    } = options ?? {};
+    const { imageUrl, traitsUrl, nftStorageToken } = options ?? {};
 
-    // S: run any format specific validation
-    const { allPassed, validationMessages } = validateSpecificParamsMint({
-      senderAddress,
-      tokenName,
-      royalties,
-      supply,
-      datasetTitle,
-      datasetDescription,
-      antiSpamTax,
-      _mandatoryParamsList: [
-        'senderAddress',
-        'tokenName',
-        'royalties',
-        'supply',
-        'datasetTitle',
-        'datasetDescription',
-        'antiSpamTax'
-      ]
-    });
+    const tokenNameValidator = new StringValidator()
+      .notEmpty()
+      .alphanumeric()
+      .minLength(3)
+      .maxLength(20)
+      .validate(tokenName);
 
-    if (!allPassed) {
-      throw new Error(`Params have validation issues = ${validationMessages}`);
-    }
-    // E: run any format specific validation...
+    const datasetTitleValidator = new StringValidator()
+      .notEmpty()
+      .minLength(10)
+      .maxLength(60)
+      .validate(datasetTitle.trim());
+
+    const datasetDescriptionValidator = new StringValidator()
+      .notEmpty()
+      .minLength(10)
+      .maxLength(400)
+      .validate(datasetDescription);
+
+    const royaltiesValidator = new NumericValidator()
+      .integer()
+      .minValue(0)
+      .validate(royalties);
+
+    const supplyValidator = new NumericValidator()
+      .integer()
+      .minValue(1)
+      .validate(supply);
+
+    validateResults([
+      tokenNameValidator,
+      datasetTitleValidator,
+      datasetDescriptionValidator,
+      royaltiesValidator,
+      supplyValidator
+    ]);
 
     // deep validate all mandatory URLs
     try {
-      await checkUrlIsUp(dataStreamUrl, [200, 403]);
       await checkUrlIsUp(dataPreviewUrl, [200]);
       await checkUrlIsUp(dataMarshalUrl + '/health-check', [200]);
     } catch (error) {
@@ -339,45 +344,35 @@ export class SftMinter extends Minter {
       metadataOnIpfsUrl = traitsUrl;
     }
 
-    let data;
-    if (antiSpamTax > BigNumber(0)) {
-      data = new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTTransfer'))
-        .addArg(new TokenIdentifierValue(antiSpamTokenIdentifier))
-        .addArg(new BigUIntValue(antiSpamTax))
-        .addArg(new StringValue('mint'))
-        .addArg(new StringValue(tokenName))
-        .addArg(new StringValue(imageOnIpfsUrl))
-        .addArg(new StringValue(metadataOnIpfsUrl))
-        .addArg(new StringValue(dataMarshalUrl))
-        .addArg(new StringValue(dataNftStreamUrlEncrypted))
-        .addArg(new StringValue(dataPreviewUrl))
-        .addArg(new U64Value(royalties))
-        .addArg(new U64Value(supply))
-        .addArg(new StringValue(datasetTitle))
-        .addArg(new StringValue(datasetDescription))
-        .build();
-    } else {
-      data = new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('mint'))
-        .addArg(new StringValue(tokenName))
-        .addArg(new StringValue(imageOnIpfsUrl))
-        .addArg(new StringValue(metadataOnIpfsUrl))
-        .addArg(new StringValue(dataMarshalUrl))
-        .addArg(new StringValue(dataNftStreamUrlEncrypted))
-        .addArg(new StringValue(dataPreviewUrl))
-        .addArg(new U64Value(royalties))
-        .addArg(new U64Value(supply))
-        .addArg(new StringValue(datasetTitle))
-        .addArg(new StringValue(datasetDescription))
-        .build();
+    const data = new ContractCallPayloadBuilder()
+      .setFunction(new ContractFunction('ESDTTransfer'))
+      .addArg(
+        new TokenIdentifierValue(
+          itheumTokenIdentifier[this.env as EnvironmentsEnum]
+        )
+      )
+      .addArg(new BigUIntValue(amountToSend))
+      .addArg(new StringValue('mint'))
+      .addArg(new StringValue(tokenName))
+      .addArg(new StringValue(imageOnIpfsUrl))
+      .addArg(new StringValue(metadataOnIpfsUrl))
+      .addArg(new StringValue(dataMarshalUrl))
+      .addArg(new StringValue(dataNftStreamUrlEncrypted))
+      .addArg(new StringValue(dataPreviewUrl))
+      .addArg(new U64Value(royalties))
+      .addArg(new U64Value(supply))
+      .addArg(new StringValue(datasetTitle))
+      .addArg(new StringValue(datasetDescription));
+
+    if (lockPeriod) {
+      data.addArg(new U64Value(lockPeriod));
     }
 
     const mintTx = new Transaction({
-      data,
+      data: data.build(),
       sender: senderAddress,
       receiver: this.contract.getAddress(),
-      gasLimit: 60000000,
+      gasLimit: 80_000_000,
       chainID: this.chainID
     });
 

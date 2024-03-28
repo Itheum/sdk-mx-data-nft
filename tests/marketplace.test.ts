@@ -117,6 +117,7 @@ describe('Marketplace Sdk test', () => {
       new Address(
         'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
       ),
+      0,
       0
     );
 
@@ -124,6 +125,7 @@ describe('Marketplace Sdk test', () => {
       new Address(
         'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
       ),
+      0,
       0,
       false
     );

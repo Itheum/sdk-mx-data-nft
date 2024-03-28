@@ -17,11 +17,7 @@ import {
   dataNFTDataStreamAdvertise,
   storeToIpfs
 } from './common/mint-utils';
-import {
-  checkTraitsUrl,
-  checkUrlIsUp,
-  validateSpecificParamsMint
-} from './common/utils';
+import { checkTraitsUrl, checkUrlIsUp } from './common/utils';
 import { EnvironmentsEnum, itheumTokenIdentifier } from './config';
 import { ErrArgumentNotSet, ErrContractQuery } from './errors';
 import { ContractConfiguration, NftMinterRequirements } from './interfaces';
@@ -189,30 +185,8 @@ export class NftMinter extends Minter {
       antiSpamTax
     } = options ?? {};
 
-    // S: run any format specific validation
-    const { allPassed, validationMessages } = validateSpecificParamsMint({
-      senderAddress,
-      tokenName,
-      royalties,
-      datasetTitle,
-      datasetDescription,
-      _mandatoryParamsList: [
-        'senderAddress',
-        'tokenName',
-        'royalties',
-        'datasetTitle',
-        'datasetDescription'
-      ]
-    });
-
-    if (!allPassed) {
-      throw new Error(`Params have validation issues = ${validationMessages}`);
-    }
-    // E: run any format specific validation...
-
     // deep validate all mandatory URLs
     try {
-      await checkUrlIsUp(dataStreamUrl, [200, 403]);
       await checkUrlIsUp(dataPreviewUrl, [200]);
       await checkUrlIsUp(dataMarshalUrl + '/health-check', [200]);
     } catch (error) {

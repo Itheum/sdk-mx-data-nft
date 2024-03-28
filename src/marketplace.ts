@@ -203,17 +203,17 @@ export class DataNftMarket {
   async viewPagedOffers(
     from: number,
     to: number,
-    senderAddress?: string
+    senderAddress?: IAddress
   ): Promise<Offer[]> {
     let interaction = this.contract.methodsExplicit.viewPagedOffers([
       new U64Value(from),
       new U64Value(to)
     ]);
     if (senderAddress) {
-      interaction = this.contract.methodsExplicit.viewPagedOffersByAddress([
+      interaction = this.contract.methodsExplicit.viewPagedOffers([
         new U64Value(from),
         new U64Value(to),
-        new AddressValue(new Address(senderAddress))
+        new AddressValue(senderAddress)
       ]);
     }
     const query = interaction.buildQuery();
@@ -274,34 +274,8 @@ export class DataNftMarket {
     );
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      const offers: Offer[] = returnValue.map(
-        ([
-          index,
-          {
-            owner,
-            offered_token: {
-              token_identifier: offeredTokenIdentifier,
-              token_nonce: offeredTokenNonce,
-              amount: offeredTokenAmount
-            },
-            wanted_token: {
-              token_identifier: wantedTokenIdentifier,
-              token_nonce: wantedTokenNonce,
-              amount: wantedTokenAmount
-            },
-            quantity
-          }
-        ]: any) => ({
-          index: index.toNumber(),
-          owner: owner.bech32(),
-          offeredTokenIdentifier: offeredTokenIdentifier.toString(),
-          offeredTokenNonce: offeredTokenNonce.toString(),
-          offeredTokenAmount,
-          wantedTokenIdentifier: wantedTokenIdentifier.toString(),
-          wantedTokenNonce: wantedTokenNonce.toString(),
-          wantedTokenAmount,
-          quantity: quantity.toNumber()
-        })
+      const offers: Offer[] = returnValue.map((offer: any) =>
+        parseOffer(offer)
       );
       return offers;
     } else {
@@ -477,7 +451,7 @@ export class DataNftMarket {
       value: 0,
       data: data,
       receiver: this.contract.getAddress(),
-      gasLimit: 12000000,
+      gasLimit: 20_000_000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -517,7 +491,7 @@ export class DataNftMarket {
         .build(),
       receiver: senderAddress,
       sender: senderAddress,
-      gasLimit: 20000000,
+      gasLimit: 20_000_000,
       chainID: this.chainID
     });
     return offerEsdtTx;
@@ -546,7 +520,7 @@ export class DataNftMarket {
       value: price,
       data: data,
       receiver: this.contract.getAddress(),
-      gasLimit: 12000000,
+      gasLimit: 20_000_000,
       sender: senderAddress,
       chainID: this.chainID
     });
@@ -587,11 +561,13 @@ export class DataNftMarket {
    * Creates a `cancelOffer` transaction
    * @param senderAddress the address of the sender
    * @param offerId the id of the offer to be cancelled
+   * @param quantity the quantity of the offer to be cancelled
    * @param sendFundsBackToOwner default `true`, if `false` the offer will be cancelled, but the funds will be kept in the contract until withdrawal
    */
   cancelOffer(
     senderAddress: IAddress,
     offerId: number,
+    quantity: number,
     sendFundsBackToOwner = true
   ): Transaction {
     const cancelTx = new Transaction({
@@ -599,6 +575,7 @@ export class DataNftMarket {
       data: new ContractCallPayloadBuilder()
         .setFunction(new ContractFunction('cancelOffer'))
         .addArg(new U64Value(offerId))
+        .addArg(new U64Value(quantity))
         .addArg(new BooleanValue(sendFundsBackToOwner))
         .build(),
       receiver: this.contract.getAddress(),

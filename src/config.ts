@@ -49,6 +49,12 @@ export const minterContractAddress: { [key in EnvironmentsEnum]: string } = {
   testnet: ''
 };
 
+export const bondContractAddress: { [key in EnvironmentsEnum]: string } = {
+  devnet: 'erd1qqqqqqqqqqqqqpgq4xqxlq8p8zenrq4f0htgcwjzdlwmrhwdfsxsmavcuq',
+  mainnet: '',
+  testnet: ''
+};
+
 export const apiConfiguration: { [key in EnvironmentsEnum]: string } = {
   devnet: 'https://devnet-api.multiversx.com',
   mainnet: 'https://api.multiversx.com',
