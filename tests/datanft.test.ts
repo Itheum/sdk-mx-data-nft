@@ -120,7 +120,7 @@ describe('Data NFT test', () => {
     const dataNft = await DataNft.createFromApi({ nonce: 5 });
 
     expect(dataNft.overrideDataMarshal).toBe(
-      marshalUrls[EnvironmentsEnum.mainnet]
+      marshalUrls[EnvironmentsEnum.devnet]
     );
     expect(dataNft.dataMarshal).toBe(marshalUrls[EnvironmentsEnum.devnet]);
     expect(dataNft.overrideDataMarshalChainId).toBe('1');
