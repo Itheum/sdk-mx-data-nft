@@ -43,11 +43,11 @@ describe('Bond test', () => {
     expect(bond).toMatchObject<Bond>;
     const sameBond: Bond[] = await bondContract.viewBonds(
       [tokenIdentifier],
-      [76]
+      [172]
     );
     expect(sameBond).toMatchObject<Bond[]>;
     const sameBond2: Bond[] = await bondContract.viewBonds([
-      createTokenIdentifier(tokenIdentifier, 76)
+      createTokenIdentifier(tokenIdentifier, 172)
     ]);
     expect(sameBond2).toMatchObject<Bond[]>;
     expect(sameBond).toStrictEqual(sameBond2);
@@ -65,7 +65,7 @@ describe('Bond test', () => {
     expect(compensation).toMatchObject<Compensation>;
 
     const compensations: Compensation[] = await bondContract.viewCompensations([
-      { tokenIdentifier: tokenIdentifier, nonce: 76 }
+      { tokenIdentifier: tokenIdentifier, nonce: 172 }
     ]);
     expect(compensations).toMatchObject<Compensation[]>;
     expect(compensations[0]).toStrictEqual(compensation);
