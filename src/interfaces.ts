@@ -136,7 +136,7 @@ export interface Bond {
   nonce: number;
   lockPeriod: number; // seconds
   bondTimestamp: number;
-  unboundTimestamp: number;
+  unbondTimestamp: number;
   bondAmount: BigNumber.Value;
   remainingAmount: BigNumber.Value;
 }
