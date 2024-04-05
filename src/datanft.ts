@@ -49,6 +49,7 @@ export class DataNft implements DataNftType {
   readonly owner: string = ''; // works if tokenIdentifier is an NFT
   readonly overrideDataMarshal: string = '';
   readonly overrideDataMarshalChainId: string = '';
+  readonly isDataNFTPH: boolean = false;
 
   static networkConfiguration: Config;
   static apiConfiguration: string;

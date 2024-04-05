@@ -4,9 +4,20 @@ import {
   ErrFetch,
   ErrInvalidTokenIdentifier,
   ErrMissingTrait,
-  ErrMissingValueForTrait
+  ErrMissingValueForTrait,
+  ErrParseNft
 } from '../errors';
-import { NftEnumType, NftType, Offer } from '../interfaces';
+import {
+  Bond,
+  BondConfiguration,
+  Compensation,
+  ContractConfiguration,
+  NftEnumType,
+  NftType,
+  Offer,
+  Refund,
+  State
+} from '../interfaces';
 import { EnvironmentsEnum, dataMarshalUrlOverride } from '../config';
 
 export function numberToPaddedHex(value: BigNumber.Value) {
@@ -20,7 +31,10 @@ export function numberToPaddedHex(value: BigNumber.Value) {
  * @param nonce the nonce of the token
  * @returns The token identifier in the format of ticker-randomString-nonce
  */
-export function createTokenIdentifier(collection: string, nonce: number) {
+export function createTokenIdentifier(
+  collection: string,
+  nonce: BigNumber.Value
+) {
   return `${collection}-${numberToPaddedHex(nonce)}`;
 }
 
@@ -31,7 +45,7 @@ export function createTokenIdentifier(collection: string, nonce: number) {
  */
 export function parseTokenIdentifier(tokenIdentifier: string): {
   collection: string;
-  nonce: number;
+  nonce: BigNumber.Value;
 } {
   const splitTokenIdentifier: string[] = tokenIdentifier.split('-');
 
@@ -74,8 +88,88 @@ export function parseOffer(value: any): Offer {
   };
 }
 
+export function parseBond(value: any): Bond {
+  return {
+    bondId: value.bond_id.toNumber(),
+    address: value.address.toString(),
+    tokenIdentifier: value.token_identifier.toString(),
+    nonce: value.nonce.toNumber(),
+    lockPeriod: value.lock_period.toNumber(),
+    bondTimestamp: value.bond_timestamp.toNumber(),
+    unbondTimestamp: value.unbond_timestamp.toNumber(),
+    bondAmount: value.bond_amount.toFixed(0),
+    remainingAmount: value.remaining_amount.toFixed(0)
+  };
+}
+
+export function parseBondConfiguration(value: any): BondConfiguration {
+  const lockPeriods: BigNumber[] = value.lock_periods;
+  const bondAmounts: BigNumber[] = value.bond_amounts;
+
+  // Construct array of objects containing lock period and bond amount
+  const result: { lockPeriod: number; amount: BigNumber.Value }[] = [];
+  for (let i = 0; i < lockPeriods.length; i++) {
+    const lockPeriod = lockPeriods[i].toNumber();
+    const bondAmount = bondAmounts[i].toFixed(0);
+    result.push({ lockPeriod: lockPeriod, amount: bondAmount });
+  }
+  return {
+    contractState: value.contract_state.name as State,
+    bondPaymentTokenIdentifier: value.bond_payment_token_identifier.toString(),
+    lockPeriodsWithBonds: result,
+    minimumPenalty: value.minimum_penalty.toNumber(),
+    maximumPenalty: value.maximum_penalty.toNumber(),
+    withdrawPenalty: value.withdraw_penalty.toNumber(),
+    acceptedCallers: value.accepted_callers.map((address: any) =>
+      address.toString()
+    )
+  };
+}
+
+export function parseCompensation(value: any): Compensation {
+  return {
+    compensationId: value.compensation_id.toNumber(),
+    tokenIdentifier: value.token_identifier.toString(),
+    nonce: value.nonce.toNumber(),
+    accumulatedAmount: value.accumulated_amount.toFixed(0),
+    proofAmount: value.proof_amount.toFixed(0),
+    endDate: value.end_date.toNumber()
+  };
+}
+
+export function parseRefund(value: any): Refund {
+  return {
+    compensationId: value.compensation_id.toNumber(),
+    address: value.address.toString(),
+    proofOfRefund: {
+      tokenIdentifier: value.proof_of_refund.token_identifier.toString(),
+      nonce: value.proof_of_refund.token_nonce.toNumber(),
+      amount: value.proof_of_refund.amount.toFixed(0)
+    }
+  };
+}
+
 export function parseDataNft(value: NftType): DataNft {
-  return new DataNft({
+  let attributes;
+  try {
+    attributes = DataNft.decodeAttributes(value.attributes); // normal attributes
+  } catch (error: any) {
+    try {
+      attributes = {
+        dataPreview: value.metadata?.itheum_data_preview_url ?? '',
+        dataStream: value.metadata?.itheum_data_stream_url ?? '',
+        dataMarshal: value.metadata?.itheum_data_marshal_url ?? '',
+        creator: value.metadata?.itheum_creator ?? '',
+        creationTime: new Date(value.timestamp * 1000),
+        description: value.metadata?.description ?? '',
+        isDataNFTPH: true,
+        title: value.name
+      };
+    } catch (error: any) {
+      throw new ErrParseNft(error.message);
+    }
+  }
+  const returnValue = {
     tokenIdentifier: value.identifier,
     nftImgUrl: value.url ?? '',
     tokenName: value.name,
@@ -89,8 +183,9 @@ export function parseDataNft(value: NftType): DataNft {
     collection: value.collection,
     balance: value.balance ? Number(value.balance) : 0,
     owner: value.owner ? value.owner : '',
-    ...DataNft.decodeAttributes(value.attributes)
-  });
+    ...attributes
+  };
+  return new DataNft(returnValue);
 }
 
 export async function checkTraitsUrl(traitsUrl: string) {
@@ -424,198 +519,6 @@ export function validateSpecificParamsViewData(params: {
       !mvxNativeAuthOriginsIsValid ||
       !nestedIdxToStreamValid ||
       !asDeputyOnAppointerAddrIsValid
-    ) {
-      allPassed = false;
-    }
-  } catch (e: any) {
-    allPassed = false;
-    validationMessages = e.toString();
-  }
-
-  return {
-    allPassed,
-    validationMessages
-  };
-}
-
-export function validateSpecificParamsMint(params: {
-  senderAddress?: any;
-  tokenName?: string | undefined;
-  datasetTitle?: string | undefined;
-  datasetDescription?: string | undefined;
-  royalties?: number | undefined;
-  supply?: number | undefined;
-  antiSpamTax?: BigNumber.Value | undefined;
-  _mandatoryParamsList: string[]; // a pure JS fallback way to validate mandatory params, as typescript rules for mandatory can be bypassed by client app
-}): {
-  allPassed: boolean;
-  validationMessages: string;
-} {
-  let allPassed = true;
-  let validationMessages = '';
-
-  try {
-    // senderAddress test
-    let senderAddressValid = true;
-
-    if (
-      params.senderAddress !== undefined ||
-      params._mandatoryParamsList.includes('senderAddress')
-    ) {
-      senderAddressValid = false;
-
-      if (params.senderAddress !== undefined) {
-        senderAddressValid = true;
-      } else {
-        validationMessages += '[senderAddress needs to be a valid type]';
-      }
-    }
-
-    // tokenName test
-    let tokenNameValid = true;
-
-    if (
-      params.tokenName !== undefined ||
-      params._mandatoryParamsList.includes('tokenName')
-    ) {
-      tokenNameValid = false; // it exists or needs to exist, so we need to validate
-
-      if (
-        params.tokenName !== undefined &&
-        typeof params.tokenName === 'string' &&
-        params.tokenName.trim() !== '' &&
-        params.tokenName.trim().match(/^[a-zA-Z0-9]+$/) &&
-        params.tokenName.trim().length >= 3 &&
-        params.tokenName.trim().length <= 20
-      ) {
-        tokenNameValid = true;
-      } else {
-        validationMessages +=
-          '[tokenName needs to be a string between 3 and 20 characters (Only alphanumeric characters allowed, no spaces allowed)]';
-      }
-    }
-
-    // datasetTitle test
-    let datasetTitleValid = true;
-
-    if (
-      params.datasetTitle !== undefined ||
-      params._mandatoryParamsList.includes('datasetTitle')
-    ) {
-      datasetTitleValid = false; // it exists or needs to exist, so we need to validate
-
-      if (
-        params.datasetTitle !== undefined &&
-        typeof params.datasetTitle === 'string' &&
-        params.datasetTitle.trim() !== '' &&
-        params.datasetTitle.trim().match(/^[a-zA-Z0-9\s]+$/) &&
-        params.datasetTitle.trim().length >= 10 &&
-        params.datasetTitle.trim().length <= 60
-      ) {
-        datasetTitleValid = true;
-      } else {
-        validationMessages +=
-          '[datasetTitle needs to be a string between 10 and 60 characters (Only alphanumeric characters)]';
-      }
-    }
-
-    // datasetDescription test
-    let datasetDescriptionValid = true;
-
-    if (
-      params.datasetDescription !== undefined ||
-      params._mandatoryParamsList.includes('datasetDescription')
-    ) {
-      datasetDescriptionValid = false; // it exists or needs to exist, so we need to validate
-
-      if (
-        params.datasetDescription !== undefined &&
-        typeof params.datasetDescription === 'string' &&
-        params.datasetDescription.trim() !== '' &&
-        params.datasetDescription.trim().match(/^[a-zA-Z0-9\s]+$/) &&
-        params.datasetDescription.trim().length >= 10 &&
-        params.datasetDescription.trim().length <= 400
-      ) {
-        datasetDescriptionValid = true;
-      } else {
-        validationMessages +=
-          '[datasetDescription needs to be a string between 10 and 400 characters (Only alphanumeric characters)]';
-      }
-    }
-
-    // royalties test
-    let royaltiesValid = true;
-
-    if (
-      params.royalties !== undefined ||
-      params._mandatoryParamsList.includes('royalties')
-    ) {
-      royaltiesValid = false;
-
-      if (
-        params.royalties !== undefined &&
-        typeof params.royalties === 'number' &&
-        !(params.royalties % 1 != 0) && // modulus checking. (10 % 1 != 0) EQ false, (10.5 % 1 != 0) EQ true,
-        params.royalties >= 0 &&
-        params.royalties <= 5000
-      ) {
-        royaltiesValid = true;
-      } else {
-        validationMessages +=
-          '[royalties needs to a whole number (not decimal) between 0 and 50]';
-      }
-    }
-
-    // supply test
-    let supplyValid = true;
-
-    if (
-      params.supply !== undefined ||
-      params._mandatoryParamsList.includes('supply')
-    ) {
-      supplyValid = false;
-
-      if (
-        params.supply !== undefined &&
-        typeof params.supply === 'number' &&
-        params.supply >= 1 &&
-        params.supply <= 1000
-      ) {
-        supplyValid = true;
-      } else {
-        validationMessages += '[supply needs to a number between 1 and 1000]';
-      }
-    }
-
-    // antiSpamTax test
-    let antiSpamTaxValid = true;
-
-    if (
-      params.antiSpamTax !== undefined ||
-      params._mandatoryParamsList.includes('antiSpamTax')
-    ) {
-      antiSpamTaxValid = false;
-
-      if (
-        params.antiSpamTax !== undefined &&
-        typeof params.antiSpamTax === 'number' &&
-        params.antiSpamTax >= 0
-      ) {
-        antiSpamTaxValid = true;
-      } else {
-        validationMessages +=
-          '[antiSpamTax needs to be a number greater than or equal to 0]';
-      }
-    }
-
-    if (
-      !senderAddressValid ||
-      !tokenNameValid ||
-      !datasetTitleValid ||
-      !datasetDescriptionValid ||
-      !royaltiesValid ||
-      !supplyValid ||
-      !antiSpamTaxValid
     ) {
       allPassed = false;
     }

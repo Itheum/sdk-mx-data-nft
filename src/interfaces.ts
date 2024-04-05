@@ -36,6 +36,10 @@ export interface NftType {
     fileType?: string;
     fileUri?: string;
     fileName?: string;
+    itheum_data_preview_url?: string;
+    itheum_data_stream_url?: string;
+    itheum_data_marshal_url?: string;
+    itheum_creator?: string;
   };
   media?: {
     url: string;
@@ -118,11 +122,63 @@ export interface Offer {
   owner: string;
   offeredTokenIdentifier: string;
   offeredTokenNonce: number;
-  offeredTokenAmount: string;
+  offeredTokenAmount: BigNumber.Value;
   wantedTokenIdentifier: string;
   wantedTokenNonce: number;
-  wantedTokenAmount: string;
+  wantedTokenAmount: BigNumber.Value;
   quantity: number;
+}
+
+export interface Bond {
+  bondId: number;
+  address: string;
+  tokenIdentifier: string;
+  nonce: number;
+  lockPeriod: number; // seconds
+  bondTimestamp: number;
+  unbondTimestamp: number;
+  bondAmount: BigNumber.Value;
+  remainingAmount: BigNumber.Value;
+}
+
+export interface BondConfiguration {
+  contractState: State;
+  bondPaymentTokenIdentifier: string;
+  lockPeriodsWithBonds: { lockPeriod: number; amount: BigNumber.Value }[];
+  minimumPenalty: number;
+  maximumPenalty: number;
+  withdrawPenalty: number;
+  acceptedCallers: string[];
+}
+
+export interface Refund {
+  compensationId: number;
+  address: string;
+  proofOfRefund: {
+    tokenIdentifier: string;
+    nonce: number;
+    amount: BigNumber.Value;
+  };
+}
+
+export interface Compensation {
+  compensationId: number;
+  tokenIdentifier: string;
+  nonce: number;
+  accumulatedAmount: BigNumber.Value;
+  proofAmount: BigNumber.Value;
+  endDate: number;
+}
+
+export enum State {
+  Inactive = 0,
+  Active = 1
+}
+
+export enum PenaltyType {
+  Minimum = 0,
+  Custom = 1,
+  Maximum = 2
 }
 
 export interface ViewDataReturnType {
