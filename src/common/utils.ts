@@ -202,7 +202,7 @@ export async function checkTraitsUrl(traitsUrl: string) {
     throw new ErrMissingTrait(traits.attributes);
   }
 
-  const requiredTraits = ['Creator', 'Data Preview URL'];
+  const requiredTraits = ['Creator'];
   const traitsAttributes = traits.attributes;
 
   for (const requiredTrait of requiredTraits) {

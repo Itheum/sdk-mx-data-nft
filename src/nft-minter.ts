@@ -159,6 +159,7 @@ export class NftMinter extends Minter {
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
    *                 - antiSpamTokenIdentifier: the anti spam token identifier to be used for the minting
    *                 - antiSpamTax: the anti spam tax to be set for the Data NFT-FT with decimals. Needs to be greater than 0 and should be obtained in real time via {@link viewMinterRequirements} prior to calling mint.
+   *                 - bonusNFTMediaImgUrl [optional] a bonus media image URL you can send in if needed.
    */
   async mint(
     senderAddress: IAddress,
@@ -175,6 +176,7 @@ export class NftMinter extends Minter {
       nftStorageToken?: string;
       antiSpamTokenIdentifier?: string;
       antiSpamTax?: BigNumber.Value;
+      bonusNFTMediaImgUrl?: string;
     }
   ): Promise<Transaction> {
     const {
@@ -182,7 +184,8 @@ export class NftMinter extends Minter {
       traitsUrl,
       nftStorageToken,
       antiSpamTokenIdentifier,
-      antiSpamTax
+      antiSpamTax,
+      bonusNFTMediaImgUrl
     } = options ?? {};
 
     // deep validate all mandatory URLs
@@ -215,7 +218,8 @@ export class NftMinter extends Minter {
         datasetTitle,
         datasetDescription,
         dataPreviewUrl,
-        senderAddress.bech32()
+        senderAddress.bech32(),
+        bonusNFTMediaImgUrl
       );
 
       const {

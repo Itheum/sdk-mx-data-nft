@@ -239,14 +239,12 @@ Items below marked "required" are the "minimum" required for it to be compatible
 ```json
 {
   "description": "Data NFT description", // required
+  "data_preview_url": "https://previewdata.com",
+  "bonus_media_img": "ipfs://imgCID",
   "attributes": [
     {
       "trait_type": "Creator", // required
       "value": "creator address"
-    },
-    {
-      "trait_type": "Data Preview URL", // required
-      "value": "https://previewdata.com"
     },
     {
       "trait_type": "extra trait",
