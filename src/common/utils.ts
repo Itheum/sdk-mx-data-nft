@@ -183,6 +183,10 @@ export function parseDataNft(value: NftType): DataNft {
     collection: value.collection,
     balance: value.balance ? Number(value.balance) : 0,
     owner: value.owner ? value.owner : '',
+    extraAssets:
+      value.uris
+        ?.slice(2)
+        .map((uri) => Buffer.from(uri, 'base64').toString('ascii')) ?? [],
     ...attributes
   };
   return new DataNft(returnValue);

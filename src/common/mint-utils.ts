@@ -61,18 +61,13 @@ export function createIpfsMetadata(
   datasetTitle: string,
   datasetDescription: string,
   dataNFTStreamPreviewUrl: string,
-  address: string,
-  bonusNFTMediaImgUrl?: string
+  address: string
 ) {
   const metadata: Record<string, any> = {
     description: `${datasetTitle} : ${datasetDescription}`,
     data_preview_url: dataNFTStreamPreviewUrl,
     attributes: [] as object[]
   };
-  // if we have bonusNFTMediaImgUrl, we put that as a top level attribute as well
-  if (bonusNFTMediaImgUrl && bonusNFTMediaImgUrl.trim() !== '') {
-    metadata['bonus_media_img'] = bonusNFTMediaImgUrl.trim().toLowerCase();
-  }
   const attributes = traits
     .split(',')
     .filter((element) => element.trim() !== '');
@@ -82,11 +77,6 @@ export function createIpfsMetadata(
     const trait = { trait_type: key.trim(), value: value.trim() };
     metadataAttributes.push(trait);
   }
-  //// This should not be a trait as it will pollute the trait filters on NFT marketplaces
-  // metadataAttributes.push({
-  //   trait_type: 'Data Preview URL',
-  //   value: dataNFTStreamPreviewUrl
-  // });
   metadataAttributes.push({ trait_type: 'Creator', value: address });
   metadata.attributes = metadataAttributes;
   return metadata;
@@ -97,8 +87,7 @@ export async function createFileFromUrl(
   datasetTitle: string,
   datasetDescription: string,
   dataNFTStreamPreviewUrl: string,
-  address: string,
-  bonusNFTMediaImgUrl?: string
+  address: string
 ) {
   let res: any = '';
   let data: any = '';
@@ -113,8 +102,7 @@ export async function createFileFromUrl(
     datasetTitle,
     datasetDescription,
     dataNFTStreamPreviewUrl,
-    address,
-    bonusNFTMediaImgUrl
+    address
   );
   const _traitsFile = new File([JSON.stringify(traits)], 'metadata.json', {
     type: 'application/json'

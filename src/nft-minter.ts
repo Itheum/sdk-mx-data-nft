@@ -159,7 +159,7 @@ export class NftMinter extends Minter {
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
    *                 - antiSpamTokenIdentifier: the anti spam token identifier to be used for the minting
    *                 - antiSpamTax: the anti spam tax to be set for the Data NFT-FT with decimals. Needs to be greater than 0 and should be obtained in real time via {@link viewMinterRequirements} prior to calling mint.
-   *                 - bonusNFTMediaImgUrl [optional] a bonus media image URL you can send in if needed.
+   *                 - extraAssets [optional] extra URIs to attached to the NFT. Can be media files, documents, etc. These URIs are public
    */
   async mint(
     senderAddress: IAddress,
@@ -176,7 +176,7 @@ export class NftMinter extends Minter {
       nftStorageToken?: string;
       antiSpamTokenIdentifier?: string;
       antiSpamTax?: BigNumber.Value;
-      bonusNFTMediaImgUrl?: string;
+      extraAssets?: string[];
     }
   ): Promise<Transaction> {
     const {
@@ -185,7 +185,7 @@ export class NftMinter extends Minter {
       nftStorageToken,
       antiSpamTokenIdentifier,
       antiSpamTax,
-      bonusNFTMediaImgUrl
+      extraAssets
     } = options ?? {};
 
     // deep validate all mandatory URLs
@@ -218,8 +218,7 @@ export class NftMinter extends Minter {
         datasetTitle,
         datasetDescription,
         dataPreviewUrl,
-        senderAddress.bech32(),
-        bonusNFTMediaImgUrl
+        senderAddress.bech32()
       );
 
       const {
@@ -254,35 +253,30 @@ export class NftMinter extends Minter {
         .setFunction(new ContractFunction('ESDTTransfer'))
         .addArg(new TokenIdentifierValue(antiSpamTokenIdentifier))
         .addArg(new BigUIntValue(antiSpamTax))
-        .addArg(new StringValue('mint'))
-        .addArg(new StringValue(tokenName))
-        .addArg(new StringValue(imageOnIpfsUrl))
-        .addArg(new StringValue(metadataOnIpfsUrl))
-        .addArg(new StringValue(dataMarshalUrl))
-        .addArg(new StringValue(dataNftStreamUrlEncrypted))
-        .addArg(new StringValue(dataPreviewUrl))
-        .addArg(new U64Value(royalties))
-        .addArg(new StringValue(datasetTitle))
-        .addArg(new StringValue(datasetDescription))
-        .build();
+        .addArg(new StringValue('mint'));
     } else {
-      data = new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('mint'))
-        .addArg(new StringValue(tokenName))
-        .addArg(new StringValue(imageOnIpfsUrl))
-        .addArg(new StringValue(metadataOnIpfsUrl))
-        .addArg(new StringValue(dataMarshalUrl))
-        .addArg(new StringValue(dataNftStreamUrlEncrypted))
-        .addArg(new StringValue(dataPreviewUrl))
-        .addArg(new U64Value(royalties))
-        .addArg(new StringValue(datasetTitle))
-        .addArg(new StringValue(datasetDescription))
-        .build();
+      data = new ContractCallPayloadBuilder().setFunction(
+        new ContractFunction('mint')
+      );
     }
 
+    data
+      .addArg(new StringValue(tokenName))
+      .addArg(new StringValue(imageOnIpfsUrl))
+      .addArg(new StringValue(metadataOnIpfsUrl))
+      .addArg(new StringValue(dataMarshalUrl))
+      .addArg(new StringValue(dataNftStreamUrlEncrypted))
+      .addArg(new StringValue(dataPreviewUrl))
+      .addArg(new U64Value(royalties))
+      .addArg(new StringValue(datasetTitle))
+      .addArg(new StringValue(datasetDescription));
+
+    for (const extraAsset of extraAssets ?? []) {
+      data.addArg(new StringValue(extraAsset));
+    }
     const mintTx = new Transaction({
       value: antiSpamTokenIdentifier == 'EGLD' ? antiSpamTax : 0,
-      data,
+      data: data.build(),
       sender: senderAddress,
       receiver: this.contract.getAddress(),
       gasLimit: 60000000,
