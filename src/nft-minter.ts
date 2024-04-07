@@ -218,7 +218,8 @@ export class NftMinter extends Minter {
         datasetTitle,
         datasetDescription,
         dataPreviewUrl,
-        senderAddress.bech32()
+        senderAddress.bech32(),
+        extraAssets ?? []
       );
 
       const {

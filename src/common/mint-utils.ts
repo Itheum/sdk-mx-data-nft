@@ -61,11 +61,13 @@ export function createIpfsMetadata(
   datasetTitle: string,
   datasetDescription: string,
   dataNFTStreamPreviewUrl: string,
-  address: string
+  address: string,
+  extraAssets: string[]
 ) {
   const metadata: Record<string, any> = {
     description: `${datasetTitle} : ${datasetDescription}`,
     data_preview_url: dataNFTStreamPreviewUrl,
+    extra_assets: extraAssets,
     attributes: [] as object[]
   };
   const attributes = traits
@@ -87,7 +89,8 @@ export async function createFileFromUrl(
   datasetTitle: string,
   datasetDescription: string,
   dataNFTStreamPreviewUrl: string,
-  address: string
+  address: string,
+  extraAssets: string[]
 ) {
   let res: any = '';
   let data: any = '';
@@ -102,7 +105,8 @@ export async function createFileFromUrl(
     datasetTitle,
     datasetDescription,
     dataNFTStreamPreviewUrl,
-    address
+    address,
+    extraAssets
   );
   const _traitsFile = new File([JSON.stringify(traits)], 'metadata.json', {
     type: 'application/json'
