@@ -69,6 +69,8 @@ export interface DataNftType {
   readonly owner: string;
   readonly overrideDataMarshal: string;
   readonly overrideDataMarshalChainId: string;
+  readonly isDataNFTPH: boolean;
+  readonly extraAssets: string[];
 }
 
 export enum NftEnumType {
