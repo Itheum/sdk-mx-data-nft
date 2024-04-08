@@ -67,9 +67,11 @@ export function createIpfsMetadata(
   const metadata: Record<string, any> = {
     description: `${datasetTitle} : ${datasetDescription}`,
     data_preview_url: dataNFTStreamPreviewUrl,
-    extra_assets: extraAssets,
     attributes: [] as object[]
   };
+  if (extraAssets && extraAssets.length > 0) {
+    metadata.extra_assets = extraAssets;
+  }
   const attributes = traits
     .split(',')
     .filter((element) => element.trim() !== '');
