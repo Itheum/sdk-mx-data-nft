@@ -61,12 +61,17 @@ export function createIpfsMetadata(
   datasetTitle: string,
   datasetDescription: string,
   dataNFTStreamPreviewUrl: string,
-  address: string
+  address: string,
+  extraAssets: string[]
 ) {
-  const metadata = {
+  const metadata: Record<string, any> = {
     description: `${datasetTitle} : ${datasetDescription}`,
+    data_preview_url: dataNFTStreamPreviewUrl,
     attributes: [] as object[]
   };
+  if (extraAssets && extraAssets.length > 0) {
+    metadata.extra_assets = extraAssets;
+  }
   const attributes = traits
     .split(',')
     .filter((element) => element.trim() !== '');
@@ -76,10 +81,6 @@ export function createIpfsMetadata(
     const trait = { trait_type: key.trim(), value: value.trim() };
     metadataAttributes.push(trait);
   }
-  metadataAttributes.push({
-    trait_type: 'Data Preview URL',
-    value: dataNFTStreamPreviewUrl
-  });
   metadataAttributes.push({ trait_type: 'Creator', value: address });
   metadata.attributes = metadataAttributes;
   return metadata;
@@ -90,7 +91,8 @@ export async function createFileFromUrl(
   datasetTitle: string,
   datasetDescription: string,
   dataNFTStreamPreviewUrl: string,
-  address: string
+  address: string,
+  extraAssets: string[]
 ) {
   let res: any = '';
   let data: any = '';
@@ -105,7 +107,8 @@ export async function createFileFromUrl(
     datasetTitle,
     datasetDescription,
     dataNFTStreamPreviewUrl,
-    address
+    address,
+    extraAssets
   );
   const _traitsFile = new File([JSON.stringify(traits)], 'metadata.json', {
     type: 'application/json'
