@@ -69,6 +69,8 @@ export interface DataNftType {
   readonly owner: string;
   readonly overrideDataMarshal: string;
   readonly overrideDataMarshalChainId: string;
+  readonly isDataNFTPH: boolean;
+  readonly extraAssets: string[];
 }
 
 export enum NftEnumType {
@@ -136,7 +138,7 @@ export interface Bond {
   nonce: number;
   lockPeriod: number; // seconds
   bondTimestamp: number;
-  unboundTimestamp: number;
+  unbondTimestamp: number;
   bondAmount: BigNumber.Value;
   remainingAmount: BigNumber.Value;
 }

@@ -231,6 +231,7 @@ export class SftMinter extends Minter {
    *                 - imageUrl: the URL of the image for the Data NFT
    *                 - traitsUrl: the URL of the traits for the Data NFT
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
+   *                 - extraAssets: [optional] extra URIs to attached to the NFT. Can be media files, documents, etc. These URIs are public
    *
    */
   async mint(
@@ -249,9 +250,10 @@ export class SftMinter extends Minter {
       imageUrl?: string;
       traitsUrl?: string;
       nftStorageToken?: string;
+      extraAssets?: string[];
     }
   ): Promise<Transaction> {
-    const { imageUrl, traitsUrl, nftStorageToken } = options ?? {};
+    const { imageUrl, traitsUrl, nftStorageToken, extraAssets } = options ?? {};
 
     const tokenNameValidator = new StringValidator()
       .notEmpty()
@@ -320,7 +322,8 @@ export class SftMinter extends Minter {
         datasetTitle,
         datasetDescription,
         dataPreviewUrl,
-        senderAddress.bech32()
+        senderAddress.bech32(),
+        extraAssets ?? []
       );
 
       const {
@@ -366,6 +369,10 @@ export class SftMinter extends Minter {
 
     if (lockPeriod) {
       data.addArg(new U64Value(lockPeriod));
+    }
+
+    for (const extraAsset of extraAssets ?? []) {
+      data.addArg(new StringValue(extraAsset));
     }
 
     const mintTx = new Transaction({

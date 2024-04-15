@@ -96,7 +96,7 @@ export function parseBond(value: any): Bond {
     nonce: value.nonce.toNumber(),
     lockPeriod: value.lock_period.toNumber(),
     bondTimestamp: value.bond_timestamp.toNumber(),
-    unboundTimestamp: value.unbound_timestamp.toNumber(),
+    unbondTimestamp: value.unbond_timestamp.toNumber(),
     bondAmount: value.bond_amount.toFixed(0),
     remainingAmount: value.remaining_amount.toFixed(0)
   };
@@ -183,6 +183,10 @@ export function parseDataNft(value: NftType): DataNft {
     collection: value.collection,
     balance: value.balance ? Number(value.balance) : 0,
     owner: value.owner ? value.owner : '',
+    extraAssets:
+      value.uris
+        ?.slice(2)
+        .map((uri) => Buffer.from(uri, 'base64').toString('ascii')) ?? [],
     ...attributes
   };
   return new DataNft(returnValue);
@@ -202,7 +206,7 @@ export async function checkTraitsUrl(traitsUrl: string) {
     throw new ErrMissingTrait(traits.attributes);
   }
 
-  const requiredTraits = ['Creator', 'Data Preview URL'];
+  const requiredTraits = ['Creator'];
   const traitsAttributes = traits.attributes;
 
   for (const requiredTrait of requiredTraits) {

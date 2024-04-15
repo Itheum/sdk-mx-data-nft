@@ -50,6 +50,7 @@ export class DataNft implements DataNftType {
   readonly overrideDataMarshal: string = '';
   readonly overrideDataMarshalChainId: string = '';
   readonly isDataNFTPH: boolean = false;
+  readonly extraAssets: string[] = [];
 
   static networkConfiguration: Config;
   static apiConfiguration: string;

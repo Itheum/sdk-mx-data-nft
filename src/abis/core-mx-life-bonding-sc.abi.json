@@ -9,11 +9,11 @@
         },
         "contractCrate": {
             "name": "core-mx-life-bonding-sc",
-            "version": "0.0.0"
+            "version": "1.0.0"
         },
         "framework": {
             "name": "multiversx-sc",
-            "version": "0.47.4"
+            "version": "0.47.8"
         }
     },
     "name": "LifeBondingContract",
@@ -751,7 +751,7 @@
                     "indexed": true
                 },
                 {
-                    "name": "unbound_timestmap",
+                    "name": "unbond_timestmap",
                     "type": "u64",
                     "indexed": true
                 }
@@ -920,7 +920,7 @@
                     "indexed": true
                 },
                 {
-                    "name": "unbound_timestamp",
+                    "name": "unbond_timestamp",
                     "type": "u64",
                     "indexed": true
                 }
@@ -1028,7 +1028,7 @@
                     "type": "u64"
                 },
                 {
-                    "name": "unbound_timestamp",
+                    "name": "unbond_timestamp",
                     "type": "u64"
                 },
                 {
