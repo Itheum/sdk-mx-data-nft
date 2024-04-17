@@ -92,7 +92,7 @@ export const dataMarshalUrlOverride: {
     {
       tokenIdentifier: dataNftTokenIdentifier[EnvironmentsEnum.mainnet],
       nonce: 5,
-      url: marshalUrls.devnet,
+      url: marshalUrls.mainnet,
       chainId: '1'
     }
   ],
