@@ -130,6 +130,7 @@ export interface Offer {
   wantedTokenNonce: number;
   wantedTokenAmount: BigNumber.Value;
   quantity: number;
+  maxQuantityPerAddress: number;
 }
 
 export interface Bond {

@@ -84,7 +84,8 @@ export function parseOffer(value: any): Offer {
     wantedTokenIdentifier: value.wanted_token_identifier.toString(),
     wantedTokenNonce: value.wanted_token_nonce.toString(),
     wantedTokenAmount: value.wanted_token_amount.toFixed(0),
-    quantity: value.quantity.toNumber()
+    quantity: value.quantity.toNumber(),
+    maxQuantityPerAddress: value.max_quantity_per_address.toNumber()
   };
 }
 

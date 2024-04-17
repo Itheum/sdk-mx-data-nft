@@ -23,6 +23,12 @@
     },
     "endpoints": [
         {
+            "name": "upgrade",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
             "name": "initializeContract",
             "onlyOwner": true,
             "mutability": "mutable",
@@ -459,6 +465,25 @@
             "name": "getMaxDefaultQuantity",
             "mutability": "readonly",
             "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "getMaxQuantityPerAddress",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                }
+            ],
             "outputs": [
                 {
                     "type": "BigUint"
@@ -983,6 +1008,10 @@
                 },
                 {
                     "name": "quantity",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "max_quantity_per_address",
                     "type": "BigUint"
                 }
             ]
