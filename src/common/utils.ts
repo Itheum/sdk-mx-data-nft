@@ -366,12 +366,12 @@ export function validateSpecificParamsViewData(params: {
         typeof params.fwdHeaderKeys === 'string' &&
         params.fwdHeaderKeys.trim() !== '' &&
         params.fwdHeaderKeys.split(',').length > 0 &&
-        params.fwdHeaderKeys.split(',').length < 5
+        params.fwdHeaderKeys.split(',').length < 10
       ) {
         fwdHeaderKeysIsValid = true;
       } else {
         validationMessages +=
-          '[fwdHeaderKeys needs to be a comma separated lowercase string with less than 5 items]';
+          '[fwdHeaderKeys needs to be a comma separated lowercase string with less than 10 items]';
       }
     }
 
