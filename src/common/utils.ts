@@ -187,6 +187,7 @@ export function parseDataNft(value: NftType): DataNft {
       value.uris
         ?.slice(2)
         .map((uri) => Buffer.from(uri, 'base64').toString('ascii')) ?? [],
+    media: value.media,
     ...attributes
   };
   return new DataNft(returnValue);
