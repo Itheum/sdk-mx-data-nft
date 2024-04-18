@@ -389,7 +389,7 @@ export function validateSpecificParamsViewData(params: {
           .call(params.fwdHeaderMapLookup)
           .includes('Object') &&
         Object.keys(params.fwdHeaderMapLookup).length > 0 &&
-        Object.keys(params.fwdHeaderMapLookup).length < 5
+        Object.keys(params.fwdHeaderMapLookup).length < 10
       ) {
         if (!params._fwdHeaderMapLookupMustContainBearerAuthHeader) {
           fwdHeaderMapLookupIsValid = true;
@@ -411,7 +411,7 @@ export function validateSpecificParamsViewData(params: {
         }
       } else {
         validationMessages +=
-          '[fwdHeaderMapLookup needs to be a object map with maximum 5 items]';
+          '[fwdHeaderMapLookup needs to be a object map with maximum 10 items]';
       }
     }
 
