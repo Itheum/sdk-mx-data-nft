@@ -472,7 +472,7 @@
             ]
         },
         {
-            "name": "getMaxQuantityPerAddress",
+            "name": "getBoughtPerAddress",
             "mutability": "readonly",
             "inputs": [
                 {
