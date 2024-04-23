@@ -188,6 +188,7 @@ export function parseDataNft(value: NftType): DataNft {
       value.uris
         ?.slice(2)
         .map((uri) => Buffer.from(uri, 'base64').toString('ascii')) ?? [],
+    media: value.media,
     ...attributes
   };
   return new DataNft(returnValue);
@@ -366,12 +367,12 @@ export function validateSpecificParamsViewData(params: {
         typeof params.fwdHeaderKeys === 'string' &&
         params.fwdHeaderKeys.trim() !== '' &&
         params.fwdHeaderKeys.split(',').length > 0 &&
-        params.fwdHeaderKeys.split(',').length < 5
+        params.fwdHeaderKeys.split(',').length < 10
       ) {
         fwdHeaderKeysIsValid = true;
       } else {
         validationMessages +=
-          '[fwdHeaderKeys needs to be a comma separated lowercase string with less than 5 items]';
+          '[fwdHeaderKeys needs to be a comma separated lowercase string with less than 10 items]';
       }
     }
 
@@ -390,7 +391,7 @@ export function validateSpecificParamsViewData(params: {
           .call(params.fwdHeaderMapLookup)
           .includes('Object') &&
         Object.keys(params.fwdHeaderMapLookup).length > 0 &&
-        Object.keys(params.fwdHeaderMapLookup).length < 5
+        Object.keys(params.fwdHeaderMapLookup).length < 10
       ) {
         if (!params._fwdHeaderMapLookupMustContainBearerAuthHeader) {
           fwdHeaderMapLookupIsValid = true;
@@ -412,7 +413,7 @@ export function validateSpecificParamsViewData(params: {
         }
       } else {
         validationMessages +=
-          '[fwdHeaderMapLookup needs to be a object map with maximum 5 items]';
+          '[fwdHeaderMapLookup needs to be a object map with maximum 10 items]';
       }
     }
 
