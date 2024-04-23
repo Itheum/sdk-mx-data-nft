@@ -294,21 +294,15 @@ export class SftMinter extends Minter {
     datasetDescription: string,
     amountToSend: number,
     lockPeriod?: number,
+    donationPercentage = 0,
     options?: {
       imageUrl?: string;
       traitsUrl?: string;
       nftStorageToken?: string;
       extraAssets?: string[];
-      donationPercentage?: number;
     }
   ): Promise<Transaction> {
-    const {
-      imageUrl,
-      traitsUrl,
-      nftStorageToken,
-      extraAssets,
-      donationPercentage
-    } = options ?? {};
+    const { imageUrl, traitsUrl, nftStorageToken, extraAssets } = options ?? {};
 
     const tokenNameValidator = new StringValidator()
       .notEmpty()
@@ -426,9 +420,7 @@ export class SftMinter extends Minter {
       data.addArg(new U64Value(lockPeriod));
     }
 
-    if (donationPercentage) {
-      data.addArg(new U64Value(donationPercentage));
-    }
+    data.addArg(new U64Value(donationPercentage));
 
     for (const extraAsset of extraAssets ?? []) {
       data.addArg(new StringValue(extraAsset));
