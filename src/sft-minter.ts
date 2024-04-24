@@ -83,7 +83,8 @@ export class SftMinter extends Minter {
         numberOfMintsForUser: returnValue.minted_per_user.toNumber(),
         totalNumberOfMints: returnValue.total_minted.toNumber(),
         addressFrozen: returnValue.frozen,
-        frozenNonces: returnValue.frozen_nonces.map((v: any) => v.toNumber())
+        frozenNonces: returnValue.frozen_nonces.map((v: any) => v.toNumber()),
+        maxDonationPecentage: returnValue.max_donation_percentage.toNumber()
       };
       return requirements;
     } else {
@@ -185,6 +186,52 @@ export class SftMinter extends Minter {
   }
 
   /**
+   * Creates a `setDonationTreasuryAddress` transaction
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param donationTreasuryAddress The address of the donation treasury to collect the donation tax
+   */
+  setDonationTreasuryAddress(
+    senderAddress: IAddress,
+    donationTreasuryAddress: IAddress
+  ): Transaction {
+    const setDonationTreasuryAddressTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setDonationTreasuryAddress'))
+        .addArg(new AddressValue(donationTreasuryAddress))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setDonationTreasuryAddressTx;
+  }
+
+  /**
+   * Creates a `setMaxDonationPercentage` transaction
+   * @param senderAddress The address of the sender, must be the admin of the contract
+   * @param maxDonationPercentage The maximum donation percentage that can be set
+   */
+  setMaxDonationPercentage(
+    senderAddress: IAddress,
+    maxDonationPercentage: BigNumber.Value
+  ): Transaction {
+    const setMaxDonationPercentageTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('setMaxDonationPercentage'))
+        .addArg(new U64Value(maxDonationPercentage))
+        .build(),
+      receiver: this.contract.getAddress(),
+      gasLimit: 10000000,
+      sender: senderAddress,
+      chainID: this.chainID
+    });
+    return setMaxDonationPercentageTx;
+  }
+
+  /**
    * Creates a `setAntiSpamTax` transaction
    * @param senderAddress The address of the sender, must be the admin of the contract
    * @param maxSupply The maximum supply that can be minted
@@ -232,6 +279,7 @@ export class SftMinter extends Minter {
    *                 - traitsUrl: the URL of the traits for the Data NFT
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
    *                 - extraAssets: [optional] extra URIs to attached to the NFT. Can be media files, documents, etc. These URIs are public
+   *                 - donationPercentage: [optional] the donation percentage to be set for the Data NFT-FT supply to be sent to the donation
    *
    */
   async mint(
@@ -246,6 +294,7 @@ export class SftMinter extends Minter {
     datasetDescription: string,
     amountToSend: number,
     lockPeriod?: number,
+    donationPercentage = 0,
     options?: {
       imageUrl?: string;
       traitsUrl?: string;
@@ -370,6 +419,8 @@ export class SftMinter extends Minter {
     if (lockPeriod) {
       data.addArg(new U64Value(lockPeriod));
     }
+
+    data.addArg(new U64Value(donationPercentage));
 
     for (const extraAsset of extraAssets ?? []) {
       data.addArg(new StringValue(extraAsset));
