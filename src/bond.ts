@@ -6,6 +6,7 @@ import {
   ContractFunction,
   IAddress,
   ResultsParser,
+  StringValue,
   TokenIdentifierValue,
   Transaction,
   TypedValue,
@@ -1195,7 +1196,7 @@ export class BondContract extends Contract {
       .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
       .addArg(new U64Value(payment.nonce))
       .addArg(new BigUIntValue(payment.amount))
-      .setFunction('proof')
+      .addArg(new StringValue('proof'))
       .build();
 
     const proofTx = new Transaction({
