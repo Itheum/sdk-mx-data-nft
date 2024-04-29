@@ -1046,13 +1046,14 @@ export class BondContract extends Contract {
         .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
         .addArg(new U64Value(payment.nonce))
         .addArg(new BigUIntValue(payment.amount))
+        .addArg(new AddressValue(this.contract.getAddress()))
         .setFunction('bond')
         .addArg(new AddressValue(originalCaller))
         .addArg(new TokenIdentifierValue(tokenIdentifier))
         .addArg(new U64Value(nonce))
         .addArg(new U64Value(lockPeriod))
         .build(),
-      receiver: this.contract.getAddress(),
+      receiver: senderAddress,
       sender: senderAddress,
       gasLimit: 40_000_000,
       chainID: this.chainID
@@ -1196,13 +1197,14 @@ export class BondContract extends Contract {
       .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
       .addArg(new U64Value(payment.nonce))
       .addArg(new BigUIntValue(payment.amount))
+      .addArg(new AddressValue(this.contract.getAddress()))
       .addArg(new StringValue('proof'))
       .build();
 
     const proofTx = new Transaction({
       value: 0,
       data,
-      receiver: this.contract.getAddress(),
+      receiver: senderAddress,
       sender: senderAddress,
       gasLimit: 40_000_000,
       chainID: this.chainID
