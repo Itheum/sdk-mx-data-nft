@@ -310,14 +310,10 @@ export class BondContract extends Contract {
     );
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      if (returnValue) {
-        const [compensation, refund] = returnValue;
-        const parsedCompensation = parseCompensation(compensation);
-        const parsedRefund = refund ? parseRefund(refund) : null;
-        return { compensation: parsedCompensation, refund: parsedRefund };
-      } else {
-        return null;
-      }
+      const { field0: compensation, field1: refund } = returnValue;
+      const parsedCompensation = parseCompensation(compensation);
+      const parsedRefund = refund ? parseRefund(refund) : null;
+      return { compensation: parsedCompensation, refund: parsedRefund };
     } else {
       throw new ErrContractQuery('viewAddressRefund', returnCode.toString());
     }
