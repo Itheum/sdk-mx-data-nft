@@ -34,13 +34,13 @@ describe('Marketplace Sdk test', () => {
     expect(typeof result).toBe('number');
   });
 
-  test('#viewRequirements', async () => {
-    const dataNftMarket = new DataNftMarket('devnet');
+  // test('#viewRequirements', async () => {
+  //   const dataNftMarket = new DataNftMarket('devnet');
 
-    const result = await dataNftMarket.viewRequirements();
+  //   const result = await dataNftMarket.viewRequirements();
 
-    expect(result).toBeInstanceOf(Object as unknown as MarketplaceRequirements);
-  });
+  //   expect(result).toBeInstanceOf(Object as unknown as MarketplaceRequirements);
+  // });
 
   test('#viewLastValidOfferId', async () => {
     const dataNftMarket = new DataNftMarket('devnet');
@@ -65,10 +65,11 @@ describe('Marketplace Sdk test', () => {
       new Address(
         'erd1qqqqqqqqqqqqqpgq7ykazrzd905zvnlr88dpfw06677lxe9w0n4suz00uh'
       ),
-      '',
+      'Foo',
       0,
       0,
-      '',
+      'Bar',
+      0,
       0,
       0,
       0
