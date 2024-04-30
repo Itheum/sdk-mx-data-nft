@@ -9,11 +9,11 @@
         },
         "contractCrate": {
             "name": "datanftmint",
-            "version": "2.0.0"
+            "version": "3.0.0"
         },
         "framework": {
             "name": "multiversx-sc",
-            "version": "0.47.4"
+            "version": "0.47.5"
         }
     },
     "name": "DataNftMint",
@@ -120,6 +120,15 @@
                 {
                     "name": "lock_period_sec",
                     "type": "u64"
+                },
+                {
+                    "name": "donation_percentage",
+                    "type": "u64"
+                },
+                {
+                    "name": "extra_assets",
+                    "type": "variadic<bytes>",
+                    "multi_arg": true
                 }
             ],
             "outputs": [
@@ -145,6 +154,28 @@
                 {
                     "name": "address",
                     "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setDonationTreasuryAddress",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setMaxDonationPercentage",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "percentage",
+                    "type": "u64"
                 }
             ],
             "outputs": []
@@ -262,6 +293,7 @@
         },
         {
             "name": "setBondContractAddress",
+            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -319,6 +351,26 @@
             "outputs": [
                 {
                     "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getDonationTreasuryAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getMaxDonationPercentage",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
                 }
             ]
         },
@@ -631,6 +683,48 @@
                 }
             ],
             "outputs": []
+        },
+        {
+            "name": "get_bond_amount_for_lock_period",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "lock_period",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "send_bond",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "original_caller",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "lock_period",
+                    "type": "u64"
+                },
+                {
+                    "name": "payment",
+                    "type": "EgldOrEsdtTokenPayment"
+                }
+            ],
+            "outputs": []
         }
     ],
     "events": [
@@ -650,6 +744,26 @@
                 {
                     "name": "treasury_address",
                     "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "setDonationTreasuryAddress",
+            "inputs": [
+                {
+                    "name": "donation_treasury_address",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "setMaxDonationPercentage",
+            "inputs": [
+                {
+                    "name": "max_donation_percentage",
+                    "type": "u64",
                     "indexed": true
                 }
             ]
@@ -926,6 +1040,11 @@
                     "name": "bond_amount",
                     "type": "BigUint",
                     "indexed": true
+                },
+                {
+                    "name": "extra_assets",
+                    "type": "List<bytes>",
+                    "indexed": true
                 }
             ]
         },
@@ -1006,6 +1125,23 @@
                 }
             ]
         },
+        "EgldOrEsdtTokenPayment": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "token_identifier",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "token_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ]
+        },
         "UserDataOut": {
             "type": "struct",
             "fields": [
@@ -1060,6 +1196,10 @@
                 {
                     "name": "frozen_nonces",
                     "type": "List<u64>"
+                },
+                {
+                    "name": "max_donation_percentage",
+                    "type": "u64"
                 }
             ]
         }

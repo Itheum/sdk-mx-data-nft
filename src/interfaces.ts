@@ -102,6 +102,7 @@ export interface SftMinterRequirements {
   numberOfMintsForUser: number;
   totalNumberOfMints: number;
   contractWhitelistEnabled: boolean;
+  maxDonationPecentage: number;
 }
 
 export interface NftMinterRequirements {

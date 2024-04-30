@@ -720,8 +720,7 @@ export class BondContract extends Contract {
       value: 0,
       data: new ContractCallPayloadBuilder()
         .setFunction('setBlacklist')
-        .addArg(new U64Value(compensationId))
-        .setArgs(inputAddresses)
+        .setArgs([new U64Value(compensationId), ...inputAddresses])
         .build(),
       receiver: this.contract.getAddress(),
       sender: senderAddress,
@@ -749,8 +748,7 @@ export class BondContract extends Contract {
       value: 0,
       data: new ContractCallPayloadBuilder()
         .setFunction('removeBlacklist')
-        .addArg(new U64Value(compensationId))
-        .setArgs(toBeRemovedAddresses)
+        .setArgs([new U64Value(compensationId), ...toBeRemovedAddresses])
         .build(),
       receiver: this.contract.getAddress(),
       sender: senderAddress,
