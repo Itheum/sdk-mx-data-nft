@@ -287,13 +287,20 @@ export class BondContract extends Contract {
   /**
    * Returns an Optional `Compensation` and `Refund` object for the given address and compensation id
    * @param address address to query
-   * @param compensationId compensation id to query
+   * @param tokenIdentifier token identifier to query
+   * @param nonce nonce to query
    */
-  async viewAddressRefund(address: IAddress, compensationId: number) {
-    const interaction = this.contract.methodsExplicit.getAddressRefund([
-      new AddressValue(address),
-      new U64Value(compensationId)
-    ]);
+  async viewAddressRefundForCompensation(
+    address: IAddress,
+    tokenIdentifier: string,
+    nonce: number
+  ) {
+    const interaction =
+      this.contract.methodsExplicit.getAddressRefundForCompensation([
+        new AddressValue(address),
+        new TokenIdentifierValue(tokenIdentifier),
+        new U64Value(nonce)
+      ]);
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
     const endpointDefinition = interaction.getEndpoint();
@@ -1004,7 +1011,7 @@ export class BondContract extends Contract {
         .setFunction(new ContractFunction('ESDTTransfer'))
         .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
         .addArg(new BigUIntValue(payment.amount))
-        .setFunction('bond')
+        .addArg(new StringValue('bond'))
         .addArg(new AddressValue(originalCaller))
         .addArg(new TokenIdentifierValue(tokenIdentifier))
         .addArg(new U64Value(nonce))
@@ -1047,7 +1054,7 @@ export class BondContract extends Contract {
         .addArg(new U64Value(payment.nonce))
         .addArg(new BigUIntValue(payment.amount))
         .addArg(new AddressValue(this.contract.getAddress()))
-        .setFunction('bond')
+        .addArg(new StringValue('bond'))
         .addArg(new AddressValue(originalCaller))
         .addArg(new TokenIdentifierValue(tokenIdentifier))
         .addArg(new U64Value(nonce))
