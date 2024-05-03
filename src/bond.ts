@@ -35,6 +35,7 @@ import {
   BondConfiguration,
   Compensation,
   PenaltyType,
+  Refund,
   State
 } from './interfaces';
 
@@ -285,16 +286,16 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Returns an Optional `Compensation` and `Refund` object for the given address and compensation id
+   * Returns an `Refund` object for the given address
    * @param address address to query
    * @param tokenIdentifier token identifier to query
    * @param nonce nonce to query
    */
-  async viewAddressRefundForCompensation(
+  async viewAddressRefund(
     address: IAddress,
     tokenIdentifier: string,
     nonce: number
-  ) {
+  ): Promise<Refund> {
     const interaction =
       this.contract.methodsExplicit.getAddressRefundForCompensation([
         new AddressValue(address),
@@ -308,15 +309,51 @@ export class BondContract extends Contract {
       queryResponse,
       endpointDefinition
     );
+
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      const { field0: compensation, field1: refund } = returnValue;
-      const parsedCompensation = parseCompensation(compensation);
-      const parsedRefund = refund ? parseRefund(refund) : null;
-      return { compensation: parsedCompensation, refund: parsedRefund };
+      const parsedRefund = parseRefund(returnValue);
+      return parsedRefund;
     } else {
       throw new ErrContractQuery('viewAddressRefund', returnCode.toString());
     }
+  }
+
+  /**
+   * Returns an `Refund` object array for the given address
+   * @param address address to query
+   * @param compensation_ids compensation ids to query
+   *
+   */
+  viewAddressRefunds(
+    address: IAddress,
+    compensation_ids: number[]
+  ): Promise<Refund[]> {
+    const compensation_ids_as_u64 = compensation_ids.map(
+      (id) => new U64Value(id)
+    );
+    const interaction =
+      this.contract.methodsExplicit.getAddressRefundForCompensations([
+        new AddressValue(address),
+        ...compensation_ids_as_u64
+      ]);
+    const query = interaction.buildQuery();
+    return this.networkProvider.queryContract(query).then((queryResponse) => {
+      const endpointDefinition = interaction.getEndpoint();
+      const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+        queryResponse,
+        endpointDefinition
+      );
+      if (returnCode.isSuccess()) {
+        const returnValue = firstValue?.valueOf();
+        const refunds: Refund[] = returnValue.map((refund: any) =>
+          parseRefund(refund)
+        );
+        return refunds;
+      } else {
+        throw new ErrContractQuery('viewAddressRefunds', returnCode.toString());
+      }
+    });
   }
 
   /**

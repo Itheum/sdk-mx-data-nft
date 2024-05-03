@@ -208,7 +208,27 @@
             ],
             "outputs": [
                 {
-                    "type": "Option<tuple<Compensation,Option<Refund>>>"
+                    "type": "Option<Refund>"
+                }
+            ]
+        },
+        {
+            "name": "getAddressRefundForCompensations",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "compensation_ids",
+                    "type": "variadic<u64>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<Refund>"
                 }
             ]
         },
