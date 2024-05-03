@@ -325,7 +325,7 @@ export class BondContract extends Contract {
    * @param compensation_ids compensation ids to query
    *
    */
-  viewAddressRefunds(
+  async viewAddressRefunds(
     address: IAddress,
     compensation_ids: number[]
   ): Promise<Refund[]> {
