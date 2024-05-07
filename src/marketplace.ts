@@ -308,7 +308,8 @@ export class DataNftMarket {
         sellerTaxPercentageDiscount:
           returnValue.discount_fee_percentage_seller.toNumber(),
         buyerTaxPercentage: returnValue.percentage_cut_from_buyer.toNumber(),
-        sellerTaxPercentage: returnValue.percentage_cut_from_seller.toNumber()
+        sellerTaxPercentage: returnValue.percentage_cut_from_seller.toNumber(),
+        maxDefaultQuantity: returnValue.max_default_quantity.toNumber()
       };
       return requirements;
     } else {
@@ -388,6 +389,7 @@ export class DataNftMarket {
    * @param paymentTokenNonce the nonce of the payment token
    * @param paymentTokenAmount the amount of the payment token
    * @param minimumPaymentTokenAmount the minimum amount of which the `sender` is willing to receive (useful in case where an offer was added and the smart contract fee was changed afterwards)
+   * @param maxQuantity the maximum quantity a user can buy (default could be 0 - (no enforced max value) or admin defined value)
    */
   addOffer(
     senderAddress: IAddress,
@@ -397,7 +399,8 @@ export class DataNftMarket {
     paymentTokenIdentifier: string,
     paymentTokenNonce: number,
     paymentTokenAmount: BigNumber.Value,
-    minimumPaymentTokenAmount = 0
+    minimumPaymentTokenAmount = 0,
+    maxQuantity: BigNumber.Value
   ): Transaction {
     const addOfferTx = new Transaction({
       value: 0,
@@ -413,6 +416,7 @@ export class DataNftMarket {
         .addArg(new U64Value(paymentTokenAmount))
         .addArg(new U64Value(minimumPaymentTokenAmount))
         .addArg(new BigUIntValue(dataNftAmount))
+        .addArg(new BigUIntValue(maxQuantity))
         .build(),
       receiver: senderAddress,
       sender: senderAddress,

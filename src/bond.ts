@@ -6,6 +6,7 @@ import {
   ContractFunction,
   IAddress,
   ResultsParser,
+  StringValue,
   TokenIdentifierValue,
   Transaction,
   TypedValue,
@@ -34,6 +35,7 @@ import {
   BondConfiguration,
   Compensation,
   PenaltyType,
+  Refund,
   State
 } from './interfaces';
 
@@ -284,15 +286,22 @@ export class BondContract extends Contract {
   }
 
   /**
-   * Returns an Optional `Compensation` and `Refund` object for the given address and compensation id
+   * Returns an `Refund` object for the given address
    * @param address address to query
-   * @param compensationId compensation id to query
+   * @param tokenIdentifier token identifier to query
+   * @param nonce nonce to query
    */
-  async viewAddressRefund(address: IAddress, compensationId: number) {
-    const interaction = this.contract.methodsExplicit.getAddressRefund([
-      new AddressValue(address),
-      new U64Value(compensationId)
-    ]);
+  async viewAddressRefund(
+    address: IAddress,
+    tokenIdentifier: string,
+    nonce: number
+  ): Promise<Refund> {
+    const interaction =
+      this.contract.methodsExplicit.getAddressRefundForCompensation([
+        new AddressValue(address),
+        new TokenIdentifierValue(tokenIdentifier),
+        new U64Value(nonce)
+      ]);
     const query = interaction.buildQuery();
     const queryResponse = await this.networkProvider.queryContract(query);
     const endpointDefinition = interaction.getEndpoint();
@@ -300,19 +309,51 @@ export class BondContract extends Contract {
       queryResponse,
       endpointDefinition
     );
+
     if (returnCode.isSuccess()) {
       const returnValue = firstValue?.valueOf();
-      if (returnValue) {
-        const [compensation, refund] = returnValue;
-        const parsedCompensation = parseCompensation(compensation);
-        const parsedRefund = refund ? parseRefund(refund) : null;
-        return { compensation: parsedCompensation, refund: parsedRefund };
-      } else {
-        return null;
-      }
+      const parsedRefund = parseRefund(returnValue);
+      return parsedRefund;
     } else {
       throw new ErrContractQuery('viewAddressRefund', returnCode.toString());
     }
+  }
+
+  /**
+   * Returns an `Refund` object array for the given address
+   * @param address address to query
+   * @param compensation_ids compensation ids to query
+   *
+   */
+  async viewAddressRefunds(
+    address: IAddress,
+    compensation_ids: number[]
+  ): Promise<Refund[]> {
+    const compensation_ids_as_u64 = compensation_ids.map(
+      (id) => new U64Value(id)
+    );
+    const interaction =
+      this.contract.methodsExplicit.getAddressRefundForCompensations([
+        new AddressValue(address),
+        ...compensation_ids_as_u64
+      ]);
+    const query = interaction.buildQuery();
+    return this.networkProvider.queryContract(query).then((queryResponse) => {
+      const endpointDefinition = interaction.getEndpoint();
+      const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+        queryResponse,
+        endpointDefinition
+      );
+      if (returnCode.isSuccess()) {
+        const returnValue = firstValue?.valueOf();
+        const refunds: Refund[] = returnValue.map((refund: any) =>
+          parseRefund(refund)
+        );
+        return refunds;
+      } else {
+        throw new ErrContractQuery('viewAddressRefunds', returnCode.toString());
+      }
+    });
   }
 
   /**
@@ -720,8 +761,7 @@ export class BondContract extends Contract {
       value: 0,
       data: new ContractCallPayloadBuilder()
         .setFunction('setBlacklist')
-        .addArg(new U64Value(compensationId))
-        .setArgs(inputAddresses)
+        .setArgs([new U64Value(compensationId), ...inputAddresses])
         .build(),
       receiver: this.contract.getAddress(),
       sender: senderAddress,
@@ -749,8 +789,7 @@ export class BondContract extends Contract {
       value: 0,
       data: new ContractCallPayloadBuilder()
         .setFunction('removeBlacklist')
-        .addArg(new U64Value(compensationId))
-        .setArgs(toBeRemovedAddresses)
+        .setArgs([new U64Value(compensationId), ...toBeRemovedAddresses])
         .build(),
       receiver: this.contract.getAddress(),
       sender: senderAddress,
@@ -1005,7 +1044,7 @@ export class BondContract extends Contract {
         .setFunction(new ContractFunction('ESDTTransfer'))
         .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
         .addArg(new BigUIntValue(payment.amount))
-        .setFunction('bond')
+        .addArg(new StringValue('bond'))
         .addArg(new AddressValue(originalCaller))
         .addArg(new TokenIdentifierValue(tokenIdentifier))
         .addArg(new U64Value(nonce))
@@ -1047,13 +1086,14 @@ export class BondContract extends Contract {
         .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
         .addArg(new U64Value(payment.nonce))
         .addArg(new BigUIntValue(payment.amount))
-        .setFunction('bond')
+        .addArg(new AddressValue(this.contract.getAddress()))
+        .addArg(new StringValue('bond'))
         .addArg(new AddressValue(originalCaller))
         .addArg(new TokenIdentifierValue(tokenIdentifier))
         .addArg(new U64Value(nonce))
         .addArg(new U64Value(lockPeriod))
         .build(),
-      receiver: this.contract.getAddress(),
+      receiver: senderAddress,
       sender: senderAddress,
       gasLimit: 40_000_000,
       chainID: this.chainID
@@ -1197,13 +1237,14 @@ export class BondContract extends Contract {
       .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
       .addArg(new U64Value(payment.nonce))
       .addArg(new BigUIntValue(payment.amount))
-      .setFunction('proof')
+      .addArg(new AddressValue(this.contract.getAddress()))
+      .addArg(new StringValue('proof'))
       .build();
 
     const proofTx = new Transaction({
       value: 0,
       data,
-      receiver: this.contract.getAddress(),
+      receiver: senderAddress,
       sender: senderAddress,
       gasLimit: 40_000_000,
       chainID: this.chainID
