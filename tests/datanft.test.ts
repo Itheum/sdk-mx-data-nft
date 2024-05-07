@@ -73,6 +73,21 @@ describe('Data NFT test', () => {
     }
   }, 10000);
 
+  test('#Create nft from payload', async () => {
+    DataNft.setNetworkConfig('mainnet');
+    const query =
+      'https://api.multiversx.com/nfts?identifiers=DATANFTFT-e936d4-02&withSupply=true';
+
+    const response = await fetch(query);
+    const data = await response.json();
+
+    const dataNfts: DataNft[] = DataNft.createFromApiResponseOrBulk(data);
+
+    for (const item of dataNfts) {
+      expect(item).toBeInstanceOf(Object as unknown as DataNft);
+    }
+  });
+
   test('#create many data NFTs different token identifiers', async () => {
     DataNft.setNetworkConfig('devnet');
 

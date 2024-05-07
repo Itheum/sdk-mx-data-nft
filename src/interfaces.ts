@@ -71,6 +71,13 @@ export interface DataNftType {
   readonly overrideDataMarshalChainId: string;
   readonly isDataNFTPH: boolean;
   readonly extraAssets: string[];
+  readonly media: {
+    url: string;
+    originalUrl: string;
+    thumbnailUrl: string;
+    fileType: string;
+    fileSize: number;
+  }[];
 }
 
 export enum NftEnumType {
@@ -86,6 +93,7 @@ export interface MarketplaceRequirements {
   sellerTaxPercentageDiscount: number;
   buyerTaxPercentage: number;
   sellerTaxPercentage: number;
+  maxDefaultQuantity: number;
 }
 
 export interface SftMinterRequirements {
@@ -130,6 +138,7 @@ export interface Offer {
   wantedTokenNonce: number;
   wantedTokenAmount: BigNumber.Value;
   quantity: number;
+  maxQuantityPerAddress: number;
 }
 
 export interface Bond {
