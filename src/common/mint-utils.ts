@@ -61,8 +61,7 @@ async function storeImageToIpfs(image: Blob, storageToken: string) {
   const options = {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${storageToken}`,
-      'Content-Type': 'multipart/form-data'
+      Authorization: `Bearer ${storageToken}`
     },
     body: form
   };
