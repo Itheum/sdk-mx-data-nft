@@ -56,7 +56,7 @@ async function storeImageToIpfs(image: Blob, storageToken: string) {
   const form = new FormData();
   form.append('file', image);
   form.append('pinataMetadata', '{\n  "name": "image"\n}');
-  form.append('pinataOptions', '{\n  "cidVersion": 1\n}');
+  form.append('pinataOptions', '{\n  "cidVersion": 0\n}');
 
   const options = {
     method: 'POST',
@@ -81,7 +81,11 @@ async function storeTraitsToIpfs(traits: object, storageToken: string) {
       Authorization: `Bearer ${storageToken}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(traits)
+    body: JSON.stringify({
+      pinataOptions: { cidVersion: 0 },
+      pinataMetadata: { name: 'metadata' },
+      pinataContent: traits
+    })
   };
 
   const response = await fetch(
