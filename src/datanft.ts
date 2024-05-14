@@ -27,7 +27,12 @@ import {
   ErrNetworkConfig,
   ErrTooManyItems
 } from './errors';
-import { DataNftType, NftType, ViewDataReturnType } from './interfaces';
+import {
+  DataNftType,
+  NftEnumType,
+  NftType,
+  ViewDataReturnType
+} from './interfaces';
 import BigNumber from 'bignumber.js';
 
 export class DataNft implements DataNftType {
@@ -46,11 +51,13 @@ export class DataNft implements DataNftType {
   readonly nonce: number = 0;
   readonly collection: string = '';
   readonly balance: BigNumber.Value = 0;
+  readonly type: NftEnumType = NftEnumType.SemiFungibleESDT;
   readonly owner: string = ''; // works if tokenIdentifier is an NFT
   readonly overrideDataMarshal: string = '';
   readonly overrideDataMarshalChainId: string = '';
   readonly isDataNFTPH: boolean = false;
   readonly extraAssets: string[] = [];
+
   readonly media: {
     url: string;
     originalUrl: string;
