@@ -37,23 +37,61 @@ export async function dataNFTDataStreamAdvertise(
 
 export async function storeToIpfs(
   storageToken: string,
-  traits: File,
-  image: File
+  traits: object,
+  image: Blob
 ): Promise<{ imageOnIpfsUrl: string; metadataOnIpfsUrl: string }> {
-  let res;
   try {
-    const nftstorage = new NFTStorage({
-      token: storageToken
-    });
-    const dir = [image, traits];
-    res = await nftstorage.storeDirectory(dir);
+    const imageHash = await storeImageToIpfs(image, storageToken);
+    const traitsHash = await storeTraitsToIpfs(traits, storageToken);
+    return {
+      imageOnIpfsUrl: `https://ipfs.io/ipfs/${imageHash}`,
+      metadataOnIpfsUrl: `https://ipfs.io/ipfs/${traitsHash}`
+    };
   } catch (error) {
     throw error;
   }
-  return {
-    imageOnIpfsUrl: `https://ipfs.io/ipfs/${res}/image.png`,
-    metadataOnIpfsUrl: `https://ipfs.io/ipfs/${res}/metadata.json`
+}
+
+async function storeImageToIpfs(image: Blob, storageToken: string) {
+  const form = new FormData();
+  form.append('file', image);
+  form.append('pinataMetadata', '{\n  "name": "image"\n}');
+  form.append('pinataOptions', '{\n  "cidVersion": 1\n}');
+
+  const options = {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${storageToken}`,
+      'Content-Type': 'multipart/form-data'
+    },
+    body: form
   };
+  const response = await fetch(
+    'https://api.pinata.cloud/pinning/pinFileToIPFS',
+    options
+  );
+  const res = await response.json();
+  const imageHash = res.IpfsHash;
+  return imageHash;
+}
+
+async function storeTraitsToIpfs(traits: object, storageToken: string) {
+  const options = {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${storageToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(traits)
+  };
+
+  const response = await fetch(
+    'https://api.pinata.cloud/pinning/pinJSONToIPFS',
+    options
+  );
+  const res = await response.json();
+  const traitsHash = res.IpfsHash;
+  return traitsHash;
 }
 
 export function createIpfsMetadata(
@@ -96,11 +134,11 @@ export async function createFileFromUrl(
 ) {
   let res: any = '';
   let data: any = '';
-  let _imageFile: File = new File([], '');
+  let _imageFile: Blob = new Blob();
   if (url) {
     res = await fetch(url);
     data = await res.blob();
-    _imageFile = new File([data], 'image.png', { type: 'image/png' });
+    _imageFile = data;
   }
   const traits = createIpfsMetadata(
     res.headers.get('x-nft-traits') || '',
@@ -110,8 +148,6 @@ export async function createFileFromUrl(
     address,
     extraAssets
   );
-  const _traitsFile = new File([JSON.stringify(traits)], 'metadata.json', {
-    type: 'application/json'
-  });
+  const _traitsFile = traits;
   return { image: _imageFile, traits: _traitsFile };
 }
