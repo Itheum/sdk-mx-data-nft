@@ -301,7 +301,7 @@ export class SftMinter extends Minter {
       nftStorageToken?: string;
       extraAssets?: string[];
     }
-  ): Promise<Transaction> {
+  ): Promise<{ imageUrl: string; metadataUrl: string; tx: Transaction }> {
     const { imageUrl, traitsUrl, nftStorageToken, extraAssets } = options ?? {};
 
     const tokenNameValidator = new StringValidator()
@@ -434,6 +434,10 @@ export class SftMinter extends Minter {
       chainID: this.chainID
     });
 
-    return mintTx;
+    return {
+      imageUrl: imageOnIpfsUrl,
+      metadataUrl: metadataOnIpfsUrl,
+      tx: mintTx
+    };
   }
 }
