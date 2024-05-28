@@ -382,15 +382,35 @@ export class DataNft implements DataNftType {
     }
 
     try {
+      let chainId;
+
+      if (this.overrideDataMarshalChainId === '') {
+        chainId =
+          DataNft.networkConfiguration.chainID === 'D'
+            ? 'ED'
+            : DataNft.networkConfiguration.chainID == '1'
+            ? 'E1'
+            : '';
+      } else if (this.overrideDataMarshalChainId === 'D') {
+        chainId = 'ED';
+      } else if (this.overrideDataMarshalChainId === '1') {
+        chainId = 'E1';
+      } else {
+        chainId = this.overrideDataMarshalChainId;
+      }
+
+      let dataMarshal;
+      if (this.overrideDataMarshal === '') {
+        dataMarshal = this.dataMarshal;
+      } else {
+        dataMarshal = this.overrideDataMarshal;
+      }
+
       let url = `${this.dataMarshal}/access?nonce=${p.signedMessage}&NFTId=${
         this.collection
       }-${numberToPaddedHex(this.nonce)}&signature=${
         signResult.signature
-      }&chainId=${
-        DataNft.networkConfiguration.chainID == 'D'
-          ? 'ED'
-          : DataNft.networkConfiguration.chainID
-      }&accessRequesterAddr=${signResult.addrInHex}`;
+      }&chainId=${chainId}&accessRequesterAddr=${signResult.addrInHex}`;
 
       type FetchConfig = {
         [key: string]: any;
@@ -529,9 +549,13 @@ export class DataNft implements DataNftType {
         chainId =
           DataNft.networkConfiguration.chainID === 'D'
             ? 'ED'
-            : DataNft.networkConfiguration.chainID;
+            : DataNft.networkConfiguration.chainID == '1'
+            ? 'E1'
+            : '';
       } else if (this.overrideDataMarshalChainId === 'D') {
         chainId = 'ED';
+      } else if (this.overrideDataMarshalChainId === '1') {
+        chainId = 'E1';
       } else {
         chainId = this.overrideDataMarshalChainId;
       }
