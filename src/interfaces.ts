@@ -53,6 +53,7 @@ export interface NftType {
 export interface DataNftType {
   readonly tokenIdentifier: string;
   readonly nftImgUrl: string;
+  readonly type: NftEnumType;
   readonly dataPreview: string;
   readonly dataStream: string;
   readonly dataMarshal: string;
