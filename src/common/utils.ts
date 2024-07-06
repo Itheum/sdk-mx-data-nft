@@ -12,6 +12,7 @@ import {
   BondConfiguration,
   Compensation,
   ContractConfiguration,
+  LivelinessStakeConfiguration,
   NftEnumType,
   NftType,
   Offer,
@@ -124,6 +125,21 @@ export function parseBondConfiguration(value: any): BondConfiguration {
     acceptedCallers: value.accepted_callers.map((address: any) =>
       address.toString()
     )
+  };
+}
+
+export function parseLivelinessStakeConfiguration(
+  value: any
+): LivelinessStakeConfiguration {
+  return {
+    rewardsPerBlock: BigNumber(value.rewards_per_block),
+    rewardsReserve: BigNumber(value.rewards_reserve),
+    accumulatedRewards: BigNumber(value.accumulated_rewards),
+    rewardsTokenIdentifier: value.rewards_token_identifier.toString(),
+    lastRewardBlockNonce: value.last_reward_block_nonce.toNumber(),
+    maxApr: BigNumber(value.max_apr).div(10000).toNumber(),
+    administrator: value.administrator.toString(),
+    bondContractAddress: value.bond_contract_address.toString()
   };
 }
 
