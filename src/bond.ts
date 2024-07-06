@@ -109,6 +109,77 @@ export class BondContract extends Contract {
   }
 
   /**
+   * Returns the total bond amount
+   */
+  async viewTotalBondAmount(): Promise<BigNumber.Value> {
+    const interaction = this.contract.methodsExplicit.getTotalBondAmount([]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return BigNumber(firstValue?.valueOf());
+    } else {
+      throw new ErrContractQuery('viewTotalBondAmount', returnCode.toString());
+    }
+  }
+
+  /**
+   * Returns the total bond amount for a specific address
+   * @param address address to query
+   */
+  async viewAddressTotalBondAmount(
+    address: IAddress
+  ): Promise<BigNumber.Value> {
+    const interaction = this.contract.methodsExplicit.getAddressBondsTotalValue(
+      [new AddressValue(address)]
+    );
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return BigNumber(firstValue?.valueOf());
+    } else {
+      throw new ErrContractQuery(
+        'viewAddressTotalBondAmount',
+        returnCode.toString()
+      );
+    }
+  }
+
+  /**
+   * Returns the average liveliness score for a specific address
+   * @param address address to query
+   */
+  async viewAddressAvgLivelinessScore(address: IAddress): Promise<number> {
+    const interaction = this.contract.methodsExplicit.getAddressBondsAvgScore([
+      new AddressValue(address)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return BigNumber(firstValue?.valueOf()).div(10000).toNumber();
+    } else {
+      throw new ErrContractQuery(
+        'viewAddressAvgLivelinessScore',
+        returnCode.toString()
+      );
+    }
+  }
+
+  /**
    * Returns the contract owner address
    */
   async viewAdministrator(): Promise<string> {
