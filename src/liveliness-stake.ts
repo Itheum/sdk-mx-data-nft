@@ -1,9 +1,11 @@
 import {
   Address,
   AddressValue,
+  BooleanType,
   BooleanValue,
   ContractCallPayloadBuilder,
   IAddress,
+  OptionValue,
   ResultsParser,
   Transaction,
   VariadicValue
@@ -113,10 +115,17 @@ export class LivelinessStake extends Contract {
     let interaction = bypass_liveliness_check
       ? this.contract.methodsExplicit.claimableRewards([
           new AddressValue(address),
-          new BooleanValue(bypass_liveliness_check)
+          new OptionValue(
+            new BooleanType(),
+            new BooleanValue(bypass_liveliness_check)
+          )
         ])
       : this.contract.methodsExplicit.claimableRewards([
-          new AddressValue(address)
+          new AddressValue(address),
+          new OptionValue(
+            new BooleanType(),
+            new BooleanValue(bypass_liveliness_check)
+          )
         ]);
 
     const query = interaction.buildQuery();
