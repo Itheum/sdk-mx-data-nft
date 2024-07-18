@@ -16,6 +16,7 @@ import {
 import {
   EnvironmentsEnum,
   bondContractAddress,
+  dataNftTokenIdentifier,
   itheumTokenIdentifier
 } from './config';
 import { ErrContractQuery } from './errors';
@@ -174,6 +175,36 @@ export class BondContract extends Contract {
     } else {
       throw new ErrContractQuery(
         'viewAddressAvgLivelinessScore',
+        returnCode.toString()
+      );
+    }
+  }
+
+  /**
+   * Returns the address vault nonce for a specific address
+   * @param address address to query
+   * @param tokenIdentifier token identifier to query [default token identifier based on the {@link EnvironmentsEnum}]
+   */
+  async viewAddressVaultNonce(
+    address: IAddress,
+    tokenIdentifier = itheumTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Promise<number> {
+    const interaction = this.contract.methodsExplicit.getAddressVaultNone([
+      new AddressValue(address),
+      new TokenIdentifierValue(tokenIdentifier)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return firstValue?.valueOf().toNumber();
+    } else {
+      throw new ErrContractQuery(
+        'viewAddressVaultNonce',
         returnCode.toString()
       );
     }
@@ -1130,6 +1161,40 @@ export class BondContract extends Contract {
   }
 
   /**
+   * Builds a `topUpVault` transaction
+   * @param senderAddress the address of the sender
+   * @param payment the payment for the top up (tokenIdentifier, nonce and amount)
+   * @param nonce the nonce of the Data Nft
+   * @param tokenIdentifier the token identifier of the Data Nft [default is the Data Nft token identifier based on {@link EnvironmentsEnum}]
+   */
+  topUpVault(
+    senderAddress: IAddress,
+    payment: {
+      tokenIdentifier: string;
+      amount: BigNumber.Value;
+    },
+    nonce: number,
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Transaction {
+    const topUpVaultTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('ESDTTransfer'))
+        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
+        .addArg(new BigUIntValue(payment.amount))
+        .addArg(new StringValue('topUpVault'))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 40_000_000,
+      chainID: this.chainID
+    });
+    return topUpVaultTx;
+  }
+
+  /**
    * Builds a `bond` transaction with NFT/SFT transfer
    * @param senderAddress the address of the sender
    * @param originalCaller  the address of the original caller
@@ -1291,6 +1356,32 @@ export class BondContract extends Contract {
       chainID: this.chainID
     });
     return renewTx;
+  }
+
+  /**
+   * Builds a `setVaultNonce` transaction
+   * @param senderAddress the address of the sender
+   * @param nonce the nonce to set
+   * @param tokenIdentifier the Data Nft token identifier [default is the Data Nft token identifier based on {@link EnvironmentsEnum}]
+   */
+  setVaultNonce(
+    senderAddress: IAddress,
+    nonce: number,
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Transaction {
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setVaultNonce')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
   /**
