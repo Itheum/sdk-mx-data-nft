@@ -33,6 +33,17 @@
             "outputs": []
         },
         {
+            "name": "stakeRewards",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "setContractStateActive",
             "mutability": "mutable",
             "inputs": [],
@@ -173,6 +184,12 @@
             ]
         },
         {
+            "name": "generateAggregatedRewards",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
             "name": "rewardsReserve",
             "mutability": "readonly",
             "inputs": [],
@@ -233,7 +250,7 @@
             ]
         },
         {
-            "name": "addresLastRewardPerShare",
+            "name": "addressLastRewardPerShare",
             "mutability": "readonly",
             "inputs": [
                 {
@@ -304,6 +321,126 @@
                 {
                     "name": "state",
                     "type": "State",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "max_apr",
+            "inputs": [
+                {
+                    "name": "max_apr",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "rewards_token_identifier",
+            "inputs": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "per_block_reward_amount",
+            "inputs": [
+                {
+                    "name": "per_block_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "top_up_rewards_event",
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "withdraw_rewards_event",
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "rewards_state_event",
+            "inputs": [
+                {
+                    "name": "state",
+                    "type": "State",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "bond_contract_address",
+            "inputs": [
+                {
+                    "name": "bond_contract_address",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "claim_rewards",
+            "inputs": [
+                {
+                    "name": "caller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "rewards_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "timestamp",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "block_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "rewards_reserve",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "accumulated_rewards",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "current_rewards_per_share",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "user_last_rewards_per_share",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "rewards_per_block",
+                    "type": "BigUint",
                     "indexed": true
                 }
             ]

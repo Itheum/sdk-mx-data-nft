@@ -9,11 +9,11 @@
         },
         "contractCrate": {
             "name": "core-mx-life-bonding-sc",
-            "version": "2.0.0"
+            "version": "3.0.0"
         },
         "framework": {
             "name": "multiversx-sc",
-            "version": "0.51.0"
+            "version": "0.51.1"
         }
     },
     "name": "LifeBondingContract",
@@ -140,6 +140,25 @@
             "outputs": []
         },
         {
+            "name": "stakeRewards",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "original_caller",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "getCompensationBlacklist",
             "mutability": "readonly",
             "inputs": [
@@ -181,6 +200,16 @@
             "outputs": [
                 {
                     "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getLivelinessStakeAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
                 }
             ]
         },
@@ -652,6 +681,17 @@
             "outputs": []
         },
         {
+            "name": "setLivelinessStakeAddress",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "setAdministrator",
             "onlyOwner": true,
             "mutability": "mutable",
@@ -1101,6 +1141,16 @@
             "inputs": [
                 {
                     "name": "administrator",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "set_liveliness_stake_address",
+            "inputs": [
+                {
+                    "name": "address",
                     "type": "Address",
                     "indexed": true
                 }

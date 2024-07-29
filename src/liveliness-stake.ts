@@ -7,16 +7,22 @@ import {
   IAddress,
   OptionValue,
   ResultsParser,
+  TokenIdentifierValue,
   Transaction,
   VariadicValue
 } from '@multiversx/sdk-core/out';
-import { EnvironmentsEnum, livelinessStakeContractAddress } from './config';
+import {
+  dataNftTokenIdentifier,
+  EnvironmentsEnum,
+  livelinessStakeContractAddress
+} from './config';
 import { Contract } from './contract';
 import livelinessStakeAbi from './abis/core-mx-liveliness-stake.abi.json';
 import { LivelinessStakeConfiguration, State } from './interfaces';
 import { ErrContractQuery } from './errors';
 import { parseLivelinessStakeConfiguration } from './common/utils';
 import BigNumber from 'bignumber.js';
+import { Token } from 'nft.storage';
 
 export class LivelinessStake extends Contract {
   constructor(env: string, timeout: number = 10000) {
@@ -110,7 +116,7 @@ export class LivelinessStake extends Contract {
 
   async viewClaimableRewards(
     address: IAddress,
-    bypass_liveliness_check: false
+    bypass_liveliness_check: boolean = false
   ): Promise<BigNumber.Value> {
     let interaction = bypass_liveliness_check
       ? this.contract.methodsExplicit.claimableRewards([
@@ -159,5 +165,28 @@ export class LivelinessStake extends Contract {
       chainID: this.chainID
     });
     return claimRewardsTx;
+  }
+
+  /**
+   * Builds a `stakeRewards` transaction
+   * @param senderAddress address of the sender
+   * @param tokenIdentifier the token identifier of the Data Nft [default is the Data Nft token identifier based on {@link EnvironmentsEnum}]
+   */
+  stakeRewards(
+    senderAddress: IAddress,
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Transaction {
+    const stakeRewardsTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('stakeRewards')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 90_000_000,
+      chainID: this.chainID
+    });
+    return stakeRewardsTx;
   }
 }
