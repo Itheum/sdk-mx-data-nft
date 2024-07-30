@@ -129,6 +129,41 @@ export class BondContract extends Contract {
   }
 
   /**
+   * Returns the address bonds info
+   * @param address address to query
+   *
+   */
+
+  async viewAddressBondsInfo(address: IAddress): Promise<{
+    totalStakedAmount: BigNumber.Value;
+    userStakedAmount: BigNumber.Value;
+    livelinessScore: number;
+  }> {
+    const interaction = this.contract.methodsExplicit.getAddressBondsInfo([
+      new AddressValue(address)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      return {
+        totalStakedAmount: returnValue.field0.valueOf(),
+        userStakedAmount: returnValue.field1.valueOf(),
+        livelinessScore: new BigNumber(returnValue.field2.valueOf())
+          .div(100)
+          .toNumber()
+      };
+    } else {
+      throw new ErrContractQuery('viewAddressBondsInfo', returnCode.toString());
+    }
+  }
+
+  /**
    * Returns the total bond amount for a specific address
    * @param address address to query
    */
@@ -725,6 +760,29 @@ export class BondContract extends Contract {
   }
 
   /**
+   * Builds a 'setTopUpAdministrator' transaction
+   * @param senderAddress address of the sender (must be the owner of the contract)
+   * @param address new top up administrator address
+   */
+  setTopUpAdministrator(
+    senderAddress: IAddress,
+    address: IAddress
+  ): Transaction {
+    const setTopUpAdministratorTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setTopUpAdministrator')
+        .addArg(new AddressValue(address))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 10_000_000,
+      chainID: this.chainID
+    });
+    return setTopUpAdministratorTx;
+  }
+
+  /**
    * Builds a `sanction` transaction
    * @param senderAddress address of the sender (must be the owner of the contract or the administrator)
    * @param tokenIdentifier token identifier to sanction
@@ -1189,6 +1247,42 @@ export class BondContract extends Contract {
       receiver: this.contract.getAddress(),
       sender: senderAddress,
       gasLimit: 40_000_000,
+      chainID: this.chainID
+    });
+    return topUpVaultTx;
+  }
+  /**
+   * Builds a `topUpAddressVault` transaction
+   * @param senderAddress the address of the sender (must be the top up administrator)
+   * @param address the address to top up the vault for
+   * @param payment the payment for the top up (tokenIdentifier, nonce and amount)
+   * @param nonce the nonce of the Data Nft
+   * @param tokenIdentifier the token identifier of the Data Nft [default is the Data Nft token identifier based on {@link EnvironmentsEnum}]
+   */
+  topUpAddressVault(
+    senderAddress: IAddress,
+    address: IAddress,
+    payment: {
+      tokenIdentifier: string;
+      amount: BigNumber.Value;
+    },
+    nonce: number,
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Transaction {
+    const topUpVaultTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('ESDTTransfer'))
+        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
+        .addArg(new BigUIntValue(payment.amount))
+        .addArg(new StringValue('topUpVault'))
+        .addArg(new AddressValue(address))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 80_000_000,
       chainID: this.chainID
     });
     return topUpVaultTx;
