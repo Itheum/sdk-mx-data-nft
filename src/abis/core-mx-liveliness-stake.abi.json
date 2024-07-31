@@ -1,511 +1,587 @@
 {
-  "buildInfo": {
-    "rustc": {
-      "version": "1.78.0",
-      "commitHash": "9b00956e56009bab2aa15d7bff10916599e3d6d6",
-      "commitDate": "2024-04-29",
-      "channel": "Stable",
-      "short": "rustc 1.78.0 (9b00956e5 2024-04-29)"
+    "buildInfo": {
+        "rustc": {
+            "version": "1.78.0",
+            "commitHash": "9b00956e56009bab2aa15d7bff10916599e3d6d6",
+            "commitDate": "2024-04-29",
+            "channel": "Stable",
+            "short": "rustc 1.78.0 (9b00956e5 2024-04-29)"
+        },
+        "contractCrate": {
+            "name": "core-mx-liveliness-stake",
+            "version": "0.0.0"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.51.1"
+        }
     },
-    "contractCrate": {
-      "name": "core-mx-liveliness-stake",
-      "version": "0.0.0"
+    "name": "CoreMxLivelinessStake",
+    "constructor": {
+        "inputs": [],
+        "outputs": []
     },
-    "framework": {
-      "name": "multiversx-sc",
-      "version": "0.51.1"
+    "upgradeConstructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "claimRewards",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "optional<Address>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setAddressRewardsPerShare",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "stakeRewards",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setContractStateActive",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "setContractStateInactive",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "setMaxApr",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "max_apr",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setRewardsTokenIdentifier",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setPerBlockRewardAmount",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "per_block_amount",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "topUpRewards",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "withdrawRewards",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "startProduceRewards",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "endProduceRewards",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "setBondContractAddress",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "bond_contract_address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setAdministrator",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "administrator",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getContractState",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "State"
+                }
+            ]
+        },
+        {
+            "name": "rewardsState",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "State"
+                }
+            ]
+        },
+        {
+            "name": "getAdministrator",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "bondContractAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "generateAggregatedRewards",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "rewardsReserve",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "accumulatedRewards",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "rewardsTokenIdentifier",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "TokenIdentifier"
+                }
+            ]
+        },
+        {
+            "name": "rewardsPerBlock",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "lastRewardBlockNonce",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "rewardsPerShare",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "addressLastRewardPerShare",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "maxApr",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "claimableRewards",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "caller",
+                    "type": "Address"
+                },
+                {
+                    "name": "opt_bypass_liveliness",
+                    "type": "Option<bool>"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "contractDetails",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "ContractDetails"
+                }
+            ]
+        },
+        {
+            "name": "userDataOut",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "tuple<ContractDetails,UserData>"
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "identifier": "set_administrator_event",
+            "inputs": [
+                {
+                    "name": "administrator",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "contract_state_event",
+            "inputs": [
+                {
+                    "name": "state",
+                    "type": "State",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "max_apr",
+            "inputs": [
+                {
+                    "name": "max_apr",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "rewards_token_identifier",
+            "inputs": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "per_block_reward_amount",
+            "inputs": [
+                {
+                    "name": "per_block_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "top_up_rewards_event",
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "withdraw_rewards_event",
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "rewards_state_event",
+            "inputs": [
+                {
+                    "name": "state",
+                    "type": "State",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "bond_contract_address",
+            "inputs": [
+                {
+                    "name": "bond_contract_address",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "claim_rewards",
+            "inputs": [
+                {
+                    "name": "caller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "rewards_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "timestamp",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "block_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "rewards_reserve",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "accumulated_rewards",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "current_rewards_per_share",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "user_last_rewards_per_share",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "rewards_per_block",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "address_rewards_per_share_event",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "rewards_per_share",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        }
+    ],
+    "esdtAttributes": [],
+    "hasCallback": false,
+    "types": {
+        "ContractDetails": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "rewards_reserve",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "accumulated_rewards",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "rewards_token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "rewards_per_block",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "rewards_per_share",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "administrator",
+                    "type": "Address"
+                },
+                {
+                    "name": "bond_contract_address",
+                    "type": "Address"
+                },
+                {
+                    "name": "last_reward_block_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "max_apr",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        "State": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Inactive",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Active",
+                    "discriminant": 1
+                }
+            ]
+        },
+        "UserData": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "total_staked_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "user_staked_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "liveliness_score",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "accumulated_rewards",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "accumulated_rewards_bypass",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "vault_nonce",
+                    "type": "u64"
+                }
+            ]
+        }
     }
-  },
-  "name": "CoreMxLivelinessStake",
-  "constructor": {
-    "inputs": [],
-    "outputs": []
-  },
-  "upgradeConstructor": {
-    "inputs": [],
-    "outputs": []
-  },
-  "endpoints": [
-    {
-      "name": "claimRewards",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "address",
-          "type": "optional<Address>",
-          "multi_arg": true
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "stakeRewards",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "token_identifier",
-          "type": "TokenIdentifier"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "setContractStateActive",
-      "mutability": "mutable",
-      "inputs": [],
-      "outputs": []
-    },
-    {
-      "name": "setContractStateInactive",
-      "mutability": "mutable",
-      "inputs": [],
-      "outputs": []
-    },
-    {
-      "name": "setMaxApr",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "max_apr",
-          "type": "BigUint"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "setRewardsTokenIdentifier",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "token_identifier",
-          "type": "TokenIdentifier"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "setPerBlockRewardAmount",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "per_block_amount",
-          "type": "BigUint"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "topUpRewards",
-      "mutability": "mutable",
-      "payableInTokens": ["*"],
-      "inputs": [],
-      "outputs": []
-    },
-    {
-      "name": "withdrawRewards",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "amount",
-          "type": "BigUint"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "startProduceRewards",
-      "mutability": "mutable",
-      "inputs": [],
-      "outputs": []
-    },
-    {
-      "name": "endProduceRewards",
-      "mutability": "mutable",
-      "inputs": [],
-      "outputs": []
-    },
-    {
-      "name": "setBondContractAddress",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "bond_contract_address",
-          "type": "Address"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "setAdministrator",
-      "onlyOwner": true,
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "administrator",
-          "type": "Address"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "getContractState",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "State"
-        }
-      ]
-    },
-    {
-      "name": "rewardsState",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "State"
-        }
-      ]
-    },
-    {
-      "name": "getAdministrator",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "Address"
-        }
-      ]
-    },
-    {
-      "name": "bondContractAddress",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "Address"
-        }
-      ]
-    },
-    {
-      "name": "generateAggregatedRewards",
-      "mutability": "mutable",
-      "inputs": [],
-      "outputs": []
-    },
-    {
-      "name": "rewardsReserve",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "name": "accumulatedRewards",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "name": "rewardsTokenIdentifier",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "TokenIdentifier"
-        }
-      ]
-    },
-    {
-      "name": "rewardsPerBlock",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "name": "lastRewardBlockNonce",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "rewardsPerShare",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "name": "addressLastRewardPerShare",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "address",
-          "type": "Address"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "name": "maxApr",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "name": "claimableRewards",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "caller",
-          "type": "Address"
-        },
-        {
-          "name": "opt_bypass_liveliness",
-          "type": "Option<bool>"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "name": "contractDetails",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "ContractDetails"
-        }
-      ]
-    }
-  ],
-  "events": [
-    {
-      "identifier": "set_administrator_event",
-      "inputs": [
-        {
-          "name": "administrator",
-          "type": "Address",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "contract_state_event",
-      "inputs": [
-        {
-          "name": "state",
-          "type": "State",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "max_apr",
-      "inputs": [
-        {
-          "name": "max_apr",
-          "type": "BigUint",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "rewards_token_identifier",
-      "inputs": [
-        {
-          "name": "token_identifier",
-          "type": "TokenIdentifier",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "per_block_reward_amount",
-      "inputs": [
-        {
-          "name": "per_block_amount",
-          "type": "BigUint",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "top_up_rewards_event",
-      "inputs": [
-        {
-          "name": "amount",
-          "type": "BigUint",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "withdraw_rewards_event",
-      "inputs": [
-        {
-          "name": "amount",
-          "type": "BigUint",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "rewards_state_event",
-      "inputs": [
-        {
-          "name": "state",
-          "type": "State",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "bond_contract_address",
-      "inputs": [
-        {
-          "name": "bond_contract_address",
-          "type": "Address",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "claim_rewards",
-      "inputs": [
-        {
-          "name": "caller",
-          "type": "Address",
-          "indexed": true
-        },
-        {
-          "name": "rewards_amount",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "timestamp",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "block_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "rewards_reserve",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "accumulated_rewards",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "current_rewards_per_share",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "user_last_rewards_per_share",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "rewards_per_block",
-          "type": "BigUint",
-          "indexed": true
-        }
-      ]
-    }
-  ],
-  "esdtAttributes": [],
-  "hasCallback": false,
-  "types": {
-    "ContractDetails": {
-      "type": "struct",
-      "fields": [
-        {
-          "name": "rewards_reserve",
-          "type": "BigUint"
-        },
-        {
-          "name": "accumulated_rewards",
-          "type": "BigUint"
-        },
-        {
-          "name": "rewards_token_identifier",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "rewards_per_block",
-          "type": "BigUint"
-        },
-        {
-          "name": "rewards_per_share",
-          "type": "BigUint"
-        },
-        {
-          "name": "administrator",
-          "type": "Address"
-        },
-        {
-          "name": "bond_contract_address",
-          "type": "Address"
-        },
-        {
-          "name": "last_reward_block_nonce",
-          "type": "u64"
-        },
-        {
-          "name": "max_apr",
-          "type": "BigUint"
-        }
-      ]
-    },
-    "State": {
-      "type": "enum",
-      "variants": [
-        {
-          "name": "Inactive",
-          "discriminant": 0
-        },
-        {
-          "name": "Active",
-          "discriminant": 1
-        }
-      ]
-    }
-  }
 }

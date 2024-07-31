@@ -18,9 +18,17 @@ import {
 } from './config';
 import { Contract } from './contract';
 import livelinessStakeAbi from './abis/core-mx-liveliness-stake.abi.json';
-import { LivelinessStakeConfiguration, State } from './interfaces';
+import {
+  ContractConfiguration,
+  LivelinessStakeConfiguration,
+  State,
+  UserData
+} from './interfaces';
 import { ErrContractQuery } from './errors';
-import { parseLivelinessStakeConfiguration } from './common/utils';
+import {
+  parseLivelinessStakeConfiguration,
+  parseUserData
+} from './common/utils';
 import BigNumber from 'bignumber.js';
 import { Token } from 'nft.storage';
 
@@ -84,6 +92,41 @@ export class LivelinessStake extends Contract {
         'viewContractConfiguration',
         returnCode.toString()
       );
+    }
+  }
+
+  /**
+   * Returns the `user data out` for a given address
+   * @param address address to check user data out
+   * @param tokenIdentifier the token identifier of the Data Nft [default is the Data Nft token identifier based on {@link EnvironmentsEnum}]
+   */
+  async getUserDataOut(
+    address: IAddress,
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Promise<{
+    contractDetails: LivelinessStakeConfiguration;
+    userData: UserData;
+  }> {
+    const interaction = this.contract.methodsExplicit.userDataOut([
+      new AddressValue(address),
+      new TokenIdentifierValue(tokenIdentifier)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      const livelinessConfiguration = parseLivelinessStakeConfiguration(
+        returnValue.field0.valueOf()
+      );
+      const userData = parseUserData(returnValue.field1.valueOf());
+      return { contractDetails: livelinessConfiguration, userData };
+    } else {
+      throw new ErrContractQuery('getUserDataOut', returnCode.toString());
     }
   }
 

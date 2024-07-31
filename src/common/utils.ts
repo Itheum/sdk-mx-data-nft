@@ -17,7 +17,8 @@ import {
   NftType,
   Offer,
   Refund,
-  State
+  State,
+  UserData
 } from '../interfaces';
 import { EnvironmentsEnum, dataMarshalUrlOverride } from '../config';
 
@@ -137,9 +138,20 @@ export function parseLivelinessStakeConfiguration(
     accumulatedRewards: BigNumber(value.accumulated_rewards),
     rewardsTokenIdentifier: value.rewards_token_identifier.toString(),
     lastRewardBlockNonce: value.last_reward_block_nonce.toNumber(),
-    maxApr: BigNumber(value.max_apr).div(10000).toNumber(),
+    maxApr: BigNumber(value.max_apr).div(100).toNumber(),
     administrator: value.administrator.toString(),
     bondContractAddress: value.bond_contract_address.toString()
+  };
+}
+
+export function parseUserData(value: any): UserData {
+  return {
+    totalStakedAmount: BigNumber(value.total_staked_amount),
+    userStakedAmount: BigNumber(value.user_staked_amount),
+    livelinessScore: BigNumber(value.liveliness_score).div(100).toNumber(),
+    accumulatedRewards: BigNumber(value.accumulated_rewards),
+    accumulatedRewardsBypass: BigNumber(value.accumulated_rewards_bypass),
+    vaultNonce: value.vault_nonce.toNumber()
   };
 }
 

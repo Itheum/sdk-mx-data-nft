@@ -225,3 +225,12 @@ export interface ContractConfiguration {
   administratorAddress: string;
   taxToken: string;
 }
+
+export interface UserData {
+  totalStakedAmount: BigNumber.Value;
+  userStakedAmount: BigNumber.Value;
+  livelinessScore: number;
+  accumulatedRewards: BigNumber.Value;
+  accumulatedRewardsBypass: BigNumber.Value;
+  vaultNonce: number;
+}
