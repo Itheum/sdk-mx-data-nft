@@ -299,7 +299,7 @@ export class NftMinter extends Minter {
       data: data.build(),
       sender: senderAddress,
       receiver: this.contract.getAddress(),
-      gasLimit: 100_000_000,
+      gasLimit: 130_000_000,
       chainID: this.chainID
     });
 
