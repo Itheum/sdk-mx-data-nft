@@ -180,8 +180,17 @@ export function parseRefund(value: any): Refund {
 
 export function parseDataNft(value: NftType): DataNft {
   let attributes;
+  let metadataFile;
+
   try {
     attributes = DataNft.decodeAttributes(value.attributes); // normal attributes
+
+    // get the metadata file, assume for now its the 2nd item. (1 = img, 2 = json, 3.... extra assets)
+    metadataFile = value.uris?.[1];
+
+    if (metadataFile) {
+      metadataFile = Buffer.from(metadataFile, 'base64').toString('ascii');
+    }
   } catch (error: any) {
     try {
       attributes = {
@@ -198,6 +207,7 @@ export function parseDataNft(value: NftType): DataNft {
       throw new ErrParseNft(error.message);
     }
   }
+
   const returnValue = {
     tokenIdentifier: value.identifier,
     nftImgUrl: value.url ?? '',
@@ -218,8 +228,10 @@ export function parseDataNft(value: NftType): DataNft {
         ?.slice(2)
         .map((uri) => Buffer.from(uri, 'base64').toString('ascii')) ?? [],
     media: value.media,
+    metadataFile,
     ...attributes
   };
+
   return new DataNft(returnValue);
 }
 
