@@ -59,7 +59,7 @@ export const livelinessStakeContractAddress: {
   [key in EnvironmentsEnum]: string;
 } = {
   devnet: 'erd1qqqqqqqqqqqqqpgq9j3dj650amzz8lyvek6uq0w0yvgtgggjfsxsf489hq',
-  mainnet: '',
+  mainnet: 'erd1qqqqqqqqqqqqqpgq65rn8zmf2tckftpu5lvxg2pzlg0dhfrwc77qcuynw7',
   testnet: ''
 };
 
