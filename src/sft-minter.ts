@@ -280,6 +280,8 @@ export class SftMinter extends Minter {
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
    *                 - extraAssets: [optional] extra URIs to attached to the NFT. Can be media files, documents, etc. These URIs are public
    *                 - donationPercentage: [optional] the donation percentage to be set for the Data NFT-FT supply to be sent to the donation
+   *                 - imgGenBg: [optional] the custom series bg to influence the image generation service
+   *                 - imgGenSet: [optional] the custom series layer set to influence the image generation service
    *
    */
   async mint(
@@ -300,9 +302,18 @@ export class SftMinter extends Minter {
       traitsUrl?: string;
       nftStorageToken?: string;
       extraAssets?: string[];
+      imgGenBg?: string;
+      imgGenSet?: string;
     }
   ): Promise<{ imageUrl: string; metadataUrl: string; tx: Transaction }> {
-    const { imageUrl, traitsUrl, nftStorageToken, extraAssets } = options ?? {};
+    const {
+      imageUrl,
+      traitsUrl,
+      nftStorageToken,
+      extraAssets,
+      imgGenBg,
+      imgGenSet
+    } = options ?? {};
 
     const tokenNameValidator = new StringValidator()
       .notEmpty()
@@ -366,8 +377,20 @@ export class SftMinter extends Minter {
           'NFT Storage token is required when not using custom image and traits'
         );
       }
+
+      // create the img generative service API based on user options
+      let imgGenServiceApi = `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`;
+
+      if (imgGenBg && imgGenBg.trim() !== '') {
+        imgGenServiceApi += `&bg=${imgGenBg.trim()}`;
+      }
+
+      if (imgGenSet && imgGenSet.trim() !== '') {
+        imgGenServiceApi += `&set=${imgGenSet.trim()}`;
+      }
+
       const { image, traits } = await createFileFromUrl(
-        `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`,
+        imgGenServiceApi,
         datasetTitle,
         datasetDescription,
         dataPreviewUrl,
@@ -430,7 +453,7 @@ export class SftMinter extends Minter {
       data: data.build(),
       sender: senderAddress,
       receiver: this.contract.getAddress(),
-      gasLimit: 80_000_000,
+      gasLimit: 130_000_000,
       chainID: this.chainID
     });
 

@@ -1,1195 +1,1396 @@
 {
-    "buildInfo": {
-        "rustc": {
-            "version": "1.76.0-nightly",
-            "commitHash": "d86d65bbc19b928387f68427fcc3a0da498d8a19",
-            "commitDate": "2023-12-10",
-            "channel": "Nightly",
-            "short": "rustc 1.76.0-nightly (d86d65bbc 2023-12-10)"
-        },
-        "contractCrate": {
-            "name": "core-mx-life-bonding-sc",
-            "version": "1.0.0"
-        },
-        "framework": {
-            "name": "multiversx-sc",
-            "version": "0.47.8"
-        }
+  "buildInfo": {
+    "rustc": {
+      "version": "1.78.0",
+      "commitHash": "9b00956e56009bab2aa15d7bff10916599e3d6d6",
+      "commitDate": "2024-04-29",
+      "channel": "Stable",
+      "short": "rustc 1.78.0 (9b00956e5 2024-04-29)"
     },
-    "name": "LifeBondingContract",
-    "constructor": {
-        "inputs": [],
-        "outputs": []
+    "contractCrate": {
+      "name": "core-mx-life-bonding-sc",
+      "version": "3.1.0"
     },
-    "endpoints": [
-        {
-            "name": "upgrade",
-            "mutability": "mutable",
-            "inputs": [],
-            "outputs": []
-        },
-        {
-            "name": "bond",
-            "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
-            "inputs": [
-                {
-                    "name": "original_caller",
-                    "type": "Address"
-                },
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                },
-                {
-                    "name": "lock_period_seconds",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "withdraw",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "renew",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "proof",
-            "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
-            "inputs": [],
-            "outputs": []
-        },
-        {
-            "name": "claimRefund",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "getCompensationBlacklist",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "variadic<Address>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getBond",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "bond_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "Bond"
-                }
-            ]
-        },
-        {
-            "name": "getCompensation",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "Compensation"
-                }
-            ]
-        },
-        {
-            "name": "getCompensations",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "input",
-                    "type": "variadic<multi<TokenIdentifier,u64>>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "List<Compensation>"
-                }
-            ]
-        },
-        {
-            "name": "getPagedCompensations",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "start_index",
-                    "type": "u64"
-                },
-                {
-                    "name": "end_index",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "List<Compensation>"
-                }
-            ]
-        },
-        {
-            "name": "getAddressRefundForCompensation",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                },
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "Option<Refund>"
-                }
-            ]
-        },
-        {
-            "name": "getAddressRefundForCompensations",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                },
-                {
-                    "name": "compensation_ids",
-                    "type": "variadic<u64>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "List<Refund>"
-                }
-            ]
-        },
-        {
-            "name": "getBondsByTokenIdentifierNonce",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "input",
-                    "type": "variadic<multi<TokenIdentifier,u64>>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "List<Bond>"
-                }
-            ]
-        },
-        {
-            "name": "getBonds",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "bond_ids",
-                    "type": "variadic<u64>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "List<Bond>"
-                }
-            ]
-        },
-        {
-            "name": "getAddressBonds",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "List<Bond>"
-                }
-            ]
-        },
-        {
-            "name": "getAllBonds",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "List<Bond>"
-                }
-            ]
-        },
-        {
-            "name": "getPagedBonds",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "start_index",
-                    "type": "u64"
-                },
-                {
-                    "name": "end_index",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "List<Bond>"
-                }
-            ]
-        },
-        {
-            "name": "getBondsLen",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "u32"
-                }
-            ]
-        },
-        {
-            "name": "getCompensationsLen",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "u32"
-                }
-            ]
-        },
-        {
-            "name": "getLockPeriodsBonds",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "tuple<List<u64>,List<BigUint>>"
-                }
-            ]
-        },
-        {
-            "name": "getContractConfiguration",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "ContractConfiguration"
-                }
-            ]
-        },
-        {
-            "name": "initiateBond",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                },
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setBlacklist",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "addresses",
-                    "type": "variadic<Address>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "removeBlacklist",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "addresses",
-                    "type": "variadic<Address>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "initiateRefund",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                },
-                {
-                    "name": "timestamp",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "sanction",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                },
-                {
-                    "name": "penalty",
-                    "type": "PenaltyType"
-                },
-                {
-                    "name": "custom_penalty",
-                    "type": "optional<u64>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "modifyBond",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setContractStateActive",
-            "mutability": "mutable",
-            "inputs": [],
-            "outputs": []
-        },
-        {
-            "name": "setContractStateInactive",
-            "mutability": "mutable",
-            "inputs": [],
-            "outputs": []
-        },
-        {
-            "name": "setAcceptedCallers",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "callers",
-                    "type": "variadic<Address>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "removeAcceptedCallers",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "callers",
-                    "type": "variadic<Address>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setBondToken",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "addPeriodsBonds",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "args",
-                    "type": "variadic<multi<u64,BigUint>>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "removePeriodsBonds",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "lock_periods",
-                    "type": "variadic<u64>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setMinimumPenalty",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "penalty",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setMaximumPenalty",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "penalty",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setWithdrawPenalty",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "penalty",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setAdministrator",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "administrator",
-                    "type": "Address"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "getContractState",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "State"
-                }
-            ]
-        },
-        {
-            "name": "getAdministrator",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "Address"
-                }
-            ]
-        },
-        {
-            "name": "getAcceptedCallers",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "variadic<Address>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getBondPaymentToken",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "TokenIdentifier"
-                }
-            ]
-        },
-        {
-            "name": "getLockPeriods",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "variadic<u64>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getLockPeriodBondAmount",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "lock_period",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
-            "name": "getMinimumPenalty",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "u64"
-                }
-            ]
-        },
-        {
-            "name": "getMaximumPenalty",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "u64"
-                }
-            ]
-        },
-        {
-            "name": "getWithdrawPenalty",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "u64"
-                }
-            ]
-        }
-    ],
-    "events": [
-        {
-            "identifier": "minimum_penalty_event",
-            "inputs": [
-                {
-                    "name": "value",
-                    "type": "u64",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "maximum_penalty_event",
-            "inputs": [
-                {
-                    "name": "value",
-                    "type": "u64",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "withdraw_penalty_event",
-            "inputs": [
-                {
-                    "name": "value",
-                    "type": "u64",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "contract_state_event",
-            "inputs": [
-                {
-                    "name": "state",
-                    "type": "State",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "bond_event",
-            "inputs": [
-                {
-                    "name": "bond",
-                    "type": "Bond",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "compensation_event",
-            "inputs": [
-                {
-                    "name": "compensation",
-                    "type": "Compensation",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "withdraw_event",
-            "inputs": [
-                {
-                    "name": "bond_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "caller",
-                    "type": "Address",
-                    "indexed": true
-                },
-                {
-                    "name": "withdraw_amount",
-                    "type": "BigUint",
-                    "indexed": true
-                },
-                {
-                    "name": "penalty_amount",
-                    "type": "BigUint",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "renew_event",
-            "inputs": [
-                {
-                    "name": "bond_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "caller",
-                    "type": "Address",
-                    "indexed": true
-                },
-                {
-                    "name": "unbond_timestmap",
-                    "type": "u64",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "proof_event",
-            "inputs": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier",
-                    "indexed": true
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "proof_amount",
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
-            "identifier": "claim_refund_event",
-            "inputs": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "caller",
-                    "type": "Address",
-                    "indexed": true
-                },
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier",
-                    "indexed": true
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "amount",
-                    "type": "BigUint",
-                    "indexed": true
-                },
-                {
-                    "name": "refund_token_identifier",
-                    "type": "TokenIdentifier",
-                    "indexed": true
-                },
-                {
-                    "name": "refund_token_nonce",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "refund_amount",
-                    "type": "BigUint",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "add_to_blacklist_event",
-            "inputs": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "addresses",
-                    "type": "variadic<Address>",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "remove_from_blacklist_event",
-            "inputs": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "addresses",
-                    "type": "variadic<Address>",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "initiate_refund_event",
-            "inputs": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier",
-                    "indexed": true
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "timestamp",
-                    "type": "u64",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "sanction_event",
-            "inputs": [
-                {
-                    "name": "bond_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "compensation_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier",
-                    "indexed": true
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "penalty_amount",
-                    "type": "BigUint",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "modify_bond_event",
-            "inputs": [
-                {
-                    "name": "bond_id",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "unbond_timestamp",
-                    "type": "u64",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "set_accepted_callers_event",
-            "inputs": [
-                {
-                    "name": "callers",
-                    "type": "variadic<Address>",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "remove_accepted_callers_event",
-            "inputs": [
-                {
-                    "name": "callers",
-                    "type": "variadic<Address>",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "set_bond_token_event",
-            "inputs": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "set_period_and_bond_event",
-            "inputs": [
-                {
-                    "name": "period",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "bond",
-                    "type": "BigUint",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "remove_period_and_bond_event",
-            "inputs": [
-                {
-                    "name": "period",
-                    "type": "u64",
-                    "indexed": true
-                },
-                {
-                    "name": "bond",
-                    "type": "BigUint",
-                    "indexed": true
-                }
-            ]
-        },
-        {
-            "identifier": "set_administrator_event",
-            "inputs": [
-                {
-                    "name": "administrator",
-                    "type": "Address",
-                    "indexed": true
-                }
-            ]
-        }
-    ],
-    "esdtAttributes": [],
-    "hasCallback": false,
-    "types": {
-        "Bond": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "bond_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "address",
-                    "type": "Address"
-                },
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                },
-                {
-                    "name": "lock_period",
-                    "type": "u64"
-                },
-                {
-                    "name": "bond_timestamp",
-                    "type": "u64"
-                },
-                {
-                    "name": "unbond_timestamp",
-                    "type": "u64"
-                },
-                {
-                    "name": "bond_amount",
-                    "type": "BigUint"
-                },
-                {
-                    "name": "remaining_amount",
-                    "type": "BigUint"
-                }
-            ]
-        },
-        "Compensation": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "compensation_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                },
-                {
-                    "name": "accumulated_amount",
-                    "type": "BigUint"
-                },
-                {
-                    "name": "proof_amount",
-                    "type": "BigUint"
-                },
-                {
-                    "name": "end_date",
-                    "type": "u64"
-                }
-            ]
-        },
-        "ContractConfiguration": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "contract_state",
-                    "type": "State"
-                },
-                {
-                    "name": "bond_payment_token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "lock_periods",
-                    "type": "List<u64>"
-                },
-                {
-                    "name": "bond_amounts",
-                    "type": "List<BigUint>"
-                },
-                {
-                    "name": "minimum_penalty",
-                    "type": "u64"
-                },
-                {
-                    "name": "maximum_penalty",
-                    "type": "u64"
-                },
-                {
-                    "name": "withdraw_penalty",
-                    "type": "u64"
-                },
-                {
-                    "name": "accepted_callers",
-                    "type": "List<Address>"
-                }
-            ]
-        },
-        "EsdtTokenPayment": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "token_identifier",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "token_nonce",
-                    "type": "u64"
-                },
-                {
-                    "name": "amount",
-                    "type": "BigUint"
-                }
-            ]
-        },
-        "PenaltyType": {
-            "type": "enum",
-            "variants": [
-                {
-                    "name": "Minimum",
-                    "discriminant": 0
-                },
-                {
-                    "name": "Custom",
-                    "discriminant": 1
-                },
-                {
-                    "name": "Maximum",
-                    "discriminant": 2
-                }
-            ]
-        },
-        "Refund": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                },
-                {
-                    "name": "proof_of_refund",
-                    "type": "EsdtTokenPayment"
-                },
-                {
-                    "name": "compensation_id",
-                    "type": "u64"
-                }
-            ]
-        },
-        "State": {
-            "type": "enum",
-            "variants": [
-                {
-                    "name": "Inactive",
-                    "discriminant": 0
-                },
-                {
-                    "name": "Active",
-                    "discriminant": 1
-                }
-            ]
-        }
+    "framework": {
+      "name": "multiversx-sc",
+      "version": "0.51.1"
     }
+  },
+  "name": "LifeBondingContract",
+  "constructor": {
+    "inputs": [],
+    "outputs": []
+  },
+  "upgradeConstructor": {
+    "inputs": [],
+    "outputs": []
+  },
+  "endpoints": [
+    {
+      "name": "bond",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "original_caller",
+          "type": "Address"
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
+          "name": "lock_period_seconds",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "withdraw",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "renew",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "proof",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "claimRefund",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setVaultNonce",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "topUpVault",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "topUpAddressVault",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "stakeRewards",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "original_caller",
+          "type": "Address"
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "amount",
+          "type": "BigUint"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "getCompensationBlacklist",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "compensation_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getTotalBondAmount",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getAddressVaultNone",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "getLivelinessStakeAddress",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "Address"
+        }
+      ]
+    },
+    {
+      "name": "getBond",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "bond_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Bond"
+        }
+      ]
+    },
+    {
+      "name": "getCompensation",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "compensation_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Compensation"
+        }
+      ]
+    },
+    {
+      "name": "getCompensations",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "input",
+          "type": "variadic<multi<TokenIdentifier,u64>>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Compensation>"
+        }
+      ]
+    },
+    {
+      "name": "getPagedCompensations",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "start_index",
+          "type": "u64"
+        },
+        {
+          "name": "end_index",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Compensation>"
+        }
+      ]
+    },
+    {
+      "name": "getAddressRefundForCompensation",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Option<Refund>"
+        }
+      ]
+    },
+    {
+      "name": "getAddressRefundForCompensations",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "compensation_ids",
+          "type": "variadic<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Refund>"
+        }
+      ]
+    },
+    {
+      "name": "getBondsByTokenIdentifierNonce",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "input",
+          "type": "variadic<multi<TokenIdentifier,u64>>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Bond>"
+        }
+      ]
+    },
+    {
+      "name": "getBonds",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "bond_ids",
+          "type": "variadic<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Bond>"
+        }
+      ]
+    },
+    {
+      "name": "getAddressBonds",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Bond>"
+        }
+      ]
+    },
+    {
+      "name": "getAddressBondsAvgScore",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getAddressBondsTotalValue",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getAddressBondsInfo",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "tuple<BigUint,BigUint,BigUint>"
+        }
+      ]
+    },
+    {
+      "name": "getAllBonds",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "List<Bond>"
+        }
+      ]
+    },
+    {
+      "name": "getPagedBonds",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "start_index",
+          "type": "u64"
+        },
+        {
+          "name": "end_index",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Bond>"
+        }
+      ]
+    },
+    {
+      "name": "getBondsLen",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "getCompensationsLen",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "getLockPeriodsBonds",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "tuple<List<u64>,List<BigUint>>"
+        }
+      ]
+    },
+    {
+      "name": "getContractConfiguration",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "ContractConfiguration"
+        }
+      ]
+    },
+    {
+      "name": "initiateBond",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setBlacklist",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "compensation_id",
+          "type": "u64"
+        },
+        {
+          "name": "addresses",
+          "type": "variadic<Address>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "removeBlacklist",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "compensation_id",
+          "type": "u64"
+        },
+        {
+          "name": "addresses",
+          "type": "variadic<Address>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "initiateRefund",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
+          "name": "timestamp",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "sanction",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
+          "name": "penalty",
+          "type": "PenaltyType"
+        },
+        {
+          "name": "custom_penalty",
+          "type": "optional<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "modifyBond",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setContractStateActive",
+      "mutability": "mutable",
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "setContractStateInactive",
+      "mutability": "mutable",
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "setAcceptedCallers",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "callers",
+          "type": "variadic<Address>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "removeAcceptedCallers",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "callers",
+          "type": "variadic<Address>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setBondToken",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "addPeriodsBonds",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "args",
+          "type": "variadic<multi<u64,BigUint>>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "removePeriodsBonds",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "lock_periods",
+          "type": "variadic<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setMinimumPenalty",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "penalty",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setMaximumPenalty",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "penalty",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setWithdrawPenalty",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "penalty",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setLivelinessStakeAddress",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setTopUpAdministrator",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setAdministrator",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "administrator",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "getContractState",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "State"
+        }
+      ]
+    },
+    {
+      "name": "getAdministrator",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "Address"
+        }
+      ]
+    },
+    {
+      "name": "getTopUpAdministrator",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "Address"
+        }
+      ]
+    },
+    {
+      "name": "getAcceptedCallers",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getBondPaymentToken",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "TokenIdentifier"
+        }
+      ]
+    },
+    {
+      "name": "getLockPeriods",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getLockPeriodBondAmount",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "lock_period",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getMinimumPenalty",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "getMaximumPenalty",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "getWithdrawPenalty",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "identifier": "minimum_penalty_event",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "u64",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "maximum_penalty_event",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "u64",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "withdraw_penalty_event",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "u64",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "contract_state_event",
+      "inputs": [
+        {
+          "name": "state",
+          "type": "State",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "bond_event",
+      "inputs": [
+        {
+          "name": "bond",
+          "type": "Bond",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "compensation_event",
+      "inputs": [
+        {
+          "name": "compensation",
+          "type": "Compensation",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "withdraw_event",
+      "inputs": [
+        {
+          "name": "bond_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "caller",
+          "type": "Address",
+          "indexed": true
+        },
+        {
+          "name": "withdraw_amount",
+          "type": "BigUint",
+          "indexed": true
+        },
+        {
+          "name": "penalty_amount",
+          "type": "BigUint",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "renew_event",
+      "inputs": [
+        {
+          "name": "bond_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "caller",
+          "type": "Address",
+          "indexed": true
+        },
+        {
+          "name": "unbond_timestmap",
+          "type": "u64",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "proof_event",
+      "inputs": [
+        {
+          "name": "compensation_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier",
+          "indexed": true
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "proof_amount",
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "identifier": "claim_refund_event",
+      "inputs": [
+        {
+          "name": "compensation_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "caller",
+          "type": "Address",
+          "indexed": true
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier",
+          "indexed": true
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "amount",
+          "type": "BigUint",
+          "indexed": true
+        },
+        {
+          "name": "refund_token_identifier",
+          "type": "TokenIdentifier",
+          "indexed": true
+        },
+        {
+          "name": "refund_token_nonce",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "refund_amount",
+          "type": "BigUint",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "add_to_blacklist_event",
+      "inputs": [
+        {
+          "name": "compensation_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "addresses",
+          "type": "variadic<Address>",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "remove_from_blacklist_event",
+      "inputs": [
+        {
+          "name": "compensation_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "addresses",
+          "type": "variadic<Address>",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "initiate_refund_event",
+      "inputs": [
+        {
+          "name": "compensation_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier",
+          "indexed": true
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "timestamp",
+          "type": "u64",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "sanction_event",
+      "inputs": [
+        {
+          "name": "bond_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "compensation_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier",
+          "indexed": true
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "penalty_amount",
+          "type": "BigUint",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "modify_bond_event",
+      "inputs": [
+        {
+          "name": "bond_id",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "unbond_timestamp",
+          "type": "u64",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "set_accepted_callers_event",
+      "inputs": [
+        {
+          "name": "callers",
+          "type": "variadic<Address>",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "remove_accepted_callers_event",
+      "inputs": [
+        {
+          "name": "callers",
+          "type": "variadic<Address>",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "set_bond_token_event",
+      "inputs": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "set_period_and_bond_event",
+      "inputs": [
+        {
+          "name": "period",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "bond",
+          "type": "BigUint",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "remove_period_and_bond_event",
+      "inputs": [
+        {
+          "name": "period",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "bond",
+          "type": "BigUint",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "set_administrator_event",
+      "inputs": [
+        {
+          "name": "administrator",
+          "type": "Address",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "set_liveliness_stake_address",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "set_top_up_administrator_event",
+      "inputs": [
+        {
+          "name": "top_up_administrator",
+          "type": "Address",
+          "indexed": true
+        }
+      ]
+    }
+  ],
+  "esdtAttributes": [],
+  "hasCallback": false,
+  "types": {
+    "Bond": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "bond_id",
+          "type": "u64"
+        },
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
+          "name": "lock_period",
+          "type": "u64"
+        },
+        {
+          "name": "bond_timestamp",
+          "type": "u64"
+        },
+        {
+          "name": "unbond_timestamp",
+          "type": "u64"
+        },
+        {
+          "name": "bond_amount",
+          "type": "BigUint"
+        },
+        {
+          "name": "remaining_amount",
+          "type": "BigUint"
+        }
+      ]
+    },
+    "Compensation": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "compensation_id",
+          "type": "u64"
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
+          "name": "accumulated_amount",
+          "type": "BigUint"
+        },
+        {
+          "name": "proof_amount",
+          "type": "BigUint"
+        },
+        {
+          "name": "end_date",
+          "type": "u64"
+        }
+      ]
+    },
+    "ContractConfiguration": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "contract_state",
+          "type": "State"
+        },
+        {
+          "name": "bond_payment_token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "lock_periods",
+          "type": "List<u64>"
+        },
+        {
+          "name": "bond_amounts",
+          "type": "List<BigUint>"
+        },
+        {
+          "name": "minimum_penalty",
+          "type": "u64"
+        },
+        {
+          "name": "maximum_penalty",
+          "type": "u64"
+        },
+        {
+          "name": "withdraw_penalty",
+          "type": "u64"
+        },
+        {
+          "name": "accepted_callers",
+          "type": "List<Address>"
+        }
+      ]
+    },
+    "EsdtTokenPayment": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "token_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "BigUint"
+        }
+      ]
+    },
+    "PenaltyType": {
+      "type": "enum",
+      "variants": [
+        {
+          "name": "Minimum",
+          "discriminant": 0
+        },
+        {
+          "name": "Custom",
+          "discriminant": 1
+        },
+        {
+          "name": "Maximum",
+          "discriminant": 2
+        }
+      ]
+    },
+    "Refund": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "proof_of_refund",
+          "type": "EsdtTokenPayment"
+        },
+        {
+          "name": "compensation_id",
+          "type": "u64"
+        }
+      ]
+    },
+    "State": {
+      "type": "enum",
+      "variants": [
+        {
+          "name": "Inactive",
+          "discriminant": 0
+        },
+        {
+          "name": "Active",
+          "discriminant": 1
+        }
+      ]
+    }
+  }
 }

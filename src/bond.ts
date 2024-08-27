@@ -16,6 +16,7 @@ import {
 import {
   EnvironmentsEnum,
   bondContractAddress,
+  dataNftTokenIdentifier,
   itheumTokenIdentifier
 } from './config';
 import { ErrContractQuery } from './errors';
@@ -103,6 +104,142 @@ export class BondContract extends Contract {
     } else {
       throw new ErrContractQuery(
         'viewContractConfiguration',
+        returnCode.toString()
+      );
+    }
+  }
+
+  /**
+   * Returns the total bond amount
+   */
+  async viewTotalBondAmount(): Promise<BigNumber.Value> {
+    const interaction = this.contract.methodsExplicit.getTotalBondAmount([]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return BigNumber(firstValue?.valueOf());
+    } else {
+      throw new ErrContractQuery('viewTotalBondAmount', returnCode.toString());
+    }
+  }
+
+  /**
+   * Returns the address bonds info
+   * @param address address to query
+   *
+   */
+
+  async viewAddressBondsInfo(address: IAddress): Promise<{
+    totalStakedAmount: BigNumber.Value;
+    userStakedAmount: BigNumber.Value;
+    livelinessScore: number;
+  }> {
+    const interaction = this.contract.methodsExplicit.getAddressBondsInfo([
+      new AddressValue(address)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      const returnValue = firstValue?.valueOf();
+      return {
+        totalStakedAmount: returnValue.field0.valueOf(),
+        userStakedAmount: returnValue.field1.valueOf(),
+        livelinessScore: new BigNumber(returnValue.field2.valueOf())
+          .div(100)
+          .toNumber()
+      };
+    } else {
+      throw new ErrContractQuery('viewAddressBondsInfo', returnCode.toString());
+    }
+  }
+
+  /**
+   * Returns the total bond amount for a specific address
+   * @param address address to query
+   */
+  async viewAddressTotalBondAmount(
+    address: IAddress
+  ): Promise<BigNumber.Value> {
+    const interaction = this.contract.methodsExplicit.getAddressBondsTotalValue(
+      [new AddressValue(address)]
+    );
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return BigNumber(firstValue?.valueOf());
+    } else {
+      throw new ErrContractQuery(
+        'viewAddressTotalBondAmount',
+        returnCode.toString()
+      );
+    }
+  }
+
+  /**
+   * Returns the average liveliness score for a specific address
+   * @param address address to query
+   */
+  async viewAddressAvgLivelinessScore(address: IAddress): Promise<number> {
+    const interaction = this.contract.methodsExplicit.getAddressBondsAvgScore([
+      new AddressValue(address)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return BigNumber(firstValue?.valueOf()).div(10000).toNumber();
+    } else {
+      throw new ErrContractQuery(
+        'viewAddressAvgLivelinessScore',
+        returnCode.toString()
+      );
+    }
+  }
+
+  /**
+   * Returns the address vault nonce for a specific address
+   * @param address address to query
+   * @param tokenIdentifier token identifier to query [default token identifier based on the {@link EnvironmentsEnum}]
+   */
+  async viewAddressVaultNonce(
+    address: IAddress,
+    tokenIdentifier = itheumTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Promise<number> {
+    const interaction = this.contract.methodsExplicit.getAddressVaultNone([
+      new AddressValue(address),
+      new TokenIdentifierValue(tokenIdentifier)
+    ]);
+    const query = interaction.buildQuery();
+    const queryResponse = await this.networkProvider.queryContract(query);
+    const endpointDefinition = interaction.getEndpoint();
+    const { firstValue, returnCode } = new ResultsParser().parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    if (returnCode.isSuccess()) {
+      return firstValue?.valueOf().toNumber();
+    } else {
+      throw new ErrContractQuery(
+        'viewAddressVaultNonce',
         returnCode.toString()
       );
     }
@@ -623,6 +760,29 @@ export class BondContract extends Contract {
   }
 
   /**
+   * Builds a 'setTopUpAdministrator' transaction
+   * @param senderAddress address of the sender (must be the owner of the contract)
+   * @param address new top up administrator address
+   */
+  setTopUpAdministrator(
+    senderAddress: IAddress,
+    address: IAddress
+  ): Transaction {
+    const setTopUpAdministratorTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setTopUpAdministrator')
+        .addArg(new AddressValue(address))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 10_000_000,
+      chainID: this.chainID
+    });
+    return setTopUpAdministratorTx;
+  }
+
+  /**
    * Builds a `sanction` transaction
    * @param senderAddress address of the sender (must be the owner of the contract or the administrator)
    * @param tokenIdentifier token identifier to sanction
@@ -1059,6 +1219,76 @@ export class BondContract extends Contract {
   }
 
   /**
+   * Builds a `topUpVault` transaction
+   * @param senderAddress the address of the sender
+   * @param payment the payment for the top up (tokenIdentifier, nonce and amount)
+   * @param nonce the nonce of the Data Nft
+   * @param tokenIdentifier the token identifier of the Data Nft [default is the Data Nft token identifier based on {@link EnvironmentsEnum}]
+   */
+  topUpVault(
+    senderAddress: IAddress,
+    payment: {
+      tokenIdentifier: string;
+      amount: BigNumber.Value;
+    },
+    nonce: number,
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Transaction {
+    const topUpVaultTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('ESDTTransfer'))
+        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
+        .addArg(new BigUIntValue(payment.amount))
+        .addArg(new StringValue('topUpVault'))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 40_000_000,
+      chainID: this.chainID
+    });
+    return topUpVaultTx;
+  }
+  /**
+   * Builds a `topUpAddressVault` transaction
+   * @param senderAddress the address of the sender (must be the top up administrator)
+   * @param address the address to top up the vault for
+   * @param payment the payment for the top up (tokenIdentifier, nonce and amount)
+   * @param nonce the nonce of the Data Nft
+   * @param tokenIdentifier the token identifier of the Data Nft [default is the Data Nft token identifier based on {@link EnvironmentsEnum}]
+   */
+  topUpAddressVault(
+    senderAddress: IAddress,
+    address: IAddress,
+    payment: {
+      tokenIdentifier: string;
+      amount: BigNumber.Value;
+    },
+    nonce: number,
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Transaction {
+    const topUpVaultTx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction(new ContractFunction('ESDTTransfer'))
+        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
+        .addArg(new BigUIntValue(payment.amount))
+        .addArg(new StringValue('topUpVault'))
+        .addArg(new AddressValue(address))
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 80_000_000,
+      chainID: this.chainID
+    });
+    return topUpVaultTx;
+  }
+
+  /**
    * Builds a `bond` transaction with NFT/SFT transfer
    * @param senderAddress the address of the sender
    * @param originalCaller  the address of the original caller
@@ -1220,6 +1450,32 @@ export class BondContract extends Contract {
       chainID: this.chainID
     });
     return renewTx;
+  }
+
+  /**
+   * Builds a `setVaultNonce` transaction
+   * @param senderAddress the address of the sender
+   * @param nonce the nonce to set
+   * @param tokenIdentifier the Data Nft token identifier [default is the Data Nft token identifier based on {@link EnvironmentsEnum}]
+   */
+  setVaultNonce(
+    senderAddress: IAddress,
+    nonce: number,
+    tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
+  ): Transaction {
+    const tx = new Transaction({
+      value: 0,
+      data: new ContractCallPayloadBuilder()
+        .setFunction('setVaultNonce')
+        .addArg(new TokenIdentifierValue(tokenIdentifier))
+        .addArg(new U64Value(nonce))
+        .build(),
+      receiver: this.contract.getAddress(),
+      sender: senderAddress,
+      gasLimit: 20_000_000,
+      chainID: this.chainID
+    });
+    return tx;
   }
 
   /**

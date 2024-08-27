@@ -55,6 +55,14 @@ export const bondContractAddress: { [key in EnvironmentsEnum]: string } = {
   testnet: ''
 };
 
+export const livelinessStakeContractAddress: {
+  [key in EnvironmentsEnum]: string;
+} = {
+  devnet: 'erd1qqqqqqqqqqqqqpgq9j3dj650amzz8lyvek6uq0w0yvgtgggjfsxsf489hq',
+  mainnet: 'erd1qqqqqqqqqqqqqpgq65rn8zmf2tckftpu5lvxg2pzlg0dhfrwc77qcuynw7',
+  testnet: ''
+};
+
 export const apiConfiguration: { [key in EnvironmentsEnum]: string } = {
   devnet: 'https://devnet-api.multiversx.com',
   mainnet: 'https://api.multiversx.com',

@@ -160,6 +160,8 @@ export class NftMinter extends Minter {
    *                 - antiSpamTokenIdentifier: the anti spam token identifier to be used for the minting
    *                 - antiSpamTax: the anti spam tax to be set for the Data NFT-FT with decimals. Needs to be greater than 0 and should be obtained in real time via {@link viewMinterRequirements} prior to calling mint.
    *                 - extraAssets [optional] extra URIs to attached to the NFT. Can be media files, documents, etc. These URIs are public
+   *                 - imgGenBg: [optional] the custom series bg to influence the image generation service
+   *                 - imgGenSet: [optional] the custom series layer set to influence the image generation service
    */
   async mint(
     senderAddress: IAddress,
@@ -177,6 +179,8 @@ export class NftMinter extends Minter {
       antiSpamTokenIdentifier?: string;
       antiSpamTax?: BigNumber.Value;
       extraAssets?: string[];
+      imgGenBg?: string;
+      imgGenSet?: string;
     }
   ): Promise<Transaction> {
     const {
@@ -185,7 +189,9 @@ export class NftMinter extends Minter {
       nftStorageToken,
       antiSpamTokenIdentifier,
       antiSpamTax,
-      extraAssets
+      extraAssets,
+      imgGenBg,
+      imgGenSet
     } = options ?? {};
 
     // deep validate all mandatory URLs
@@ -213,8 +219,20 @@ export class NftMinter extends Minter {
           'NFT Storage token is required when not using custom image and traits'
         );
       }
+
+      // create the img generative service API based on user options
+      let imgGenServiceApi = `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`;
+
+      if (imgGenBg && imgGenBg.trim() !== '') {
+        imgGenServiceApi += `&bg=${imgGenBg.trim()}`;
+      }
+
+      if (imgGenSet && imgGenSet.trim() !== '') {
+        imgGenServiceApi += `&set=${imgGenSet.trim()}`;
+      }
+
       const { image, traits } = await createFileFromUrl(
-        `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`,
+        imgGenServiceApi,
         datasetTitle,
         datasetDescription,
         dataPreviewUrl,
@@ -275,12 +293,13 @@ export class NftMinter extends Minter {
     for (const extraAsset of extraAssets ?? []) {
       data.addArg(new StringValue(extraAsset));
     }
+
     const mintTx = new Transaction({
       value: antiSpamTokenIdentifier == 'EGLD' ? antiSpamTax : 0,
       data: data.build(),
       sender: senderAddress,
       receiver: this.contract.getAddress(),
-      gasLimit: 60000000,
+      gasLimit: 130_000_000,
       chainID: this.chainID
     });
 

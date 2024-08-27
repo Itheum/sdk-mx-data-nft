@@ -164,6 +164,17 @@ export interface BondConfiguration {
   acceptedCallers: string[];
 }
 
+export interface LivelinessStakeConfiguration {
+  rewardsReserve: BigNumber.Value;
+  accumulatedRewards: BigNumber.Value;
+  rewardsTokenIdentifier: string;
+  rewardsPerBlock: BigNumber.Value;
+  lastRewardBlockNonce: number;
+  maxApr: number;
+  administrator: string;
+  bondContractAddress: string;
+}
+
 export interface Refund {
   compensationId: number;
   address: string;
@@ -213,4 +224,13 @@ export interface ContractConfiguration {
   claimsAddress: string;
   administratorAddress: string;
   taxToken: string;
+}
+
+export interface UserData {
+  totalStakedAmount: BigNumber.Value;
+  userStakedAmount: BigNumber.Value;
+  livelinessScore: number;
+  accumulatedRewards: BigNumber.Value;
+  accumulatedRewardsBypass: BigNumber.Value;
+  vaultNonce: number;
 }

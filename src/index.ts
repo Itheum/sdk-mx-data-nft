@@ -7,4 +7,5 @@ export * from './nft-minter';
 export * from './sft-minter';
 export * from './bond';
 export * from './contract';
+export * from './liveliness-stake';
 export { parseTokenIdentifier, createTokenIdentifier } from './common/utils';

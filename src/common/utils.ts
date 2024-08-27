@@ -12,11 +12,13 @@ import {
   BondConfiguration,
   Compensation,
   ContractConfiguration,
+  LivelinessStakeConfiguration,
   NftEnumType,
   NftType,
   Offer,
   Refund,
-  State
+  State,
+  UserData
 } from '../interfaces';
 import { EnvironmentsEnum, dataMarshalUrlOverride } from '../config';
 
@@ -127,6 +129,32 @@ export function parseBondConfiguration(value: any): BondConfiguration {
   };
 }
 
+export function parseLivelinessStakeConfiguration(
+  value: any
+): LivelinessStakeConfiguration {
+  return {
+    rewardsPerBlock: BigNumber(value.rewards_per_block),
+    rewardsReserve: BigNumber(value.rewards_reserve),
+    accumulatedRewards: BigNumber(value.accumulated_rewards),
+    rewardsTokenIdentifier: value.rewards_token_identifier.toString(),
+    lastRewardBlockNonce: value.last_reward_block_nonce.toNumber(),
+    maxApr: BigNumber(value.max_apr).div(100).toNumber(),
+    administrator: value.administrator.toString(),
+    bondContractAddress: value.bond_contract_address.toString()
+  };
+}
+
+export function parseUserData(value: any): UserData {
+  return {
+    totalStakedAmount: BigNumber(value.total_staked_amount),
+    userStakedAmount: BigNumber(value.user_staked_amount),
+    livelinessScore: BigNumber(value.liveliness_score).div(100).toNumber(),
+    accumulatedRewards: BigNumber(value.accumulated_rewards),
+    accumulatedRewardsBypass: BigNumber(value.accumulated_rewards_bypass),
+    vaultNonce: value.vault_nonce.toNumber()
+  };
+}
+
 export function parseCompensation(value: any): Compensation {
   return {
     compensationId: value.compensation_id.toNumber(),
@@ -152,8 +180,17 @@ export function parseRefund(value: any): Refund {
 
 export function parseDataNft(value: NftType): DataNft {
   let attributes;
+  let metadataFile;
+
   try {
     attributes = DataNft.decodeAttributes(value.attributes); // normal attributes
+
+    // get the metadata file, assume for now its the 2nd item. (1 = img, 2 = json, 3.... extra assets)
+    metadataFile = value.uris?.[1];
+
+    if (metadataFile) {
+      metadataFile = Buffer.from(metadataFile, 'base64').toString('ascii');
+    }
   } catch (error: any) {
     try {
       attributes = {
@@ -170,6 +207,7 @@ export function parseDataNft(value: NftType): DataNft {
       throw new ErrParseNft(error.message);
     }
   }
+
   const returnValue = {
     tokenIdentifier: value.identifier,
     nftImgUrl: value.url ?? '',
@@ -190,8 +228,10 @@ export function parseDataNft(value: NftType): DataNft {
         ?.slice(2)
         .map((uri) => Buffer.from(uri, 'base64').toString('ascii')) ?? [],
     media: value.media,
+    metadataFile,
     ...attributes
   };
+
   return new DataNft(returnValue);
 }
 
