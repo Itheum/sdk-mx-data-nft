@@ -58,7 +58,7 @@ export const bondContractAddress: { [key in EnvironmentsEnum]: string } = {
 export const livelinessStakeContractAddress: {
   [key in EnvironmentsEnum]: string;
 } = {
-  devnet: 'erd1qqqqqqqqqqqqqpgqydk7awqqukk9utkxtdtnuu4z53e0ahjm8ypszvjjh6',
+  devnet: 'erd1qqqqqqqqqqqqqpgq9j3dj650amzz8lyvek6uq0w0yvgtgggjfsxsf489hq',
   mainnet: '',
   testnet: ''
 };
