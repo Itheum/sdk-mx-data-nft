@@ -52,6 +52,37 @@ export async function storeToIpfs(
   }
 }
 
+export async function storeToIpfsFullSolCNftMetadata(
+  storageToken: string,
+  metadataStructureSolCNft: object
+): Promise<{ metadataIpfsUrl: string }> {
+  try {
+    const metadataIpfsHash = await storeTraitsToIpfs(
+      metadataStructureSolCNft,
+      storageToken
+    );
+    return {
+      metadataIpfsUrl: `https://ipfs.io/ipfs/${metadataIpfsHash}`
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function storeToIpfsOnlyImg(
+  storageToken: string,
+  image: Blob
+): Promise<{ imageOnIpfsUrl: string }> {
+  try {
+    const imageHash = await storeImageToIpfs(image, storageToken);
+    return {
+      imageOnIpfsUrl: `https://ipfs.io/ipfs/${imageHash}`
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
 async function storeImageToIpfs(image: Blob, storageToken: string) {
   const form = new FormData();
   form.append('file', image);
@@ -127,6 +158,49 @@ export function createIpfsMetadata(
   return metadata;
 }
 
+export function createIpfsMetadataSolCNft(
+  tokenName: string,
+  datasetTitle: string,
+  datasetDescription: string,
+  imageOnIpfsUrl: string,
+  creatorAddress: string,
+  dataNFTStreamUrl: string,
+  dataNFTStreamPreviewUrl: string,
+  dataNFTDataMarshalUrl: string,
+  traits: string,
+  extraAssets: string[]
+) {
+  const metadata: Record<string, any> = {
+    name: tokenName,
+    description: `${datasetTitle} : ${datasetDescription}`,
+    image: imageOnIpfsUrl,
+    itheum_creator: creatorAddress,
+    itheum_data_stream_url: dataNFTStreamUrl,
+    itheum_data_preview_url: dataNFTStreamPreviewUrl,
+    itheum_data_marshal_url: dataNFTDataMarshalUrl,
+    attributes: [] as object[]
+  };
+
+  if (extraAssets && extraAssets.length > 0) {
+    metadata.extra_assets = extraAssets;
+  }
+
+  const attributes = traits
+    .split(',')
+    .filter((element) => element.trim() !== '');
+
+  const metadataAttributes = [];
+
+  for (const attribute of attributes) {
+    const [key, value] = attribute.split(':');
+    const trait = { trait_type: key.trim(), value: value.trim() };
+    metadataAttributes.push(trait);
+  }
+
+  metadata.attributes = metadataAttributes;
+  return metadata;
+}
+
 export async function createFileFromUrl(
   url: string,
   datasetTitle: string,
@@ -143,6 +217,36 @@ export async function createFileFromUrl(
     data = await res.blob();
     _imageFile = data;
   }
+  const traits = createIpfsMetadata(
+    res.headers.get('x-nft-traits') || '',
+    datasetTitle,
+    datasetDescription,
+    dataNFTStreamPreviewUrl,
+    address,
+    extraAssets
+  );
+  const _traitsFile = traits;
+  return { image: _imageFile, traits: _traitsFile };
+}
+
+export async function createFileFromUrlSolCNft(
+  url: string,
+  datasetTitle: string,
+  datasetDescription: string,
+  dataNFTStreamPreviewUrl: string,
+  address: string,
+  extraAssets: string[]
+) {
+  let res: any = '';
+  let data: any = '';
+  let _imageFile: Blob = new Blob();
+
+  if (url) {
+    res = await fetch(url);
+    data = await res.blob();
+    _imageFile = data;
+  }
+
   const traits = createIpfsMetadata(
     res.headers.get('x-nft-traits') || '',
     datasetTitle,
