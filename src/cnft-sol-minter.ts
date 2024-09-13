@@ -237,8 +237,9 @@ export class CNftSolMinter extends MinterSol {
           throw e;
         }
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
 
     return {
