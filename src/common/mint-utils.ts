@@ -43,10 +43,18 @@ export async function storeToIpfs(
   try {
     const imageHash = await storeImageToIpfs(image, storageToken);
     const traitsHash = await storeTraitsToIpfs(traits, storageToken);
-    return {
-      imageOnIpfsUrl: `https://ipfs.io/ipfs/${imageHash}`,
-      metadataOnIpfsUrl: `https://ipfs.io/ipfs/${traitsHash}`
-    };
+
+    if (imageHash && traitsHash) {
+      return {
+        imageOnIpfsUrl: `https://ipfs.io/ipfs/${imageHash}`,
+        metadataOnIpfsUrl: `https://ipfs.io/ipfs/${traitsHash}`
+      };
+    } else {
+      return {
+        imageOnIpfsUrl: '',
+        metadataOnIpfsUrl: ''
+      };
+    }
   } catch (error) {
     throw error;
   }
@@ -61,9 +69,16 @@ export async function storeToIpfsFullSolCNftMetadata(
       metadataStructureSolCNft,
       storageToken
     );
-    return {
-      metadataIpfsUrl: `https://ipfs.io/ipfs/${metadataIpfsHash}`
-    };
+
+    if (metadataIpfsHash) {
+      return {
+        metadataIpfsUrl: `https://ipfs.io/ipfs/${metadataIpfsHash}`
+      };
+    } else {
+      return {
+        metadataIpfsUrl: ''
+      };
+    }
   } catch (error) {
     throw error;
   }
@@ -75,9 +90,16 @@ export async function storeToIpfsOnlyImg(
 ): Promise<{ imageOnIpfsUrl: string }> {
   try {
     const imageHash = await storeImageToIpfs(image, storageToken);
-    return {
-      imageOnIpfsUrl: `https://ipfs.io/ipfs/${imageHash}`
-    };
+
+    if (imageHash) {
+      return {
+        imageOnIpfsUrl: `https://ipfs.io/ipfs/${imageHash}`
+      };
+    } else {
+      return {
+        imageOnIpfsUrl: ''
+      };
+    }
   } catch (error) {
     throw error;
   }
