@@ -8,6 +8,7 @@ import { checkTraitsUrl, checkUrlIsUp } from './common/utils';
 import { ErrArgumentNotSet } from './errors';
 import { MinterSol } from './minter-sol';
 import { StringValidator, validateResults } from './common/validator';
+import { CNftSolPostMintMetaType } from './interfaces';
 
 export class CNftSolMinter extends MinterSol {
   /**
@@ -24,8 +25,6 @@ export class CNftSolMinter extends MinterSol {
    * NOTE: The `dataStreamUrl` is being encrypted and the `media` and `metadata` urls are build and uploaded to IPFS
    *
    * NOTE: The `options.nftStorageToken` is required when not using custom image and traits, when using custom image and traits the traits should be compliant with the `traits` structure
-   *
-   * For more information, see the [README documentation](https://github.com/Itheum/sdk-mx-data-nft#create-a-mint-transaction).
    *
    * @param creatorAddress the address of the creator who we mint a CNft for
    * @param tokenName the name of the DataNFT-FT. Between 3 and 20 alphanumeric characters, no spaces.
@@ -59,7 +58,11 @@ export class CNftSolMinter extends MinterSol {
       imgGenBg?: string;
       imgGenSet?: string;
     }
-  ): Promise<{ imageUrl: string; metadataUrl: string; mintMeta: object }> {
+  ): Promise<{
+    imageUrl: string;
+    metadataUrl: string;
+    mintMeta: CNftSolPostMintMetaType;
+  }> {
     const {
       imageUrl,
       traitsUrl,
@@ -105,115 +108,123 @@ export class CNftSolMinter extends MinterSol {
     let imageOnIpfsUrl: string;
     let metadataOnIpfsUrl: string;
 
-    const { dataNftHash, dataNftStreamUrlEncrypted } =
-      await dataNFTDataStreamAdvertise(
-        dataStreamUrl,
-        dataMarshalUrl,
-        creatorAddress // the caller is the Creator
-      );
+    // handle all logic related to data stream and ipfs gen of img,traits etc
+    let allDataStreamAndIPFSLogicDone = false;
 
-    if (!imageUrl) {
-      if (!nftStorageToken) {
-        throw new ErrArgumentNotSet(
-          'nftStorageToken',
-          'NFT Storage token is required when not using custom image and traits'
+    try {
+      const { dataNftHash, dataNftStreamUrlEncrypted } =
+        await dataNFTDataStreamAdvertise(
+          dataStreamUrl,
+          dataMarshalUrl,
+          creatorAddress // the caller is the Creator
         );
-      }
 
-      // create the img generative service API based on user options
-      let imgGenServiceApi = `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`;
+      if (!imageUrl) {
+        if (!nftStorageToken) {
+          throw new ErrArgumentNotSet(
+            'nftStorageToken',
+            'NFT Storage token is required when not using custom image and traits'
+          );
+        }
 
-      if (imgGenBg && imgGenBg.trim() !== '') {
-        imgGenServiceApi += `&bg=${imgGenBg.trim()}`;
-      }
+        // create the img generative service API based on user options
+        let imgGenServiceApi = `${this.imageServiceUrl}/v1/generateNFTArt?hash=${dataNftHash}`;
 
-      if (imgGenSet && imgGenSet.trim() !== '') {
-        imgGenServiceApi += `&set=${imgGenSet.trim()}`;
-      }
+        if (imgGenBg && imgGenBg.trim() !== '') {
+          imgGenServiceApi += `&bg=${imgGenBg.trim()}`;
+        }
 
-      let resImgCall: any = '';
-      let dataImgCall: any = '';
-      let _imageFile: Blob = new Blob();
+        if (imgGenSet && imgGenSet.trim() !== '') {
+          imgGenServiceApi += `&set=${imgGenSet.trim()}`;
+        }
 
-      resImgCall = await fetch(imgGenServiceApi);
-      dataImgCall = await resImgCall.blob();
-      _imageFile = dataImgCall;
+        let resImgCall: any = '';
+        let dataImgCall: any = '';
+        let _imageFile: Blob = new Blob();
 
-      const traitsFromImgHeader = resImgCall.headers.get('x-nft-traits') || '';
+        resImgCall = await fetch(imgGenServiceApi);
+        dataImgCall = await resImgCall.blob();
+        _imageFile = dataImgCall;
 
-      const { imageOnIpfsUrl: imgOnIpfsUrl } = await storeToIpfsOnlyImg(
-        nftStorageToken,
-        _imageFile
-      );
+        const traitsFromImgHeader =
+          resImgCall.headers.get('x-nft-traits') || '';
 
-      const cNftMetadataContent = createIpfsMetadataSolCNft(
-        tokenName,
-        datasetTitle,
-        datasetDescription,
-        imgOnIpfsUrl,
-        creatorAddress,
-        dataNftStreamUrlEncrypted,
-        dataPreviewUrl,
-        dataMarshalUrl,
-        traitsFromImgHeader,
-        extraAssets ?? []
-      );
-
-      const { metadataIpfsUrl } = await storeToIpfsFullSolCNftMetadata(
-        nftStorageToken,
-        cNftMetadataContent
-      );
-
-      imageOnIpfsUrl = imgOnIpfsUrl;
-      metadataOnIpfsUrl = metadataIpfsUrl;
-    } else {
-      if (!traitsUrl) {
-        throw new ErrArgumentNotSet(
-          'traitsUrl',
-          'Traits URL is required when using custom image'
+        const { imageOnIpfsUrl: imgOnIpfsUrl } = await storeToIpfsOnlyImg(
+          nftStorageToken,
+          _imageFile
         );
+
+        const cNftMetadataContent = createIpfsMetadataSolCNft(
+          tokenName,
+          datasetTitle,
+          datasetDescription,
+          imgOnIpfsUrl,
+          creatorAddress,
+          dataNftStreamUrlEncrypted,
+          dataPreviewUrl,
+          dataMarshalUrl,
+          traitsFromImgHeader,
+          extraAssets ?? []
+        );
+
+        const { metadataIpfsUrl } = await storeToIpfsFullSolCNftMetadata(
+          nftStorageToken,
+          cNftMetadataContent
+        );
+
+        imageOnIpfsUrl = imgOnIpfsUrl;
+        metadataOnIpfsUrl = metadataIpfsUrl;
+      } else {
+        if (!traitsUrl) {
+          throw new ErrArgumentNotSet(
+            'traitsUrl',
+            'Traits URL is required when using custom image'
+          );
+        }
+
+        await checkTraitsUrl(traitsUrl);
+
+        imageOnIpfsUrl = imageUrl;
+        metadataOnIpfsUrl = traitsUrl;
       }
 
-      await checkTraitsUrl(traitsUrl);
-
-      imageOnIpfsUrl = imageUrl;
-      metadataOnIpfsUrl = traitsUrl;
+      allDataStreamAndIPFSLogicDone = true;
+    } catch (e: any) {
+      throw e;
     }
 
     // we not make a call to our private cNFt minter API
-    let mintMeta: any = {};
+    let mintMeta: CNftSolPostMintMetaType = {};
 
-    try {
-      const postHeaders = new Headers();
-      postHeaders.append('Content-Type', 'application/json');
+    if (allDataStreamAndIPFSLogicDone) {
+      try {
+        const postHeaders = new Headers();
+        postHeaders.append('Content-Type', 'application/json');
 
-      const raw = JSON.stringify({
-        metadataOnIpfsUrl,
-        tokenName,
-        mintForSolAddr: creatorAddress,
-        solSignature: 'solSignature',
-        signatureNonce: 'signatureNonce'
-      });
+        const raw = JSON.stringify({
+          metadataOnIpfsUrl,
+          tokenName,
+          mintForSolAddr: creatorAddress,
+          solSignature: 'solSignature',
+          signatureNonce: 'signatureNonce'
+        });
 
-      const requestOptions = {
-        method: 'POST',
-        headers: postHeaders,
-        body: raw
-      };
+        const requestOptions = {
+          method: 'POST',
+          headers: postHeaders,
+          body: raw
+        };
 
-      let resMintCall: any = '';
-      let dataMintCall: any = '';
+        let resMintCall: any = '';
+        let dataMintCall: any = '';
 
-      resMintCall = await fetch(this.solCNftMinterServiceUrl, requestOptions);
-      dataMintCall = await resMintCall.text();
-      mintMeta = dataMintCall;
-
-      // .then((response) => response.text())
-      // .then((result) => console.log(result))
-      // .catch((error) => console.error(error));
-    } catch (e: any) {
-      mintMeta = { error: true, errMsg: e.toString() };
-      throw e;
+        resMintCall = await fetch(this.solCNftMinterServiceUrl, requestOptions);
+        dataMintCall = await resMintCall.text();
+        mintMeta = dataMintCall;
+      } catch (e: any) {
+        mintMeta = { error: true, errMsg: e.toString() };
+        throw e;
+      }
     }
 
     return {

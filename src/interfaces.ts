@@ -86,6 +86,7 @@ export enum NftEnumType {
   SemiFungibleESDT = 'SemiFungibleESDT',
   MetaESDT = 'MetaESDT'
 }
+
 export interface MarketplaceRequirements {
   acceptedTokens: string[];
   acceptedPayments: string[];
@@ -234,3 +235,12 @@ export interface UserData {
   accumulatedRewardsBypass: BigNumber.Value;
   vaultNonce: number;
 }
+
+export type CNftSolPostMintMetaType = {
+  error?: boolean;
+  errMsg?: string;
+  assetId?: string;
+  leafSchema?: any;
+  index?: number;
+  root?: any;
+};
