@@ -243,4 +243,5 @@ export type CNftSolPostMintMetaType = {
   leafSchema?: any;
   index?: number;
   root?: any;
+  proof?: any;
 };
