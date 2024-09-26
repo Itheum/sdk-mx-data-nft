@@ -508,6 +508,7 @@ export class DataNft implements DataNftType {
     stream?: boolean;
     nestedIdxToStream?: number;
     asDeputyOnAppointerAddr?: string;
+    cacheDurationSeconds?: number;
   }): Promise<ViewDataReturnType> {
     try {
       // S: run any format specific validation
@@ -575,7 +576,9 @@ export class DataNft implements DataNftType {
         this.nonce
       )}&chainId=${chainId}&mvxNativeAuthEnable=1&mvxNativeAuthMaxExpirySeconds=${
         p.mvxNativeAuthMaxExpirySeconds
-      }&mvxNativeAuthOrigins=${mvxNativeAuthOriginsToBase64}`;
+      }&mvxNativeAuthOrigins=${mvxNativeAuthOriginsToBase64}&cacheDurationSeconds=${
+        p.cacheDurationSeconds || 0
+      }`;
 
       type FetchConfig = {
         [key: string]: any;
