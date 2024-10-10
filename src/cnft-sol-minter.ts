@@ -40,6 +40,8 @@ export class CNftSolMinter extends MinterSol {
    *                 - extraAssets: [optional] extra URIs to attached to the NFT. Can be media files, documents, etc. These URIs are public
    *                 - imgGenBg: [optional] the custom series bg to influence the image generation service
    *                 - imgGenSet: [optional] the custom series layer set to influence the image generation service
+   *                 - signatureNonce: [optional] a recent nonce from the marshal network that will be signed to produce solSignature
+   *                 - solSignature: [optional] a solana signature of signatureNonce to prove creatorAddress ownership
    *
    */
   async mint(
@@ -57,6 +59,8 @@ export class CNftSolMinter extends MinterSol {
       extraAssets?: string[];
       imgGenBg?: string;
       imgGenSet?: string;
+      signatureNonce?: string;
+      solSignature?: string;
     }
   ): Promise<{
     imageUrl: string;
@@ -74,7 +78,9 @@ export class CNftSolMinter extends MinterSol {
         nftStorageToken,
         extraAssets,
         imgGenBg,
-        imgGenSet
+        imgGenSet,
+        signatureNonce,
+        solSignature
       } = options ?? {};
 
       const tokenNameValidator = new StringValidator()
@@ -213,8 +219,8 @@ export class CNftSolMinter extends MinterSol {
             metadataOnIpfsUrl,
             tokenName,
             mintForSolAddr: creatorAddress,
-            solSignature: 'solSignature',
-            signatureNonce: 'signatureNonce'
+            solSignature: solSignature || '',
+            signatureNonce: signatureNonce || ''
           });
 
           const requestOptions = {
@@ -230,6 +236,7 @@ export class CNftSolMinter extends MinterSol {
             this.solCNftMinterServiceUrl,
             requestOptions
           );
+
           dataMintCall = await resMintCall.text();
           mintMeta = dataMintCall;
         } catch (e: any) {
