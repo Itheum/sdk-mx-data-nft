@@ -81,6 +81,12 @@ export const imageService: { [key in EnvironmentsEnum]: string } = {
   testnet: ''
 };
 
+export const solCNftMinterService: { [key in EnvironmentsEnum]: string } = {
+  devnet: 'https://api.itheumcloud-stg.com/datadexapi/solNftUtils/mintNft',
+  mainnet: 'https://api.itheumcloud.com/datadexapi/solNftUtils/mintNft',
+  testnet: ''
+};
+
 export const marshalUrls = {
   devnet: 'https://api.itheumcloud-stg.com/datamarshalapi/router/v1',
   mainnet: 'https://api.itheumcloud.com/datamarshalapi/router/v1',
