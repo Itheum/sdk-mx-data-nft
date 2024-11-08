@@ -8,7 +8,7 @@ describe('testing environment market', () => {
     expect(datanft.chainID).toStrictEqual('D');
     expect(datanft.networkProvider).toStrictEqual(
       new ApiNetworkProvider('https://devnet-api.multiversx.com', {
-        timeout: 10000
+        timeout: 20000
       })
     );
   });
@@ -19,7 +19,7 @@ describe('testing environment market', () => {
     expect(datanft.chainID).toStrictEqual('1');
     expect(datanft.networkProvider).toStrictEqual(
       new ApiNetworkProvider('https://api.multiversx.com', {
-        timeout: 10000
+        timeout: 20000
       })
     );
   });
@@ -54,7 +54,7 @@ describe('testing environment minter', () => {
     expect(datanft.chainID).toStrictEqual('D');
     expect(datanft.networkProvider).toStrictEqual(
       new ApiNetworkProvider('https://devnet-api.multiversx.com', {
-        timeout: 10000
+        timeout: 20000
       })
     );
   });
@@ -65,7 +65,7 @@ describe('testing environment minter', () => {
     expect(datanft.chainID).toStrictEqual('1');
     expect(datanft.networkProvider).toStrictEqual(
       new ApiNetworkProvider('https://api.multiversx.com', {
-        timeout: 10000
+        timeout: 20000
       })
     );
   });
