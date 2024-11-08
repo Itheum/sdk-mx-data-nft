@@ -2,9 +2,9 @@ import {
   AbiRegistry,
   ErrContract,
   IAddress,
-  SmartContract
+  SmartContract,
+  ApiNetworkProvider
 } from '@multiversx/sdk-core/out';
-import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import { EnvironmentsEnum, networkConfiguration } from './config';
 import { ErrContractAddressNotSet, ErrNetworkConfig } from './errors';
 
@@ -35,7 +35,8 @@ export abstract class Contract {
     this.networkProvider = new ApiNetworkProvider(
       networkConfig.networkProvider,
       {
-        timeout: timeout
+        timeout: timeout,
+        clientName: 'ithuemDataNftSDK'
       }
     );
     this.contract = new SmartContract({

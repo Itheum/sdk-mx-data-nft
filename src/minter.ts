@@ -12,9 +12,9 @@ import {
   StringValue,
   TokenIdentifierValue,
   Transaction,
-  U64Value
+  U64Value,
+  ApiNetworkProvider
 } from '@multiversx/sdk-core/out';
-import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   dataNftTokenIdentifier,

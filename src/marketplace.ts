@@ -14,9 +14,9 @@ import {
   Transaction,
   U64Value,
   U8Value,
-  VariadicValue
+  VariadicValue,
+  ApiNetworkProvider
 } from '@multiversx/sdk-core/out';
-import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import dataMarketAbi from './abis/data_market.abi.json';
 import { parseOffer } from './common/utils';
 import {
@@ -53,7 +53,8 @@ export class DataNftMarket {
     this.networkProvider = new ApiNetworkProvider(
       networkConfig.networkProvider,
       {
-        timeout: timeout
+        timeout: timeout,
+        clientName: 'ithuemDataNftSDK'
       }
     );
     const contractAddress = marketPlaceContractAddress[env as EnvironmentsEnum];
