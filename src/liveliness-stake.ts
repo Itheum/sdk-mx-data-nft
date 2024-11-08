@@ -33,7 +33,7 @@ import BigNumber from 'bignumber.js';
 import { Token } from 'nft.storage';
 
 export class LivelinessStake extends Contract {
-  constructor(env: string, timeout: number = 10000) {
+  constructor(env: string, timeout: number = 20000) {
     super(
       env,
       new Address(livelinessStakeContractAddress[env as EnvironmentsEnum]),

@@ -32,7 +32,7 @@ export abstract class Minter extends Contract {
     env: string,
     contractAddress: IAddress,
     abiFile: any,
-    timeout: number = 10000
+    timeout: number = 20000
   ) {
     super(env, contractAddress, abiFile, timeout);
     this.imageServiceUrl = imageService[env as EnvironmentsEnum];

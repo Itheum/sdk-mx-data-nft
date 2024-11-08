@@ -18,7 +18,7 @@ export abstract class Contract {
     env: string,
     contractAddress: IAddress,
     abiFile: any,
-    timeout: number = 10000
+    timeout: number = 20000
   ) {
     if (!(env in EnvironmentsEnum)) {
       throw new ErrNetworkConfig(

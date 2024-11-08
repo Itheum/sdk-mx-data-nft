@@ -29,9 +29,9 @@ export class NftMinter extends Minter {
    * Creates a new instance of the `NftMinter` class, which is used to interact with the factory generated smart contract.
    * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param contractAddress The address of the factory generated smart contract
-   * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
+   * @param timeout Timeout for the network provider (DEFAULT = 20000ms)
    */
-  constructor(env: string, contractAddress: IAddress, timeout: number = 10000) {
+  constructor(env: string, contractAddress: IAddress, timeout: number = 20000) {
     super(env, contractAddress, dataNftLeaseAbi, timeout);
   }
 

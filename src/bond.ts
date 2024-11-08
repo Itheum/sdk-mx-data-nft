@@ -44,9 +44,9 @@ export class BondContract extends Contract {
   /**
    * Creates a new instance of the DataNftMarket which can be used to interact with the marketplace smart contract
    * @param env 'devnet' | 'mainnet' | 'testnet'
-   * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
+   * @param timeout Timeout for the network provider (DEFAULT = 20000ms)
    */
-  constructor(env: string, timeout: number = 10000) {
+  constructor(env: string, timeout: number = 20000) {
     super(
       env,
       new Address(bondContractAddress[env as EnvironmentsEnum]),
