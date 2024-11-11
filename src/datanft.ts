@@ -107,14 +107,14 @@ export class DataNft implements DataNftType {
       );
     }
     this.env = env;
+    this.networkConfiguration = networkConfiguration[env as EnvironmentsEnum];
+    this.apiConfiguration = apiConfiguration[env as EnvironmentsEnum];
 
     debugger;
+
     if (useSpecificApiEndpoint && useSpecificApiEndpoint.trim() !== '') {
       this.apiConfiguration = useSpecificApiEndpoint.trim();
       this.networkConfiguration.networkProvider = useSpecificApiEndpoint.trim();
-    } else {
-      this.networkConfiguration = networkConfiguration[env as EnvironmentsEnum];
-      this.apiConfiguration = apiConfiguration[env as EnvironmentsEnum];
     }
 
     console.log(
