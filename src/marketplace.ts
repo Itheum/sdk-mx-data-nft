@@ -15,7 +15,9 @@ import {
   U64Value,
   U8Value,
   VariadicValue,
-  ApiNetworkProvider
+  ApiNetworkProvider,
+  TokenTransfer,
+  Token
 } from '@multiversx/sdk-core/out';
 import dataMarketAbi from './abis/data_market.abi.json';
 import { parseOffer } from './common/utils';
@@ -28,41 +30,28 @@ import {
 import { ErrContractQuery, ErrNetworkConfig } from './errors';
 import { MarketplaceRequirements, Offer } from './interfaces';
 import BigNumber from 'bignumber.js';
+import { Contract } from './contract';
 // import { ErrContractQuery } from './errors';
 
-export class DataNftMarket {
-  readonly contract: SmartContract;
-  readonly chainID: string;
-  readonly networkProvider: ApiNetworkProvider;
-  readonly env: string;
-
+export class DataNftMarket extends Contract {
   /**
    * Creates a new instance of the DataNftMarket which can be used to interact with the marketplace smart contract
    * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 20000ms)
+   * @param customNetworkProviderUrl Custom network provider URL
    */
-  constructor(env: string, timeout: number = 20000) {
-    if (!(env in EnvironmentsEnum)) {
-      throw new ErrNetworkConfig(
-        `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
-      );
-    }
-    this.env = env;
-    const networkConfig = networkConfiguration[env as EnvironmentsEnum];
-    this.chainID = networkConfig.chainID;
-    this.networkProvider = new ApiNetworkProvider(
-      networkConfig.networkProvider,
-      {
-        timeout: timeout,
-        clientName: 'ithuemDataNftSDK'
-      }
+  constructor(
+    env: string,
+    timeout: number = 20000,
+    customNetworkProviderUrl?: string
+  ) {
+    super(
+      env,
+      new Address(marketPlaceContractAddress[env as EnvironmentsEnum]),
+      dataMarketAbi,
+      timeout,
+      customNetworkProviderUrl
     );
-    const contractAddress = marketPlaceContractAddress[env as EnvironmentsEnum];
-
-    this.contract = new SmartContract({
-      address: new Address(contractAddress),
-      abi: AbiRegistry.create(dataMarketAbi)
-    });
   }
 
   /**
@@ -403,26 +392,28 @@ export class DataNftMarket {
     minimumPaymentTokenAmount = 0,
     maxQuantity: BigNumber.Value
   ): Transaction {
-    const addOfferTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTNFTTransfer'))
-        .addArg(new TokenIdentifierValue(dataNftIdentifier))
-        .addArg(new U64Value(dataNftNonce))
-        .addArg(new BigUIntValue(dataNftAmount))
-        .addArg(new AddressValue(this.contract.getAddress()))
-        .addArg(new StringValue('addOffer'))
-        .addArg(new TokenIdentifierValue(paymentTokenIdentifier))
-        .addArg(new U64Value(paymentTokenNonce))
-        .addArg(new U64Value(paymentTokenAmount))
-        .addArg(new U64Value(minimumPaymentTokenAmount))
-        .addArg(new BigUIntValue(dataNftAmount))
-        .addArg(new BigUIntValue(maxQuantity))
-        .build(),
-      receiver: senderAddress,
+    const addOfferTx = this.transactionFactory.createTransactionForExecute({
+      function: 'addOffer',
+      arguments: [
+        paymentTokenIdentifier,
+        paymentTokenNonce,
+        paymentTokenAmount,
+        minimumPaymentTokenAmount,
+        dataNftAmount,
+        maxQuantity
+      ],
       sender: senderAddress,
-      gasLimit: 12000000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 12000000n,
+      tokenTransfers: [
+        new TokenTransfer({
+          token: new Token({
+            identifier: dataNftIdentifier,
+            nonce: BigInt(dataNftNonce)
+          }),
+          amount: BigInt(dataNftAmount.toString())
+        })
+      ]
     });
 
     return addOfferTx;
@@ -443,25 +434,24 @@ export class DataNftMarket {
     price: BigNumber.Value,
     paymentTokenIdentifier = itheumTokenIdentifier[this.env as EnvironmentsEnum]
   ): Transaction {
-    const data = new ContractCallPayloadBuilder()
-      .setFunction(new ContractFunction('ESDTTransfer'))
-      .addArg(new TokenIdentifierValue(paymentTokenIdentifier))
-      .addArg(new BigUIntValue(price))
-      .addArg(new StringValue('acceptOffer'))
-      .addArg(new U64Value(offerId))
-      .addArg(new BigUIntValue(amount))
-      .build();
-
-    const acceptTx = new Transaction({
-      value: 0,
-      data: data,
-      receiver: this.contract.getAddress(),
-      gasLimit: 20_000_000,
+    const acceptOfferTx = this.transactionFactory.createTransactionForExecute({
+      function: 'acceptOffer',
+      arguments: [offerId, amount],
       sender: senderAddress,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 12000000n,
+      tokenTransfers: [
+        new TokenTransfer({
+          token: new Token({
+            identifier: paymentTokenIdentifier,
+            nonce: BigInt(0)
+          }),
+          amount: BigInt(price.toString())
+        })
+      ]
     });
 
-    return acceptTx;
+    return acceptOfferTx;
   }
 
   /**
@@ -482,24 +472,24 @@ export class DataNftMarket {
     nonce: number,
     paymentAmount: BigNumber.Value
   ): Transaction {
-    const offerEsdtTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTNFTTransfer'))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new BigUIntValue(paymentAmount))
-        .addArg(new AddressValue(this.contract.getAddress()))
-        .addArg(new StringValue('acceptOffer'))
-        .addArg(new U64Value(offerId))
-        .addArg(new BigUIntValue(amount))
-        .build(),
-      receiver: senderAddress,
+    const acceptOfferTx = this.transactionFactory.createTransactionForExecute({
+      function: 'acceptOffer',
+      arguments: [offerId, amount],
       sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 12000000n,
+      tokenTransfers: [
+        new TokenTransfer({
+          token: new Token({
+            identifier: tokenIdentifier,
+            nonce: BigInt(nonce)
+          }),
+          amount: BigInt(paymentAmount.toString())
+        })
+      ]
     });
-    return offerEsdtTx;
+
+    return acceptOfferTx;
   }
 
   /**
@@ -515,22 +505,16 @@ export class DataNftMarket {
     amount: BigNumber.Value,
     price: BigNumber.Value
   ): Transaction {
-    const data = new ContractCallPayloadBuilder()
-      .setFunction(new ContractFunction('acceptOffer'))
-      .addArg(new U64Value(offerId))
-      .addArg(new BigUIntValue(amount))
-      .build();
-
-    const acceptTx = new Transaction({
-      value: price,
-      data: data,
-      receiver: this.contract.getAddress(),
-      gasLimit: 20_000_000,
+    const acceptOfferTx = this.transactionFactory.createTransactionForExecute({
+      function: 'acceptOffer',
+      arguments: [offerId, amount],
       sender: senderAddress,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 12000000n,
+      nativeTransferAmount: BigInt(price.toString())
     });
 
-    return acceptTx;
+    return acceptOfferTx;
   }
 
   /**
@@ -544,22 +528,15 @@ export class DataNftMarket {
     offerId: number,
     amount: BigNumber.Value
   ): Transaction {
-    const data = new ContractCallPayloadBuilder()
-      .setFunction(new ContractFunction('acceptOffer'))
-      .addArg(new U64Value(offerId))
-      .addArg(new BigUIntValue(amount))
-      .build();
-
-    const acceptTx = new Transaction({
-      value: 0,
-      data: data,
-      receiver: this.contract.getAddress(),
-      gasLimit: 12000000,
+    const acceptOfferTx = this.transactionFactory.createTransactionForExecute({
+      function: 'acceptOffer',
+      arguments: [offerId, amount],
       sender: senderAddress,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 12000000n
     });
 
-    return acceptTx;
+    return acceptOfferTx;
   }
 
   /**
@@ -575,21 +552,15 @@ export class DataNftMarket {
     quantity: number,
     sendFundsBackToOwner = true
   ): Transaction {
-    const cancelTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('cancelOffer'))
-        .addArg(new U64Value(offerId))
-        .addArg(new U64Value(quantity))
-        .addArg(new BooleanValue(sendFundsBackToOwner))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+    const cancelOfferTx = this.transactionFactory.createTransactionForExecute({
+      function: 'cancelOffer',
+      arguments: [offerId, quantity, sendFundsBackToOwner],
       sender: senderAddress,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 10000000n
     });
 
-    return cancelTx;
+    return cancelOfferTx;
   }
 
   /**
@@ -605,21 +576,16 @@ export class DataNftMarket {
     newPrice: BigNumber.Value,
     newMinimumPaymentTokenAmount = 0
   ): Transaction {
-    const changePriceTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('changeOfferPrice'))
-        .addArg(new U64Value(offerId))
-        .addArg(new U64Value(newPrice))
-        .addArg(new U64Value(newMinimumPaymentTokenAmount))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const changeOfferPrice =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'changeOfferPrice',
+        arguments: [offerId, newPrice, newMinimumPaymentTokenAmount],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
 
-    return changePriceTx;
+    return changeOfferPrice;
   }
 
   /**
@@ -633,16 +599,12 @@ export class DataNftMarket {
     senderAddress: IAddress,
     offerId: number
   ): Transaction {
-    const withdrawTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('withdrawCancelledOffer'))
-        .addArg(new U64Value(offerId))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 12000000,
+    const withdrawTx = this.transactionFactory.createTransactionForExecute({
+      function: 'withdrawCancelledOffer',
+      arguments: [offerId],
       sender: senderAddress,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 12000000n
     });
 
     return withdrawTx;

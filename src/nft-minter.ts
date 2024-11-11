@@ -7,7 +7,9 @@ import {
   IAddress,
   ResultsParser,
   StringValue,
+  Token,
   TokenIdentifierValue,
+  TokenTransfer,
   Transaction,
   U64Value
 } from '@multiversx/sdk-core/out';
@@ -30,9 +32,21 @@ export class NftMinter extends Minter {
    * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param contractAddress The address of the factory generated smart contract
    * @param timeout Timeout for the network provider (DEFAULT = 20000ms)
+   * @param customNetworkProviderUrl Custom network provider URL
    */
-  constructor(env: string, contractAddress: IAddress, timeout: number = 20000) {
-    super(env, contractAddress, dataNftLeaseAbi, timeout);
+  constructor(
+    env: string,
+    contractAddress: IAddress,
+    timeout: number = 20000,
+    customNetworkProviderUrl?: string
+  ) {
+    super(
+      env,
+      contractAddress,
+      dataNftLeaseAbi,
+      timeout,
+      customNetworkProviderUrl
+    );
   }
 
   /**
@@ -58,36 +72,41 @@ export class NftMinter extends Minter {
   ): Transaction {
     let data;
     if (requireMintTax && options) {
-      data = new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('initializeContract'))
-        .addArg(new StringValue(collectionName))
-        .addArg(new StringValue(tokenTicker))
-        .addArg(new BigUIntValue(mintLimit))
-        .addArg(new BooleanValue(requireMintTax))
-        .addArg(new AddressValue(claimsAddress))
-        .addArg(new TokenIdentifierValue(options.taxTokenIdentifier))
-        .addArg(new BigUIntValue(options.taxTokenAmount))
-        .build();
-    } else {
-      data = new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('initializeContract'))
-        .addArg(new StringValue(collectionName))
-        .addArg(new StringValue(tokenTicker))
-        .addArg(new BigUIntValue(mintLimit))
-        .addArg(new BooleanValue(requireMintTax))
-        .addArg(new AddressValue(claimsAddress))
-        .build();
-    }
+      const initializeContractTx =
+        this.transactionFactory.createTransactionForExecute({
+          function: 'initializeContract',
+          arguments: [
+            collectionName,
+            tokenTicker,
+            mintLimit,
+            requireMintTax,
+            claimsAddress,
+            options.taxTokenIdentifier,
+            options.taxTokenAmount
+          ],
+          sender: senderAddress,
+          contract: this.contract.getAddress(),
+          gasLimit: 100000000n
+        });
 
-    const initializeContractTx = new Transaction({
-      value: 50000000000000000,
-      data: data,
-      receiver: this.contract.getAddress(),
-      gasLimit: 100000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return initializeContractTx;
+      return initializeContractTx;
+    } else {
+      const initializeContractTx =
+        this.transactionFactory.createTransactionForExecute({
+          function: 'initializeContract',
+          arguments: [
+            collectionName,
+            tokenTicker,
+            mintLimit,
+            requireMintTax,
+            claimsAddress
+          ],
+          sender: senderAddress,
+          contract: this.contract.getAddress(),
+          gasLimit: 100000000n
+        });
+      return initializeContractTx;
+    }
   }
 
   /**
@@ -112,27 +131,31 @@ export class NftMinter extends Minter {
     },
     quantity = 1
   ): Transaction {
-    const updateAttributesTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTNFTTransfer'))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new U64Value(quantity))
-        .addArg(new AddressValue(this.contract.getAddress()))
-        .addArg(new StringValue('updateAttributes'))
-        .addArg(new StringValue(attributes.dataMarshalUrl))
-        .addArg(new StringValue(attributes.dataStreamUrl))
-        .addArg(new StringValue(attributes.dataPreviewUrl))
-        .addArg(new AddressValue(attributes.creator))
-        .addArg(new StringValue(attributes.title))
-        .addArg(new StringValue(attributes.description))
-        .build(),
-      receiver: senderAddress,
-      gasLimit: 12000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const updateAttributesTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'updateAttributes',
+        arguments: [
+          attributes.dataMarshalUrl,
+          attributes.dataStreamUrl,
+          attributes.dataPreviewUrl,
+          attributes.creator,
+          attributes.title,
+          attributes.description
+        ],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 12000000n,
+        tokenTransfers: [
+          new TokenTransfer({
+            token: new Token({
+              identifier: tokenIdentifier,
+              nonce: BigInt(nonce)
+            }),
+            amount: BigInt(quantity)
+          })
+        ]
+      });
+
     return updateAttributesTx;
   }
 
@@ -261,46 +284,46 @@ export class NftMinter extends Minter {
       metadataOnIpfsUrl = traitsUrl;
     }
 
-    let data;
+    let tokenTransfers: TokenTransfer[] = [];
     if (
       antiSpamTax &&
       antiSpamTokenIdentifier &&
       antiSpamTokenIdentifier != 'EGLD' &&
       antiSpamTax > BigNumber(0)
     ) {
-      data = new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTTransfer'))
-        .addArg(new TokenIdentifierValue(antiSpamTokenIdentifier))
-        .addArg(new BigUIntValue(antiSpamTax))
-        .addArg(new StringValue('mint'));
-    } else {
-      data = new ContractCallPayloadBuilder().setFunction(
-        new ContractFunction('mint')
+      tokenTransfers.push(
+        new TokenTransfer({
+          token: new Token({ identifier: antiSpamTokenIdentifier }),
+          amount: BigInt(antiSpamTax.toString())
+        })
       );
     }
 
-    data
-      .addArg(new StringValue(tokenName))
-      .addArg(new StringValue(imageOnIpfsUrl))
-      .addArg(new StringValue(metadataOnIpfsUrl))
-      .addArg(new StringValue(dataMarshalUrl))
-      .addArg(new StringValue(dataNftStreamUrlEncrypted))
-      .addArg(new StringValue(dataPreviewUrl))
-      .addArg(new U64Value(royalties))
-      .addArg(new StringValue(datasetTitle))
-      .addArg(new StringValue(datasetDescription));
+    let args = [
+      tokenName,
+      imageOnIpfsUrl,
+      metadataOnIpfsUrl,
+      dataMarshalUrl,
+      dataNftStreamUrlEncrypted,
+      dataPreviewUrl,
+      royalties,
+      datasetTitle,
+      datasetDescription
+    ];
 
-    for (const extraAsset of extraAssets ?? []) {
-      data.addArg(new StringValue(extraAsset));
+    if (extraAssets && extraAssets?.length > 0) {
+      for (const asset of extraAssets) {
+        args.push(asset);
+      }
     }
 
-    const mintTx = new Transaction({
-      value: antiSpamTokenIdentifier == 'EGLD' ? antiSpamTax : 0,
-      data: data.build(),
+    const mintTx = this.transactionFactory.createTransactionForExecute({
+      function: 'mint',
+      arguments: args,
       sender: senderAddress,
-      receiver: this.contract.getAddress(),
-      gasLimit: 130_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 130_000_000n,
+      tokenTransfers
     });
 
     return mintTx;
@@ -312,18 +335,16 @@ export class NftMinter extends Minter {
    * @param address The address to set the transfer roles
    */
   setTransferRole(senderAddress: IAddress, address: IAddress): Transaction {
-    const setTransferRolesTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setTransferRole'))
-        .addArg(new AddressValue(address))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return setTransferRolesTx;
+    const setTransferRoleTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setTransferRole',
+        arguments: [address],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
+
+    return setTransferRoleTx;
   }
 
   /**
@@ -332,18 +353,16 @@ export class NftMinter extends Minter {
    * @param address The address to unset the transfer roles
    */
   unsetTransferRole(senderAddress: IAddress, address: IAddress): Transaction {
-    const unsetTransferRolesTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('unsetTransferRole'))
-        .addArg(new AddressValue(address))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return unsetTransferRolesTx;
+    const unsetTransferRoleTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'unsetTransferRole',
+        arguments: [address],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
+
+    return unsetTransferRoleTx;
   }
 
   /** Creates a set mint tax transaction for the contract
@@ -354,17 +373,14 @@ export class NftMinter extends Minter {
     senderAddress: IAddress,
     is_required: boolean
   ): Transaction {
-    const setMintTaxIsRequiredTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setTaxIsRequired'))
-        .addArg(new BooleanValue(is_required))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const setMintTaxIsRequiredTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setTaxIsRequired',
+        arguments: [is_required],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
 
     return setMintTaxIsRequiredTx;
   }
@@ -377,18 +393,16 @@ export class NftMinter extends Minter {
     senderAddress: IAddress,
     claimsAddress: IAddress
   ): Transaction {
-    const setClaimsAddressTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setClaimsAddress'))
-        .addArg(new AddressValue(claimsAddress))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return setClaimsAddressTx;
+    const setClaimAddressTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setClaimsAddress',
+        arguments: [claimsAddress],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
+
+    return setClaimAddressTx;
   }
 
   /** Creates a claim royalties transaction for the contract
@@ -401,18 +415,15 @@ export class NftMinter extends Minter {
     tokenIdentifier: string,
     nonce = 0
   ): Transaction {
-    const claimRoyaltiesTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('claimRoyalties'))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new BigUIntValue(nonce))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const claimRoyaltiesTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'claimRoyalties',
+        arguments: [tokenIdentifier, nonce],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
+
     return claimRoyaltiesTx;
   }
 

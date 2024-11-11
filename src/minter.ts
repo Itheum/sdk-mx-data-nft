@@ -13,7 +13,9 @@ import {
   TokenIdentifierValue,
   Transaction,
   U64Value,
-  ApiNetworkProvider
+  ApiNetworkProvider,
+  TokenTransfer,
+  Token
 } from '@multiversx/sdk-core/out';
 import {
   EnvironmentsEnum,
@@ -32,9 +34,10 @@ export abstract class Minter extends Contract {
     env: string,
     contractAddress: IAddress,
     abiFile: any,
-    timeout: number = 20000
+    timeout: number = 20000,
+    customNetworkProviderUrl?: string
   ) {
-    super(env, contractAddress, abiFile, timeout);
+    super(env, contractAddress, abiFile, timeout, customNetworkProviderUrl);
     this.imageServiceUrl = imageService[env as EnvironmentsEnum];
   }
 
@@ -130,21 +133,23 @@ export abstract class Minter extends Contract {
     quantityToBurn: BigNumber.Value,
     dataNftIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Transaction {
-    const burnTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTNFTTransfer'))
-        .addArg(new TokenIdentifierValue(dataNftIdentifier))
-        .addArg(new U64Value(dataNftNonce))
-        .addArg(new BigUIntValue(quantityToBurn))
-        .addArg(new AddressValue(this.contract.getAddress()))
-        .addArg(new StringValue('burn'))
-        .build(),
-      receiver: senderAddress,
+    const burnTx = this.transactionFactory.createTransactionForExecute({
+      function: 'burn',
+      arguments: [],
       sender: senderAddress,
-      gasLimit: 12000000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 50_000_000n,
+      tokenTransfers: [
+        new TokenTransfer({
+          token: new Token({
+            identifier: dataNftIdentifier,
+            nonce: BigInt(dataNftNonce)
+          }),
+          amount: BigInt(quantityToBurn.toString())
+        })
+      ]
     });
+
     return burnTx;
   }
 
@@ -153,16 +158,16 @@ export abstract class Minter extends Contract {
    * @param senderAddress The address of the sender, must be the admin of the contract
    */
   setLocalRoles(senderAddress: IAddress): Transaction {
-    const setLocalRolesTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setLocalRoles'))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 100000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const setLocalRolesTx = this.transactionFactory.createTransactionForExecute(
+      {
+        function: 'setLocalRoles',
+        arguments: [],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 100_000_000n
+      }
+    );
+
     return setLocalRolesTx;
   }
 
@@ -170,17 +175,15 @@ export abstract class Minter extends Contract {
    * @param senderAddress The address of the sender, must be the admin of the contract
    */
   pauseContract(senderAddress: IAddress): Transaction {
-    const pauseContractTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setIsPaused'))
-        .addArg(new BooleanValue(true))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 6000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const pauseContractTx = this.transactionFactory.createTransactionForExecute(
+      {
+        function: 'setIsPaused',
+        arguments: [new BooleanValue(true)],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 6000000n
+      }
+    );
 
     return pauseContractTx;
   }
@@ -189,17 +192,14 @@ export abstract class Minter extends Contract {
    * @param senderAddress The address of the sender, must be the admin of the contract
    */
   unpauseContract(senderAddress: IAddress): Transaction {
-    const unpauseContractTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setIsPaused'))
-        .addArg(new BooleanValue(false))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 6000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const unpauseContractTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setIsPaused',
+        arguments: [new BooleanValue(false)],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 6000000n
+      });
 
     return unpauseContractTx;
   }
@@ -217,18 +217,15 @@ export abstract class Minter extends Contract {
     minRoyalties: BigNumber.Value,
     maxRoyalties: BigNumber.Value
   ): Transaction {
-    const setRoyaltiesLimitsTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setRoyaltiesLimits'))
-        .addArg(new BigUIntValue(minRoyalties))
-        .addArg(new BigUIntValue(maxRoyalties))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 6000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const setRoyaltiesLimitsTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setRoyaltiesLimits',
+        arguments: [minRoyalties, maxRoyalties],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 6000000n
+      });
+
     return setRoyaltiesLimitsTx;
   }
 
@@ -240,17 +237,15 @@ export abstract class Minter extends Contract {
     senderAddress: IAddress,
     is_enabled: boolean
   ): Transaction {
-    const setWhitelistIsEnabledTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setWhiteListEnabled'))
-        .addArg(new BooleanValue(is_enabled))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 6000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const setWhitelistIsEnabledTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setWhiteListEnabled',
+        arguments: [is_enabled],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 6000000n
+      });
+
     return setWhitelistIsEnabledTx;
   }
 
@@ -263,22 +258,18 @@ export abstract class Minter extends Contract {
   whitelist(
     senderAddress: IAddress,
     addresses: string[],
-    extraGas = 0
+    extraGas = 0n
   ): Transaction {
-    const whitelistTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setWhiteListSpots'))
-        .setArgs(
-          addresses.map((address) => new AddressValue(new Address(address)))
-        )
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 50000000 + extraGas,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return whitelistTx;
+    const setWhitelistSpotsTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setWhiteListSpots',
+        arguments: [addresses],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 6000000n + extraGas
+      });
+
+    return setWhitelistSpotsTx;
   }
 
   /**  Creates a remove whitelist transaction for the contract
@@ -289,22 +280,18 @@ export abstract class Minter extends Contract {
   removeWhitelist(
     senderAddress: IAddress,
     addresses: string[],
-    extraGas = 0
+    extraGas = 0n
   ): Transaction {
-    const removeWhitelistTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('removeWhiteListSpots'))
-        .setArgs(
-          addresses.map((address) => new AddressValue(new Address(address)))
-        )
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 50000000 + extraGas,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return removeWhitelistTx;
+    const removeWhitelistSpotsTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'removeWhiteListSpots',
+        arguments: [addresses],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 6000000n + extraGas
+      });
+
+    return removeWhitelistSpotsTx;
   }
 
   /** Creates a set mint time limit transaction for the contract
@@ -312,17 +299,15 @@ export abstract class Minter extends Contract {
    * @param timeLimit(seconds)  The time limit to set between mints
    */
   setMintTimeLimit(senderAddress: IAddress, timeLimit: number): Transaction {
-    const setMintTimeLimitTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setMintTimeLimit'))
-        .addArg(new U64Value(timeLimit))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 6000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const setMintTimeLimitTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setMintTimeLimit',
+        arguments: [timeLimit],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 6000000n
+      });
+
     return setMintTimeLimitTx;
   }
 
@@ -334,17 +319,15 @@ export abstract class Minter extends Contract {
     senderAddress: IAddress,
     newAdministrator: IAddress
   ): Transaction {
-    const setAdministratorTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setAdministrator'))
-        .addArg(new AddressValue(newAdministrator))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 6000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const setAdministratorTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setAdministrator',
+        arguments: [newAdministrator],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 6000000n
+      });
+
     return setAdministratorTx;
   }
 
@@ -355,16 +338,15 @@ export abstract class Minter extends Contract {
    * @param senderAddress The address of the sender, must be the admin or owner of the contract
    */
   pauseCollection(senderAddress: IAddress): Transaction {
-    const pauseCollectionTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('pause'))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 100000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const pauseCollectionTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'pause',
+        arguments: [],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 100000000n
+      });
+
     return pauseCollectionTx;
   }
 
@@ -373,16 +355,14 @@ export abstract class Minter extends Contract {
    * @param senderAddress The address of the sender, must be the admin or owner of the contract
    */
   unpauseCollection(senderAddress: IAddress): Transaction {
-    const unpauseCollectionTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('unpause'))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 100000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const unpauseCollectionTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'unpause',
+        arguments: [],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 100000000n
+      });
 
     return unpauseCollectionTx;
   }
@@ -392,16 +372,12 @@ export abstract class Minter extends Contract {
    * @param senderAddress The address of the sender, must be the admin or owner of the contract
    */
   freeze(senderAddress: IAddress, freezeAddress: IAddress): Transaction {
-    const freezeTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('freeze'))
-        .addArg(new AddressValue(freezeAddress))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 100000000,
+    const freezeTx = this.transactionFactory.createTransactionForExecute({
+      function: 'freeze',
+      arguments: [freezeAddress],
       sender: senderAddress,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 100000000n
     });
 
     return freezeTx;
@@ -412,16 +388,12 @@ export abstract class Minter extends Contract {
    * @param senderAddress The address of the sender, must be the admin or owner of the contract
    */
   unfreeze(senderAddress: IAddress, unfreezeAddress: IAddress): Transaction {
-    const unfreezeTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('unfreeze'))
-        .addArg(new AddressValue(unfreezeAddress))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 100000000,
+    const unfreezeTx = this.transactionFactory.createTransactionForExecute({
+      function: 'unfreeze',
+      arguments: [unfreezeAddress],
       sender: senderAddress,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 100000000n
     });
 
     return unfreezeTx;
@@ -438,19 +410,16 @@ export abstract class Minter extends Contract {
     nonce: number,
     freezeAddress: IAddress
   ): Transaction {
-    const freezeSingleNFTTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('freezeSingleNFT'))
-        .addArg(new U64Value(nonce))
-        .addArg(new AddressValue(freezeAddress))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 100000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return freezeSingleNFTTx;
+    const freezeSingleNftTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'freezeSingleNFT',
+        arguments: [nonce, freezeAddress],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 100000000n
+      });
+
+    return freezeSingleNftTx;
   }
 
   /**
@@ -464,19 +433,16 @@ export abstract class Minter extends Contract {
     nonce: number,
     unfreezeAddress: IAddress
   ): Transaction {
-    const unFreezeSingleNFTTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('unFreezeSingleNFT'))
-        .addArg(new U64Value(nonce))
-        .addArg(new AddressValue(unfreezeAddress))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 100000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return unFreezeSingleNFTTx;
+    const unfreezeSingleNftTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'unFreezeSingleNFT',
+        arguments: [nonce, unfreezeAddress],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 100000000n
+      });
+
+    return unfreezeSingleNftTx;
   }
 
   /**
@@ -492,18 +458,16 @@ export abstract class Minter extends Contract {
     nonce: number,
     wipeAddress: IAddress
   ): Transaction {
-    const wipeSingleNFTTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('wipeSingleNFT'))
-        .addArg(new U64Value(nonce))
-        .addArg(new AddressValue(wipeAddress))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 100000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
-    return wipeSingleNFTTx;
+    const wipeSingleNftTx = this.transactionFactory.createTransactionForExecute(
+      {
+        function: 'wipeSingleNFT',
+        arguments: [nonce, wipeAddress],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 100000000n
+      }
+    );
+
+    return wipeSingleNftTx;
   }
 }

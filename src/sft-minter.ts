@@ -38,13 +38,19 @@ export class SftMinter extends Minter {
    * Creates a new instance of the `SftMinter` class, which can be used to interact with the Data NFT-FT minter smart contract
    * @param env 'devnet' | 'mainnet' | 'testnet'
    * @param timeout Timeout for the network provider (DEFAULT = 20000ms)
+   * @param customNetworkProviderUrl Custom network provider URL
    */
-  constructor(env: string, timeout: number = 20000) {
+  constructor(
+    env: string,
+    timeout: number = 20000,
+    customNetworkProviderUrl?: string
+  ) {
     super(
       env,
       new Address(minterContractAddress[env as EnvironmentsEnum]),
       dataNftMinterAbi,
-      timeout
+      timeout,
+      customNetworkProviderUrl
     );
   }
 
@@ -132,7 +138,7 @@ export class SftMinter extends Minter {
    * @param antiSpamTaxTokenIdentifier The token identifier of the anti spam token
    * @param antiSpamTaxTokenAmount The amount of anti spam token to be used for minting as tax
    * @param mintLimit(seconds)- The mint limit between mints
-   * @param treasury_address The address of the treasury to collect the anti spam tax
+   * @param treasuryAddress The address of the treasury to collect the anti spam tax
    */
   initializeContract(
     senderAddress: IAddress,
@@ -141,24 +147,24 @@ export class SftMinter extends Minter {
     antiSpamTaxTokenIdentifier: string,
     antiSpamTaxTokenAmount: BigNumber.Value,
     mintLimit: number,
-    treasury_address: IAddress
+    treasuryAddress: IAddress
   ): Transaction {
-    const initializeContractTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('initializeContract'))
-        .addArg(new StringValue(collectionName))
-        .addArg(new StringValue(tokenTicker))
-        .addArg(new TokenIdentifierValue(antiSpamTaxTokenIdentifier))
-        .addArg(new BigUIntValue(antiSpamTaxTokenAmount))
-        .addArg(new U64Value(mintLimit))
-        .addArg(new AddressValue(treasury_address))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const initializeContractTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'initializeContract',
+        arguments: [
+          collectionName,
+          tokenTicker,
+          antiSpamTaxTokenIdentifier,
+          antiSpamTaxTokenAmount,
+          mintLimit,
+          treasuryAddress
+        ],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
+
     return initializeContractTx;
   }
 
@@ -171,17 +177,15 @@ export class SftMinter extends Minter {
     senderAddress: IAddress,
     treasuryAddress: IAddress
   ): Transaction {
-    const setTreasuryAddressTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setTreasuryAddress'))
-        .addArg(new AddressValue(treasuryAddress))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const setTreasuryAddressTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setTreasuryAddress',
+        arguments: [treasuryAddress],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
+
     return setTreasuryAddressTx;
   }
 
@@ -194,17 +198,15 @@ export class SftMinter extends Minter {
     senderAddress: IAddress,
     donationTreasuryAddress: IAddress
   ): Transaction {
-    const setDonationTreasuryAddressTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setDonationTreasuryAddress'))
-        .addArg(new AddressValue(donationTreasuryAddress))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const setDonationTreasuryAddressTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setDonationTreasuryAddress',
+        arguments: [donationTreasuryAddress],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
+
     return setDonationTreasuryAddressTx;
   }
 
@@ -217,17 +219,15 @@ export class SftMinter extends Minter {
     senderAddress: IAddress,
     maxDonationPercentage: BigNumber.Value
   ): Transaction {
-    const setMaxDonationPercentageTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setMaxDonationPercentage'))
-        .addArg(new U64Value(maxDonationPercentage))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
-      sender: senderAddress,
-      chainID: this.chainID
-    });
+    const setMaxDonationPercentageTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setMaxDonationPercentage',
+        arguments: [maxDonationPercentage],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10000000n
+      });
+
     return setMaxDonationPercentageTx;
   }
 
@@ -240,17 +240,14 @@ export class SftMinter extends Minter {
     senderAddress: IAddress,
     maxSupply: BigNumber.Value
   ): Transaction {
-    const setMaxSupplyTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('setMaxSupply'))
-        .addArg(new BigUIntValue(maxSupply))
-        .build(),
-      receiver: this.contract.getAddress(),
-      gasLimit: 10000000,
+    const setMaxSupplyTx = this.transactionFactory.createTransactionForExecute({
+      function: 'setMaxSupply',
+      arguments: [maxSupply],
       sender: senderAddress,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 10000000n
     });
+
     return setMaxSupplyTx;
   }
 
@@ -419,42 +416,35 @@ export class SftMinter extends Minter {
       metadataOnIpfsUrl = traitsUrl;
     }
 
-    const data = new ContractCallPayloadBuilder()
-      .setFunction(new ContractFunction('ESDTTransfer'))
-      .addArg(
-        new TokenIdentifierValue(
-          itheumTokenIdentifier[this.env as EnvironmentsEnum]
-        )
-      )
-      .addArg(new BigUIntValue(amountToSend))
-      .addArg(new StringValue('mint'))
-      .addArg(new StringValue(tokenName))
-      .addArg(new StringValue(imageOnIpfsUrl))
-      .addArg(new StringValue(metadataOnIpfsUrl))
-      .addArg(new StringValue(dataMarshalUrl))
-      .addArg(new StringValue(dataNftStreamUrlEncrypted))
-      .addArg(new StringValue(dataPreviewUrl))
-      .addArg(new U64Value(royalties))
-      .addArg(new U64Value(supply))
-      .addArg(new StringValue(datasetTitle))
-      .addArg(new StringValue(datasetDescription));
+    let args = [
+      tokenName,
+      imageOnIpfsUrl,
+      metadataOnIpfsUrl,
+      dataMarshalUrl,
+      dataNftStreamUrlEncrypted,
+      dataPreviewUrl,
+      royalties,
+      supply,
+      datasetTitle,
+      datasetDescription
+    ];
 
     if (lockPeriod) {
-      data.addArg(new U64Value(lockPeriod));
+      args.push(lockPeriod);
     }
 
-    data.addArg(new U64Value(donationPercentage));
+    args.push(donationPercentage);
 
     for (const extraAsset of extraAssets ?? []) {
-      data.addArg(new StringValue(extraAsset));
+      args.push(extraAsset);
     }
 
-    const mintTx = new Transaction({
-      data: data.build(),
+    const mintTx = this.transactionFactory.createTransactionForExecute({
+      function: 'mint',
+      arguments: args,
       sender: senderAddress,
-      receiver: this.contract.getAddress(),
-      gasLimit: 130_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 130_000_000n
     });
 
     return {

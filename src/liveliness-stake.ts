@@ -30,15 +30,25 @@ import {
   parseUserData
 } from './common/utils';
 import BigNumber from 'bignumber.js';
-import { Token } from 'nft.storage';
 
 export class LivelinessStake extends Contract {
-  constructor(env: string, timeout: number = 20000) {
+  /**
+   * Creates a new instance of the LivelinessStake which can be used to interact with the liveliness staking smart contract
+   * @param env 'devnet' | 'mainnet' | 'testnet'
+   * @param timeout Timeout for the network provider (DEFAULT = 20000ms)
+   * @param customNetworkProviderUrl Custom network provider URL
+   */
+  constructor(
+    env: string,
+    timeout: number = 20000,
+    customNetworkProviderUrl?: string
+  ) {
     super(
       env,
       new Address(livelinessStakeContractAddress[env as EnvironmentsEnum]),
       livelinessStakeAbi,
-      timeout
+      timeout,
+      customNetworkProviderUrl
     );
   }
 
@@ -197,16 +207,14 @@ export class LivelinessStake extends Contract {
    * @returns
    */
   claimRewards(senderAddress: IAddress): Transaction {
-    const claimRewardsTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('claimRewards')
-        .build(),
-      receiver: this.contract.getAddress(),
+    const claimRewardsTx = this.transactionFactory.createTransactionForExecute({
+      function: 'claimRewards',
+      arguments: [],
       sender: senderAddress,
-      gasLimit: 50_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 50_000_000n
     });
+
     return claimRewardsTx;
   }
 
@@ -219,17 +227,14 @@ export class LivelinessStake extends Contract {
     senderAddress: IAddress,
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Transaction {
-    const stakeRewardsTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('stakeRewards')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .build(),
-      receiver: this.contract.getAddress(),
+    const stakeRewardsTx = this.transactionFactory.createTransactionForExecute({
+      function: 'stakeRewards',
+      arguments: [tokenIdentifier],
       sender: senderAddress,
-      gasLimit: 90_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 90_000_000n
     });
+
     return stakeRewardsTx;
   }
 }
