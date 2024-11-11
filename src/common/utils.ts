@@ -616,7 +616,7 @@ export function getDataFromClientSessionCache(cacheKey: string) {
     return false;
   } else {
     // did it expire? is so, delete it from the cache
-    if (cacheObject.addedOn - Date.now() > cacheObject.expireAfter) {
+    if (Date.now() - cacheObject.addedOn > cacheObject.expireAfter) {
       console.log('getDataFromClientSessionCache: expired');
       delete sessionCache[cacheKey]; // remove it from cache as its expired
       return false;

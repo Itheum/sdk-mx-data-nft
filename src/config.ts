@@ -1,12 +1,3 @@
-/*
-Host apps like the data dex or explorer, when the MVX dappProvider in initialized (very early in the page)
-it calls a utility method that loads the best RPC to use in the ITH_GLOBAL_MVX_RPC_API_SESSION global variable
-so we aim to use that if available so this SDK uses the same RPC as the host to talk to the MVX chain
-*/
-declare const window: {
-  ITH_GLOBAL_MVX_RPC_API_SESSION: string;
-} & Window;
-
 export enum EnvironmentsEnum {
   devnet = 'devnet',
   testnet = 'testnet',
@@ -21,28 +12,17 @@ export interface Config {
 // note that in all rpc check methods below we check if window === 'undefined' as this is need for tests to pass
 const devnetNetworkConfig: Config = {
   chainID: 'D',
-  networkProvider:
-    typeof window === 'undefined'
-      ? 'https://devnet-api.multiversx.com'
-      : window.ITH_GLOBAL_MVX_RPC_API_SESSION ||
-        'https://devnet-api.multiversx.com'
+  networkProvider: 'https://devnet-api.multiversx.com'
 };
 
 const mainnetNetworkConfig: Config = {
   chainID: '1',
-  networkProvider:
-    typeof window === 'undefined'
-      ? 'https://api.multiversx.com'
-      : window.ITH_GLOBAL_MVX_RPC_API_SESSION || 'https://api.multiversx.com'
+  networkProvider: 'https://api.multiversx.com'
 };
 
 const testnetNetworkConfig: Config = {
   chainID: 'T',
-  networkProvider:
-    typeof window === 'undefined'
-      ? 'https://testnet-api.multiversx.com'
-      : window.ITH_GLOBAL_MVX_RPC_API_SESSION ||
-        'https://testnet-api.multiversx.com'
+  networkProvider: 'https://testnet-api.multiversx.com'
 };
 
 export const itheumTokenIdentifier: { [key in EnvironmentsEnum]: string } = {
@@ -85,20 +65,9 @@ export const livelinessStakeContractAddress: {
 };
 
 export const apiConfiguration: { [key in EnvironmentsEnum]: string } = {
-  devnet:
-    typeof window === 'undefined'
-      ? 'https://devnet-api.multiversx.com'
-      : window.ITH_GLOBAL_MVX_RPC_API_SESSION ||
-        'https://devnet-api.multiversx.com',
-  mainnet:
-    typeof window === 'undefined'
-      ? 'https://api.multiversx.com'
-      : window.ITH_GLOBAL_MVX_RPC_API_SESSION || 'https://api.multiversx.com',
-  testnet:
-    typeof window === 'undefined'
-      ? 'https://testnet-api.multiversx.com'
-      : window.ITH_GLOBAL_MVX_RPC_API_SESSION ||
-        'https://testnet-api.multiversx.com'
+  devnet: 'https://devnet-api.multiversx.com',
+  mainnet: 'https://api.multiversx.com',
+  testnet: 'https://testnet-api.multiversx.com'
 };
 
 export const networkConfiguration: { [key in EnvironmentsEnum]: Config } = {

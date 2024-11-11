@@ -1,7 +1,3 @@
-declare const window: {
-  ITH_GLOBAL_MVX_RPC_API_SESSION: string;
-} & Window;
-
 import { ApiNetworkProvider } from '@multiversx/sdk-core/out';
 import { DataNftMarket, SftMinter } from '../src/index';
 
