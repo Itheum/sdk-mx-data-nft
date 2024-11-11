@@ -10,7 +10,9 @@ import {
   numberToPaddedHex,
   overrideMarshalUrl,
   parseDataNft,
-  validateSpecificParamsViewData
+  validateSpecificParamsViewData,
+  getDataFromClientSessionCache,
+  setDataToClientSessionCache
 } from './common/utils';
 import {
   Config,
@@ -163,15 +165,32 @@ export class DataNft implements DataNftType {
     if (identifiers.length > MAX_ITEMS) {
       throw new ErrTooManyItems();
     }
-    const response = await fetch(
-      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(
-        ','
-      )}&withSupply=true&size=${identifiers.length}`
-    );
 
-    checkStatus(response);
+    // lets not make the call if not needed
+    if (identifiers.length === 0) {
+      return [];
+    }
 
-    const data: NftType[] = await response.json();
+    const fetchUrl = `${
+      this.apiConfiguration
+    }/nfts?identifiers=${identifiers.join(',')}&withSupply=true&size=${
+      identifiers.length
+    }`;
+
+    // check if its in session cache
+    let jsonDataPayload = null;
+    const getFromSessionCache = getDataFromClientSessionCache(fetchUrl);
+
+    if (!getFromSessionCache) {
+      const response = await fetch(fetchUrl);
+      checkStatus(response);
+      jsonDataPayload = await response.json();
+      setDataToClientSessionCache(fetchUrl, jsonDataPayload, 5 * 60 * 1000);
+    } else {
+      jsonDataPayload = getFromSessionCache;
+    }
+
+    const data: NftType[] = jsonDataPayload;
 
     try {
       const dataNfts = data.map((value) => parseDataNft(value));
