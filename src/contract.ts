@@ -20,7 +20,8 @@ export abstract class Contract {
     env: string,
     contractAddress: IAddress,
     abiFile: any,
-    timeout: number = 20000
+    timeout: number = 20000,
+    customNetworkProviderUrl?: string
   ) {
     if (!(env in EnvironmentsEnum)) {
       throw new ErrNetworkConfig(
@@ -35,7 +36,7 @@ export abstract class Contract {
     const networkConfig = networkConfiguration[env as EnvironmentsEnum];
     this.chainID = networkConfig.chainID;
     this.networkProvider = new ApiNetworkProvider(
-      networkConfig.networkProvider,
+      customNetworkProviderUrl ?? networkConfig.networkProvider,
       {
         timeout: timeout,
         clientName: 'ithuemDataNftSDK'
