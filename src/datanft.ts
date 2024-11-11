@@ -110,7 +110,14 @@ export class DataNft implements DataNftType {
     this.networkConfiguration = networkConfiguration[env as EnvironmentsEnum];
     this.apiConfiguration = apiConfiguration[env as EnvironmentsEnum];
 
-    debugger;
+    console.log(
+      'SDK debug: setNetworkConfig this.apiConfiguration B4 =',
+      this.apiConfiguration
+    );
+    console.log(
+      'SDK debug: setNetworkConfig this.networkConfiguration B4 =',
+      this.networkConfiguration
+    );
 
     if (useSpecificApiEndpoint && useSpecificApiEndpoint.trim() !== '') {
       this.apiConfiguration = useSpecificApiEndpoint.trim();
@@ -118,15 +125,15 @@ export class DataNft implements DataNftType {
     }
 
     console.log(
-      'SDK debug: setNetworkConfig useSpecificApiEndpoint =',
+      'SDK debug: setNetworkConfig useSpecificApiEndpoint A8 =',
       useSpecificApiEndpoint
     );
     console.log(
-      'SDK debug: setNetworkConfig this.apiConfiguration  =',
+      'SDK debug: setNetworkConfig this.apiConfiguration A8 =',
       this.apiConfiguration
     );
     console.log(
-      'SDK debug: setNetworkConfig this.networkConfiguration  =',
+      'SDK debug: setNetworkConfig this.networkConfiguration A8 =',
       this.networkConfiguration
     );
   }
