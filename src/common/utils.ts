@@ -11,7 +11,6 @@ import {
   Bond,
   BondConfiguration,
   Compensation,
-  ContractConfiguration,
   LivelinessStakeConfiguration,
   NftEnumType,
   NftType,

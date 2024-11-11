@@ -1,6 +1,5 @@
 import {
   AbiRegistry,
-  ErrContract,
   IAddress,
   SmartContract,
   ApiNetworkProvider
