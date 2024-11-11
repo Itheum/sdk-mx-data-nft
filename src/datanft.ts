@@ -117,6 +117,19 @@ export class DataNft implements DataNftType {
       this.apiConfiguration = useSpecificApiEndpoint.trim();
       this.networkConfiguration.networkProvider = useSpecificApiEndpoint.trim();
     }
+
+    console.log(
+      'SDK debug: setNetworkConfig useSpecificApiEndpoint =',
+      useSpecificApiEndpoint
+    );
+    console.log(
+      'SDK debug: setNetworkConfig this.apiConfiguration  =',
+      this.apiConfiguration
+    );
+    console.log(
+      'SDK debug: setNetworkConfig this.networkConfiguration  =',
+      this.networkConfiguration
+    );
   }
 
   /**
@@ -179,6 +192,8 @@ export class DataNft implements DataNftType {
     if (identifiers.length === 0) {
       return [];
     }
+
+    console.log('SDK debug: createManyFromApi api =', this.apiConfiguration);
 
     const fetchUrl = `${
       this.apiConfiguration
