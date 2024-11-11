@@ -2,7 +2,9 @@ import {
   AbiRegistry,
   IAddress,
   SmartContract,
-  ApiNetworkProvider
+  ApiNetworkProvider,
+  SmartContractTransactionsFactory,
+  TransactionsFactoryConfig
 } from '@multiversx/sdk-core/out';
 import { EnvironmentsEnum, networkConfiguration } from './config';
 import { ErrContractAddressNotSet, ErrNetworkConfig } from './errors';
@@ -10,6 +12,7 @@ import { ErrContractAddressNotSet, ErrNetworkConfig } from './errors';
 export abstract class Contract {
   readonly contract: SmartContract;
   readonly chainID: string;
+  readonly transactionFactory: SmartContractTransactionsFactory;
   readonly networkProvider: ApiNetworkProvider;
   readonly env: string;
 
@@ -38,6 +41,12 @@ export abstract class Contract {
         clientName: 'ithuemDataNftSDK'
       }
     );
+
+    this.transactionFactory = new SmartContractTransactionsFactory({
+      config: new TransactionsFactoryConfig({ chainID: this.chainID }),
+      abi: AbiRegistry.create(abiFile)
+    });
+
     this.contract = new SmartContract({
       address: contractAddress,
       abi: AbiRegistry.create(abiFile)

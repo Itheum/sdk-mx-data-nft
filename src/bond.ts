@@ -7,7 +7,9 @@ import {
   IAddress,
   ResultsParser,
   StringValue,
+  Token,
   TokenIdentifierValue,
+  TokenTransfer,
   Transaction,
   TypedValue,
   U64Value,
@@ -745,17 +747,14 @@ export class BondContract extends Contract {
     senderAddress: IAddress,
     newAdministrator: IAddress
   ): Transaction {
-    const setAdministratorTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('setAdministrator')
-        .addArg(new AddressValue(newAdministrator))
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 10_000_000,
-      chainID: this.chainID
-    });
+    const setAdministratorTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setAdministrator',
+        arguments: [newAdministrator],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10_000_000n
+      });
     return setAdministratorTx;
   }
 
@@ -768,17 +767,14 @@ export class BondContract extends Contract {
     senderAddress: IAddress,
     address: IAddress
   ): Transaction {
-    const setTopUpAdministratorTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('setTopUpAdministrator')
-        .addArg(new AddressValue(address))
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 10_000_000,
-      chainID: this.chainID
-    });
+    const setTopUpAdministratorTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setTopUpAdministrator',
+        arguments: [address],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10_000_000n
+      });
     return setTopUpAdministratorTx;
   }
 
@@ -797,33 +793,27 @@ export class BondContract extends Contract {
     penalty: PenaltyType,
     customPenalty?: number
   ): Transaction {
-    let data;
+    let sanctionTx;
     if (penalty === PenaltyType.Custom && customPenalty) {
-      data = new ContractCallPayloadBuilder()
-        .setFunction('sanction')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new U64Value(penalty))
-        .addArg(new U64Value(customPenalty))
-        .build();
-    } else {
-      data = new ContractCallPayloadBuilder()
-        .setFunction('sanction')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new U64Value(penalty))
-        .build();
-    }
+      sanctionTx = this.transactionFactory.createTransactionForExecute({
+        function: 'sanction',
+        arguments: [tokenIdentifier, nonce, penalty, customPenalty],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 30_000_000n
+      });
 
-    const sanctionTx = new Transaction({
-      value: 0,
-      data,
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 30_000_000,
-      chainID: this.chainID
-    });
-    return sanctionTx;
+      return sanctionTx;
+    } else {
+      sanctionTx = this.transactionFactory.createTransactionForExecute({
+        function: 'sanction',
+        arguments: [tokenIdentifier, nonce, penalty],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 30_000_000n
+      });
+      return sanctionTx;
+    }
   }
 
   /**
@@ -837,18 +827,14 @@ export class BondContract extends Contract {
     tokenIdentifier: string,
     nonce: number
   ): Transaction {
-    const modifyBondTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('modifyBond')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .build(),
-      receiver: this.contract.getAddress(),
+    const modifyBondTx = this.transactionFactory.createTransactionForExecute({
+      function: 'modifyBond',
+      arguments: [tokenIdentifier, nonce],
       sender: senderAddress,
-      gasLimit: 10_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 10_000_000n
     });
+
     return modifyBondTx;
   }
 
@@ -858,25 +844,22 @@ export class BondContract extends Contract {
    * @param state state to set the contract to
    */
   setContractState(senderAddress: IAddress, state: State): Transaction {
-    let data;
+    let setContractStateTx;
     if (state === State.Inactive) {
-      data = new ContractCallPayloadBuilder()
-        .setFunction('setContractStateInactive')
-        .build();
+      setContractStateTx = this.transactionFactory.createTransactionForExecute({
+        function: 'setContractStateInactive',
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10_000_000n
+      });
     } else {
-      data = new ContractCallPayloadBuilder()
-        .setFunction('setContractStateActive')
-        .build();
+      setContractStateTx = this.transactionFactory.createTransactionForExecute({
+        function: 'setContractStateActive',
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 10_000_000n
+      });
     }
-
-    const setContractStateTx = new Transaction({
-      value: 0,
-      data: data,
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 10_000_000,
-      chainID: this.chainID
-    });
     return setContractStateTx;
   }
 
@@ -889,18 +872,16 @@ export class BondContract extends Contract {
     const inputAddresses = addresses.map(
       (address) => new AddressValue(address)
     );
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('setAcceptedCallers')
-        .setArgs(inputAddresses)
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
-    });
-    return tx;
+    const setAcceptedCallers =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setAcceptedCallers',
+        arguments: inputAddresses,
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 20_000_000n
+      });
+
+    return setAcceptedCallers;
   }
 
   /**
@@ -917,18 +898,16 @@ export class BondContract extends Contract {
     const inputAddresses = addresses.map(
       (address) => new AddressValue(address)
     );
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('setBlacklist')
-        .setArgs([new U64Value(compensationId), ...inputAddresses])
-        .build(),
-      receiver: this.contract.getAddress(),
+
+    const setBlacklistTx = this.transactionFactory.createTransactionForExecute({
+      function: 'setBlacklist',
+      arguments: [compensationId, ...inputAddresses],
       sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 20_000_000n
     });
-    return tx;
+
+    return setBlacklistTx;
   }
 
   /**
@@ -945,18 +924,16 @@ export class BondContract extends Contract {
     const toBeRemovedAddresses = addresses.map(
       (address) => new AddressValue(address)
     );
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('removeBlacklist')
-        .setArgs([new U64Value(compensationId), ...toBeRemovedAddresses])
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
-    });
-    return tx;
+    const removeBlacklistTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'removeBlacklist',
+        arguments: [compensationId, ...toBeRemovedAddresses],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 20_000_000n
+      });
+
+    return removeBlacklistTx;
   }
 
   /**
@@ -968,18 +945,17 @@ export class BondContract extends Contract {
     const inputAddresses = addresses.map(
       (address) => new AddressValue(address)
     );
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('removeAcceptedCallers')
-        .setArgs(inputAddresses)
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
-    });
-    return tx;
+
+    const removeAcceptedCallersTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'removeAcceptedCallers',
+        arguments: inputAddresses,
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 20_000_000n
+      });
+
+    return removeAcceptedCallersTx;
   }
 
   /**
@@ -991,18 +967,15 @@ export class BondContract extends Contract {
     senderAddress: IAddress,
     tokenIdentifier = itheumTokenIdentifier[this.env as EnvironmentsEnum]
   ) {
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('setBondToken')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .build(),
-      receiver: this.contract.getAddress(),
+    const setBondTokenTx = this.transactionFactory.createTransactionForExecute({
+      function: 'setBondToken',
+      arguments: [tokenIdentifier],
       sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 20_000_000n
     });
-    return tx;
+
+    return setBondTokenTx;
   }
 
   /**
@@ -1018,20 +991,15 @@ export class BondContract extends Contract {
     tokenIdentifier: string,
     nonce: number
   ): Transaction {
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('initiateBond')
-        .addArg(new AddressValue(address))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .build(),
-      receiver: this.contract.getAddress(),
+    const initiateBondTx = this.transactionFactory.createTransactionForExecute({
+      function: 'initiateBond',
+      arguments: [address, tokenIdentifier, nonce],
       sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 20_000_000n
     });
-    return tx;
+
+    return initiateBondTx;
   }
 
   /**
@@ -1053,18 +1021,16 @@ export class BondContract extends Contract {
       combinedArray.push(new BigUIntValue(lockPeriodWithBond.amount));
     });
 
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('addPeriodsBonds')
-        .setArgs(combinedArray)
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
-    });
-    return tx;
+    const addPeriodsBondsTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'addPeriodsBonds',
+        arguments: combinedArray,
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 20_000_000n
+      });
+
+    return addPeriodsBondsTx;
   }
 
   /**
@@ -1075,17 +1041,15 @@ export class BondContract extends Contract {
   removePeriodsBonds(senderAddress: IAddress, periods: number[]) {
     const inputPeriods = periods.map((period) => new U64Value(period));
 
-    const removePeriodsBondsTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('removePeriodsBonds')
-        .setArgs(inputPeriods)
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
-    });
+    const removePeriodsBondsTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'removePeriodsBonds',
+        arguments: inputPeriods,
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 20_000_000n
+      });
+
     return removePeriodsBondsTx;
   }
 
@@ -1095,18 +1059,16 @@ export class BondContract extends Contract {
    * @param penalty the minimum penalty value to be set
    */
   setMinimumPenalty(senderAddress: IAddress, penalty: number) {
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('setMinimumPenalty')
-        .addArg(new U64Value(penalty))
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
-    });
-    return tx;
+    const setMinimumPenaltyTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setMinimumPenalty',
+        arguments: [penalty],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 20_000_000n
+      });
+
+    return setMinimumPenaltyTx;
   }
 
   /**
@@ -1115,18 +1077,16 @@ export class BondContract extends Contract {
    * @param penalty the maximum penalty value to be set
    */
   setMaximumPenalty(senderAddress: IAddress, penalty: number) {
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('setMaximumPenalty')
-        .addArg(new U64Value(penalty))
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
-    });
-    return tx;
+    const setMaximumPenaltyTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setMaximumPenalty',
+        arguments: [penalty],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 20_000_000n
+      });
+
+    return setMaximumPenaltyTx;
   }
 
   /**
@@ -1135,18 +1095,16 @@ export class BondContract extends Contract {
    * @param penalty the withdraw penalty value to be set
    */
   setWithdrawPenalty(senderAddress: IAddress, penalty: number) {
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('setWithdrawPenalty')
-        .addArg(new U64Value(penalty))
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
-    });
-    return tx;
+    const setWithdrawPenaltyTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'setWithdrawPenalty',
+        arguments: [penalty],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 20_000_000n
+      });
+
+    return setWithdrawPenaltyTx;
   }
 
   /**
@@ -1162,19 +1120,14 @@ export class BondContract extends Contract {
     nonce: number,
     timestamp: number
   ) {
-    const refundTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('initiateRefund')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new U64Value(timestamp))
-        .build(),
-      receiver: this.contract.getAddress(),
+    const refundTx = this.transactionFactory.createTransactionForExecute({
+      function: 'initiateRefund',
+      arguments: [tokenIdentifier, nonce, timestamp],
       sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 20_000_000n
     });
+
     return refundTx;
   }
 
@@ -1198,24 +1151,21 @@ export class BondContract extends Contract {
       amount: BigNumber.Value;
     }
   ): Transaction {
-    const bondTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTTransfer'))
-        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
-        .addArg(new BigUIntValue(payment.amount))
-        .addArg(new StringValue('bond'))
-        .addArg(new AddressValue(originalCaller))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new U64Value(lockPeriod))
-        .build(),
-      receiver: this.contract.getAddress(),
+    const bondWithESDTTx = this.transactionFactory.createTransactionForExecute({
+      function: 'bond',
+      arguments: [originalCaller, tokenIdentifier, nonce, lockPeriod],
       sender: senderAddress,
-      gasLimit: 40_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 40_000_000n,
+      tokenTransfers: [
+        new TokenTransfer({
+          token: new Token({ identifier: payment.tokenIdentifier }),
+          amount: BigInt(payment.amount.toString())
+        })
+      ]
     });
-    return bondTx;
+
+    return bondWithESDTTx;
   }
 
   /**
@@ -1234,22 +1184,22 @@ export class BondContract extends Contract {
     nonce: number,
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Transaction {
-    const topUpVaultTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTTransfer'))
-        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
-        .addArg(new BigUIntValue(payment.amount))
-        .addArg(new StringValue('topUpVault'))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 40_000_000,
-      chainID: this.chainID
-    });
-    return topUpVaultTx;
+    const topUpVaultWithEsdtTx =
+      this.transactionFactory.createTransactionForExecute({
+        function: 'topUpVault',
+        arguments: [tokenIdentifier, nonce],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 40_000_000n,
+        tokenTransfers: [
+          new TokenTransfer({
+            token: new Token({ identifier: payment.tokenIdentifier }),
+            amount: BigInt(payment.amount.toString())
+          })
+        ]
+      });
+
+    return topUpVaultWithEsdtTx;
   }
   /**
    * Builds a `topUpAddressVault` transaction
@@ -1269,132 +1219,20 @@ export class BondContract extends Contract {
     nonce: number,
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Transaction {
-    const topUpVaultTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTTransfer'))
-        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
-        .addArg(new BigUIntValue(payment.amount))
-        .addArg(new StringValue('topUpVault'))
-        .addArg(new AddressValue(address))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .build(),
-      receiver: this.contract.getAddress(),
+    const topUpVaultTx = this.transactionFactory.createTransactionForExecute({
+      function: 'topUpVault',
+      arguments: [address, tokenIdentifier, nonce],
       sender: senderAddress,
-      gasLimit: 80_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 80_000_000n,
+      tokenTransfers: [
+        new TokenTransfer({
+          token: new Token({ identifier: payment.tokenIdentifier }),
+          amount: BigInt(payment.amount.toString())
+        })
+      ]
     });
     return topUpVaultTx;
-  }
-
-  /**
-   * Builds a `bond` transaction with NFT/SFT transfer
-   * @param senderAddress the address of the sender
-   * @param originalCaller  the address of the original caller
-   * @param tokenIdentifier the token identifier of the NFT/SFT
-   * @param nonce the token identifier nonce
-   * @param lockPeriod the lock period for the bond
-   * @param payment the payment for the bond (tokenIdentifier, nonce and amount)
-   */
-  bondWithNFT(
-    senderAddress: IAddress,
-    originalCaller: IAddress,
-    tokenIdentifier: string,
-    nonce: number,
-    lockPeriod: number,
-    payment: {
-      tokenIdentifier: string;
-      nonce: number;
-      amount: BigNumber.Value;
-    }
-  ): Transaction {
-    const bondTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction(new ContractFunction('ESDTNFTTransfer'))
-        .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
-        .addArg(new U64Value(payment.nonce))
-        .addArg(new BigUIntValue(payment.amount))
-        .addArg(new AddressValue(this.contract.getAddress()))
-        .addArg(new StringValue('bond'))
-        .addArg(new AddressValue(originalCaller))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new U64Value(lockPeriod))
-        .build(),
-      receiver: senderAddress,
-      sender: senderAddress,
-      gasLimit: 40_000_000,
-      chainID: this.chainID
-    });
-    return bondTx;
-  }
-
-  /**
-   * Builds a `bond` transaction with EGLD transfer
-   * @param senderAddress the address of the sender
-   * @param originalCaller  the address of the original caller
-   * @param tokenIdentifier the token identifier of the NFT/SFT
-   * @param nonce the token identifier nonce
-   * @param lockPeriod the lock period for the bond
-   * @param payment the payment for the bond (tokenIdentifier, nonce and amount)
-   */
-  bondWithEGLD(
-    senderAddress: IAddress,
-    originalCaller: IAddress,
-    tokenIdentifier: string,
-    nonce: number,
-    lockPeriod: number,
-    payment: BigNumber.Value
-  ): Transaction {
-    const bondTx = new Transaction({
-      value: payment,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('bond')
-        .addArg(new AddressValue(originalCaller))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new U64Value(lockPeriod))
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 40_000_000,
-      chainID: this.chainID
-    });
-    return bondTx;
-  }
-
-  /**
-   * Builds a `bond` transaction with no payment
-   * @param senderAddress the address of the sender
-   * @param originalCaller  the address of the original caller
-   * @param tokenIdentifier the token identifier of the NFT/SFT
-   * @param nonce the token identifier nonce
-   * @param lockPeriod the lock period for the bond
-   */
-  bondWithNoPayment(
-    senderAddress: IAddress,
-    originalCaller: IAddress,
-    tokenIdentifier: string,
-    nonce: number,
-    lockPeriod: number
-  ): Transaction {
-    const bondTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('bond')
-        .addArg(new AddressValue(originalCaller))
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .addArg(new U64Value(lockPeriod))
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 40_000_000,
-      chainID: this.chainID
-    });
-    return bondTx;
   }
 
   /**
@@ -1408,18 +1246,14 @@ export class BondContract extends Contract {
     tokenIdentifier: string,
     nonce: number
   ): Transaction {
-    const withdrawTx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('withdraw')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .build(),
-      receiver: this.contract.getAddress(),
+    const withdrawTx = this.transactionFactory.createTransactionForExecute({
+      function: 'withdraw',
+      arguments: [tokenIdentifier, nonce],
       sender: senderAddress,
-      gasLimit: 50_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 50_000_000n
     });
+
     return withdrawTx;
   }
 
@@ -1435,20 +1269,14 @@ export class BondContract extends Contract {
     tokenIdentifier: string,
     nonce: number
   ): Transaction {
-    const data = new ContractCallPayloadBuilder()
-      .setFunction('renew')
-      .addArg(new TokenIdentifierValue(tokenIdentifier))
-      .addArg(new U64Value(nonce))
-      .build();
-
-    const renewTx = new Transaction({
-      value: 0,
-      data,
-      receiver: this.contract.getAddress(),
+    const renewTx = this.transactionFactory.createTransactionForExecute({
+      function: 'renew',
+      arguments: [tokenIdentifier, nonce],
       sender: senderAddress,
-      gasLimit: 10_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 10_000_000n
     });
+
     return renewTx;
   }
 
@@ -1463,19 +1291,17 @@ export class BondContract extends Contract {
     nonce: number,
     tokenIdentifier = dataNftTokenIdentifier[this.env as EnvironmentsEnum]
   ): Transaction {
-    const tx = new Transaction({
-      value: 0,
-      data: new ContractCallPayloadBuilder()
-        .setFunction('setVaultNonce')
-        .addArg(new TokenIdentifierValue(tokenIdentifier))
-        .addArg(new U64Value(nonce))
-        .build(),
-      receiver: this.contract.getAddress(),
-      sender: senderAddress,
-      gasLimit: 20_000_000,
-      chainID: this.chainID
-    });
-    return tx;
+    const setVaultNonceTx = this.transactionFactory.createTransactionForExecute(
+      {
+        function: 'setVaultNonce',
+        arguments: [tokenIdentifier, nonce],
+        sender: senderAddress,
+        contract: this.contract.getAddress(),
+        gasLimit: 20_000_000n
+      }
+    );
+
+    return setVaultNonceTx;
   }
 
   /**
@@ -1488,23 +1314,23 @@ export class BondContract extends Contract {
     senderAddress: IAddress,
     payment: { tokenIdentifier: string; nonce: number; amount: BigNumber.Value }
   ): Transaction {
-    const data = new ContractCallPayloadBuilder()
-      .setFunction(new ContractFunction('ESDTNFTTransfer'))
-      .addArg(new TokenIdentifierValue(payment.tokenIdentifier))
-      .addArg(new U64Value(payment.nonce))
-      .addArg(new BigUIntValue(payment.amount))
-      .addArg(new AddressValue(this.contract.getAddress()))
-      .addArg(new StringValue('proof'))
-      .build();
-
-    const proofTx = new Transaction({
-      value: 0,
-      data,
-      receiver: senderAddress,
+    const proofTx = this.transactionFactory.createTransactionForExecute({
+      function: 'proof',
+      arguments: [],
       sender: senderAddress,
-      gasLimit: 40_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 40_000_000n,
+      tokenTransfers: [
+        new TokenTransfer({
+          token: new Token({
+            identifier: payment.tokenIdentifier,
+            nonce: BigInt(payment.nonce)
+          }),
+          amount: BigInt(payment.amount.toString())
+        })
+      ]
     });
+
     return proofTx;
   }
 
@@ -1519,20 +1345,14 @@ export class BondContract extends Contract {
     tokenIdentifier: string,
     nonce: number
   ): Transaction {
-    const data = new ContractCallPayloadBuilder()
-      .setFunction('claimRefund')
-      .addArg(new TokenIdentifierValue(tokenIdentifier))
-      .addArg(new U64Value(nonce))
-      .build();
-
-    const claimRefundTx = new Transaction({
-      value: 0,
-      data,
-      receiver: this.contract.getAddress(),
+    const claimRefundTx = this.transactionFactory.createTransactionForExecute({
+      function: 'claimRefund',
+      arguments: [tokenIdentifier, nonce],
       sender: senderAddress,
-      gasLimit: 10_000_000,
-      chainID: this.chainID
+      contract: this.contract.getAddress(),
+      gasLimit: 10_000_000n
     });
+
     return claimRefundTx;
   }
 }
