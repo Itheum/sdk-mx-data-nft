@@ -98,7 +98,7 @@ export class DataNft implements DataNftType {
   /**
    * Sets the network configuration for the DataNft class.
    * @param env 'devnet' | 'mainnet' | 'testnet'
-   * @param useSpecificApiEndpoint optional param to use a specific RPC API endpoint for the env, if not given, defaults to config default value. Value need to start with https://
+   * @param useSpecificApiEndpoint optional param to use a specific RPC API endpoint for the env, if not given, defaults to config default value.
    */
   static setNetworkConfig(env: string, useSpecificApiEndpoint?: string) {
     if (!(env in EnvironmentsEnum)) {
@@ -107,15 +107,14 @@ export class DataNft implements DataNftType {
       );
     }
     this.env = env;
-    this.networkConfiguration = networkConfiguration[env as EnvironmentsEnum];
-    this.apiConfiguration = apiConfiguration[env as EnvironmentsEnum];
 
-    if (
-      useSpecificApiEndpoint &&
-      useSpecificApiEndpoint.trim().includes('https://')
-    ) {
+    debugger;
+    if (useSpecificApiEndpoint && useSpecificApiEndpoint.trim() !== '') {
       this.apiConfiguration = useSpecificApiEndpoint.trim();
       this.networkConfiguration.networkProvider = useSpecificApiEndpoint.trim();
+    } else {
+      this.networkConfiguration = networkConfiguration[env as EnvironmentsEnum];
+      this.apiConfiguration = apiConfiguration[env as EnvironmentsEnum];
     }
 
     console.log(
