@@ -86,7 +86,7 @@ describe('Data NFT test', () => {
     for (const item of dataNfts) {
       expect(item).toBeInstanceOf(Object as unknown as DataNft);
     }
-  });
+  }, 10000);
 
   test('#create many data NFTs different token identifiers', async () => {
     DataNft.setNetworkConfig('devnet');

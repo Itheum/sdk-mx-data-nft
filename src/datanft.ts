@@ -70,7 +70,6 @@ export class DataNft implements DataNftType {
   }[] = [];
 
   static networkConfiguration: Config;
-  static apiConfiguration: string;
   static env: string;
 
   /**
@@ -108,34 +107,10 @@ export class DataNft implements DataNftType {
     }
     this.env = env;
     this.networkConfiguration = networkConfiguration[env as EnvironmentsEnum];
-    this.apiConfiguration = apiConfiguration[env as EnvironmentsEnum];
-
-    console.log(
-      'SDK debug: setNetworkConfig this.apiConfiguration B4 =',
-      this.apiConfiguration
-    );
-    console.log(
-      'SDK debug: setNetworkConfig this.networkConfiguration B4 =',
-      this.networkConfiguration
-    );
 
     if (useSpecificApiEndpoint && useSpecificApiEndpoint.trim() !== '') {
-      this.apiConfiguration = useSpecificApiEndpoint.trim();
       this.networkConfiguration.networkProvider = useSpecificApiEndpoint.trim();
     }
-
-    console.log(
-      'SDK debug: setNetworkConfig useSpecificApiEndpoint A8 =',
-      useSpecificApiEndpoint
-    );
-    console.log(
-      'SDK debug: setNetworkConfig this.apiConfiguration A8 =',
-      this.apiConfiguration
-    );
-    console.log(
-      'SDK debug: setNetworkConfig this.networkConfiguration A8 =',
-      this.networkConfiguration
-    );
   }
 
   /**
@@ -156,7 +131,9 @@ export class DataNft implements DataNftType {
       token.nonce
     );
 
-    const response = await fetch(`${this.apiConfiguration}/nfts/${identifier}`);
+    const response = await fetch(
+      `${this.networkConfiguration.networkProvider}/nfts/${identifier}`
+    );
 
     checkStatus(response);
 
@@ -199,10 +176,8 @@ export class DataNft implements DataNftType {
       return [];
     }
 
-    console.log('SDK debug: createManyFromApi api =', this.apiConfiguration);
-
     const fetchUrl = `${
-      this.apiConfiguration
+      this.networkConfiguration.networkProvider
     }/nfts?identifiers=${identifiers.join(',')}&withSupply=true&size=${
       identifiers.length
     }`;
@@ -304,7 +279,7 @@ export class DataNft implements DataNftType {
       dataNftTokenIdentifier[this.env as EnvironmentsEnum];
 
     const res = await fetch(
-      `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifiersMap}&withSupply=true`
+      `${this.networkConfiguration.networkProvider}/accounts/${address}/nfts?size=10000&collections=${identifiersMap}&withSupply=true`
     );
 
     checkStatus(res);
@@ -325,7 +300,7 @@ export class DataNft implements DataNftType {
     const identifier = createTokenIdentifier(this.tokenIdentifier, this.nonce);
 
     const response = await fetch(
-      `${DataNft.apiConfiguration}/nfts/${identifier}/accounts`
+      `${DataNft.networkConfiguration.networkProvider}/nfts/${identifier}/accounts`
     );
 
     checkStatus(response);
@@ -711,7 +686,7 @@ export class DataNft implements DataNftType {
   }
 
   private static ensureNetworkConfigSet() {
-    if (!this.env || !this.apiConfiguration) {
+    if (!this.env || !this.networkConfiguration) {
       throw new ErrNetworkConfig();
     }
   }
