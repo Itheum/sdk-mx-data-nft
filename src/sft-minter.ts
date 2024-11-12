@@ -7,7 +7,9 @@ import {
   IAddress,
   ResultsParser,
   StringValue,
+  Token,
   TokenIdentifierValue,
+  TokenTransfer,
   Transaction,
   U64Value
 } from '@multiversx/sdk-core/out';
@@ -444,7 +446,15 @@ export class SftMinter extends Minter {
       arguments: args,
       sender: senderAddress,
       contract: this.contract.getAddress(),
-      gasLimit: 130_000_000n
+      gasLimit: 130_000_000n,
+      tokenTransfers: [
+        new TokenTransfer({
+          token: new Token({
+            identifier: itheumTokenIdentifier[this.env as EnvironmentsEnum]
+          }),
+          amount: BigInt(amountToSend)
+        })
+      ]
     });
 
     return {
