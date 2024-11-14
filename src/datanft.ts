@@ -178,10 +178,12 @@ export class DataNft implements DataNftType {
    *               Each object should have a `nonce` property representing the token nonce.
    *               An optional `tokenIdentifier` property can be provided to specify the token identifier.
    *               If not provided, the default token identifier based on the {@link EnvironmentsEnum}
+   * @param clientCacheForMS optional. You can cache the response for this amount of MS if you want. Don't pass it in if you don't want caching (needs to be "undefined")
    * @returns An array of {@link DataNft} objects
    */
   static async createManyFromApi(
-    tokens: { nonce: number; tokenIdentifier?: string }[]
+    tokens: { nonce: number; tokenIdentifier?: string }[],
+    clientCacheForMS?: number
   ): Promise<DataNft[]> {
     this.ensureNetworkConfigSet();
     const identifiers = tokens.map(({ nonce, tokenIdentifier }) =>
@@ -190,6 +192,7 @@ export class DataNft implements DataNftType {
         nonce
       )
     );
+
     if (identifiers.length > MAX_ITEMS) {
       throw new ErrTooManyItems();
     }
@@ -208,14 +211,24 @@ export class DataNft implements DataNftType {
     }`;
 
     // check if its in session cache
+    let useCache = typeof clientCacheForMS !== 'undefined';
     let jsonDataPayload = null;
-    const getFromSessionCache = getDataFromClientSessionCache(fetchUrl);
+    const getFromSessionCache = useCache
+      ? getDataFromClientSessionCache(fetchUrl)
+      : false;
 
     if (!getFromSessionCache) {
       const response = await fetch(fetchUrl);
       checkStatus(response);
       jsonDataPayload = await response.json();
-      setDataToClientSessionCache(fetchUrl, jsonDataPayload, 5 * 60 * 1000);
+
+      if (useCache) {
+        setDataToClientSessionCache(
+          fetchUrl,
+          jsonDataPayload,
+          clientCacheForMS
+        );
+      }
     } else {
       jsonDataPayload = getFromSessionCache;
     }
@@ -292,10 +305,12 @@ export class DataNft implements DataNftType {
    *  Returns an array of `DataNft` objects owned by the address
    * @param address the address to query
    * @param collections the collection identifiers to query. If not provided, the default collection identifier based on the {@link EnvironmentsEnum}
+   * @param clientCacheForMS optional. You can cache the response for this amount of MS if you want. Don't pass it in if you don't want caching (needs to be "undefined")
    */
   static async ownedByAddress(
     address: string,
-    collections?: string[]
+    collections?: string[],
+    clientCacheForMS?: number
   ): Promise<DataNft[]> {
     this.ensureNetworkConfigSet();
 
@@ -303,15 +318,35 @@ export class DataNft implements DataNftType {
       collections?.join(',') ||
       dataNftTokenIdentifier[this.env as EnvironmentsEnum];
 
-    const res = await fetch(
-      `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifiersMap}&withSupply=true`
-    );
+    console.log('SDK debug: ownedByAddress api =', this.apiConfiguration);
 
-    checkStatus(res);
+    const fetchUrl = `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifiersMap}&withSupply=true`;
 
-    const data = await res.json();
+    // check if its in session cache
+    let useCache = typeof clientCacheForMS !== 'undefined';
+    let jsonDataPayload = null;
+    const getFromSessionCache = useCache
+      ? getDataFromClientSessionCache(fetchUrl)
+      : false;
 
-    const dataNfts: DataNft[] = this.createFromApiResponseOrBulk(data);
+    if (!getFromSessionCache) {
+      const response = await fetch(fetchUrl);
+      checkStatus(response);
+      jsonDataPayload = await response.json();
+
+      if (useCache) {
+        setDataToClientSessionCache(
+          fetchUrl,
+          jsonDataPayload,
+          clientCacheForMS
+        );
+      }
+    } else {
+      jsonDataPayload = getFromSessionCache;
+    }
+
+    const dataNfts: DataNft[] =
+      this.createFromApiResponseOrBulk(jsonDataPayload);
     return dataNfts;
   }
 
