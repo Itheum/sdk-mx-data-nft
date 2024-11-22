@@ -9,6 +9,7 @@ import { ErrArgumentNotSet } from './errors';
 import { MinterSol } from './minter-sol';
 import { StringValidator, validateResults } from './common/validator';
 import { CNftSolPostMintMetaType } from './interfaces';
+import { SolEnvChainIDEnum } from './config';
 
 export class CNftSolMinter extends MinterSol {
   /**
@@ -220,7 +221,11 @@ export class CNftSolMinter extends MinterSol {
             tokenName,
             mintForSolAddr: creatorAddress,
             solSignature: solSignature || '',
-            signatureNonce: signatureNonce || ''
+            signatureNonce: signatureNonce || '',
+            chainId:
+              this.env === 'devnet'
+                ? SolEnvChainIDEnum.devnet
+                : SolEnvChainIDEnum.mainnet
           });
 
           const requestOptions = {
@@ -233,7 +238,7 @@ export class CNftSolMinter extends MinterSol {
           let dataMintCall: any = '';
 
           resMintCall = await fetch(
-            this.solCNftMinterServiceUrl,
+            this.solCNftNfMeIdMinterServiceUrl,
             requestOptions
           );
 

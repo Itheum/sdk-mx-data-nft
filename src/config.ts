@@ -1,3 +1,8 @@
+export enum SolEnvChainIDEnum {
+  devnet = 'SD',
+  mainnet = 'S1'
+}
+
 export enum EnvironmentsEnum {
   devnet = 'devnet',
   testnet = 'testnet',
@@ -82,9 +87,19 @@ export const imageService: { [key in EnvironmentsEnum]: string } = {
   testnet: ''
 };
 
-export const solCNftMinterService: { [key in EnvironmentsEnum]: string } = {
-  devnet: 'https://api.itheumcloud-stg.com/datadexapi/solNftUtils/mintNft',
-  mainnet: 'https://api.itheumcloud.com/datadexapi/solNftUtils/mintNft',
+export const solCNftNfMeIdMinterService: { [key in EnvironmentsEnum]: string } =
+  {
+    devnet:
+      'https://api.itheumcloud-stg.com/datadexapi/solNftUtils/mintNfMeIdDataNft',
+    mainnet:
+      'https://api.itheumcloud.com/datadexapi/solNftUtils/mintNfMeIdDataNft',
+    testnet: ''
+  };
+
+export const solCNftMiscMinterService: { [key in EnvironmentsEnum]: string } = {
+  devnet:
+    'https://api.itheumcloud-stg.com/datadexapi/solNftUtils/mintMiscDataNft',
+  mainnet: 'https://api.itheumcloud.com/datadexapi/solNftUtils/mintMiscDataNft',
   testnet: ''
 };
 
