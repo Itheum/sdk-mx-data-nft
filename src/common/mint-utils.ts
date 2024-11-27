@@ -62,7 +62,8 @@ export async function storeToIpfs(
 
 export async function storeToIpfsFullSolCNftMetadata(
   storageToken: string,
-  metadataStructureSolCNft: object
+  metadataStructureSolCNft: object,
+  useThisCustomIPFSGateway?: string
 ): Promise<{ metadataIpfsUrl: string }> {
   try {
     const metadataIpfsHash = await storeTraitsToIpfs(
@@ -71,9 +72,23 @@ export async function storeToIpfsFullSolCNftMetadata(
     );
 
     if (metadataIpfsHash) {
-      return {
-        metadataIpfsUrl: `https://ipfs.io/ipfs/${metadataIpfsHash}`
-      };
+      if (
+        useThisCustomIPFSGateway &&
+        useThisCustomIPFSGateway.includes('https://') &&
+        useThisCustomIPFSGateway.includes('{insertCIDHere}')
+      ) {
+        // user wanted to use a custom gateway
+        return {
+          metadataIpfsUrl: useThisCustomIPFSGateway.replace(
+            '{insertCIDHere}',
+            metadataIpfsHash
+          )
+        };
+      } else {
+        return {
+          metadataIpfsUrl: `https://ipfs.io/ipfs/${metadataIpfsHash}`
+        };
+      }
     } else {
       return {
         metadataIpfsUrl: ''
@@ -86,15 +101,30 @@ export async function storeToIpfsFullSolCNftMetadata(
 
 export async function storeToIpfsOnlyImg(
   storageToken: string,
-  image: Blob
+  image: Blob,
+  useThisCustomIPFSGateway?: string
 ): Promise<{ imageOnIpfsUrl: string }> {
   try {
     const imageHash = await storeImageToIpfs(image, storageToken);
 
     if (imageHash) {
-      return {
-        imageOnIpfsUrl: `https://ipfs.io/ipfs/${imageHash}`
-      };
+      if (
+        useThisCustomIPFSGateway &&
+        useThisCustomIPFSGateway.includes('https://') &&
+        useThisCustomIPFSGateway.includes('{insertCIDHere}')
+      ) {
+        // user wanted to use a custom gateway
+        return {
+          imageOnIpfsUrl: useThisCustomIPFSGateway.replace(
+            '{insertCIDHere}',
+            imageHash
+          )
+        };
+      } else {
+        return {
+          imageOnIpfsUrl: `https://ipfs.io/ipfs/${imageHash}`
+        };
+      }
     } else {
       return {
         imageOnIpfsUrl: ''

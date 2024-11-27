@@ -43,6 +43,7 @@ export class CNftSolMinter extends MinterSol {
    *                 - imgGenSet: [optional] the custom series layer set to influence the image generation service
    *                 - signatureNonce: [optional] a recent nonce from the marshal network that will be signed to produce solSignature
    *                 - solSignature: [optional] a solana signature of signatureNonce to prove creatorAddress ownership
+   *                 - useThisCustomIPFSGateway: [optional] a custom ipfs gateway to use for the img and json. where the CID goes in a {insertCIDHere} placeholder e.g. https://gateway.pinata.cloud/ipfs/{insertCIDHere}.
    *
    */
   async mint(
@@ -62,6 +63,7 @@ export class CNftSolMinter extends MinterSol {
       imgGenSet?: string;
       signatureNonce?: string;
       solSignature?: string;
+      useThisCustomIPFSGateway?: string;
     }
   ): Promise<{
     imageUrl: string;
@@ -81,7 +83,8 @@ export class CNftSolMinter extends MinterSol {
         imgGenBg,
         imgGenSet,
         signatureNonce,
-        solSignature
+        solSignature,
+        useThisCustomIPFSGateway
       } = options ?? {};
 
       const tokenNameValidator = new StringValidator()
@@ -160,7 +163,8 @@ export class CNftSolMinter extends MinterSol {
 
           const { imageOnIpfsUrl: imgOnIpfsUrl } = await storeToIpfsOnlyImg(
             nftStorageToken,
-            _imageFile
+            _imageFile,
+            useThisCustomIPFSGateway
           );
 
           if (!imgOnIpfsUrl || imgOnIpfsUrl === '') {
@@ -182,7 +186,8 @@ export class CNftSolMinter extends MinterSol {
 
           const { metadataIpfsUrl } = await storeToIpfsFullSolCNftMetadata(
             nftStorageToken,
-            cNftMetadataContent
+            cNftMetadataContent,
+            useThisCustomIPFSGateway
           );
 
           if (!metadataIpfsUrl || metadataIpfsUrl === '') {
