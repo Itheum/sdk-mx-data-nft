@@ -44,6 +44,7 @@ export class CNftSolMinter extends MinterSol {
    *                 - signatureNonce: [optional] a recent nonce from the marshal network that will be signed to produce solSignature
    *                 - solSignature: [optional] a solana signature of signatureNonce to prove creatorAddress ownership
    *                 - useThisCustomIPFSGateway: [optional] a custom ipfs gateway to use for the img and json. where the CID goes in a {insertCIDHere} placeholder e.g. https://gateway.pinata.cloud/ipfs/{insertCIDHere}.
+   *                 - skipGettingMintMeta: [optional] if we send "1", then the minting service only mints and does not return any mint meta from the cNFT leaf etc
    *
    */
   async mint(
@@ -64,6 +65,7 @@ export class CNftSolMinter extends MinterSol {
       signatureNonce?: string;
       solSignature?: string;
       useThisCustomIPFSGateway?: string;
+      skipGettingMintMeta?: string;
     }
   ): Promise<{
     imageUrl: string;
@@ -84,7 +86,8 @@ export class CNftSolMinter extends MinterSol {
         imgGenSet,
         signatureNonce,
         solSignature,
-        useThisCustomIPFSGateway
+        useThisCustomIPFSGateway,
+        skipGettingMintMeta
       } = options ?? {};
 
       const tokenNameValidator = new StringValidator()
@@ -221,7 +224,7 @@ export class CNftSolMinter extends MinterSol {
           const postHeaders = new Headers();
           postHeaders.append('Content-Type', 'application/json');
 
-          const raw = JSON.stringify({
+          const payload: Record<any, any> = {
             metadataOnIpfsUrl,
             tokenName,
             mintForSolAddr: creatorAddress,
@@ -231,7 +234,13 @@ export class CNftSolMinter extends MinterSol {
               this.env === 'devnet'
                 ? SolEnvChainIDEnum.devnet
                 : SolEnvChainIDEnum.mainnet
-          });
+          };
+
+          if (skipGettingMintMeta && skipGettingMintMeta === '1') {
+            payload['skipGettingMintMeta'] = '1';
+          }
+
+          const raw = JSON.stringify(payload);
 
           const requestOptions = {
             method: 'POST',
