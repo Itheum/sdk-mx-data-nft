@@ -35,7 +35,7 @@ export class CNftSolMinter extends MinterSol {
    * @param datasetTitle the title of the dataset. Between 10 and 60 alphanumeric characters.
    * @param datasetDescription the description of the dataset. Between 10 and 400 alphanumeric characters.
    * @param options [optional] below parameters are optional or required based on use case
-   *                 - imageUrl: the URL of the image for the Data NFT
+   *                 - imageUrl: the URL of the image for the Data NFT (HAS to be PNG as the cNFT metadata hardcodes the filetype property as PNG)
    *                 - traitsUrl: the URL of the traits for the Data NFT
    *                 - nftStorageToken: the nft storage token to be used to upload the image and metadata to IPFS
    *                 - extraAssets: [optional] extra URIs to attached to the NFT. Can be media files, documents, etc. These URIs are public

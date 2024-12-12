@@ -230,7 +230,19 @@ export function createIpfsMetadataSolCNft(
     itheum_data_stream_url: dataNFTStreamUrl,
     itheum_data_preview_url: dataNFTStreamPreviewUrl,
     itheum_data_marshal_url: dataNFTDataMarshalUrl,
-    attributes: [] as object[]
+    attributes: [] as object[],
+    animation_url: '',
+    external_url: 'https://itheum.io/datanfts-solana',
+    properties: {
+      category: 'image',
+      files: [
+        {
+          type: 'image/png',
+          uri: imageOnIpfsUrl
+        }
+      ]
+    },
+    symbol: ''
   };
 
   if (extraAssets && extraAssets.length > 0) {
