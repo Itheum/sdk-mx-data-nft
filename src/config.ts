@@ -1,3 +1,8 @@
+export enum SolEnvChainIDEnum {
+  devnet = 'SD',
+  mainnet = 'S1'
+}
+
 export enum EnvironmentsEnum {
   devnet = 'devnet',
   testnet = 'testnet',
@@ -9,6 +14,7 @@ export interface Config {
   networkProvider: string;
 }
 
+// note that in all rpc check methods below we check if window === 'undefined' as this is need for tests to pass
 const devnetNetworkConfig: Config = {
   chainID: 'D',
   networkProvider: 'https://devnet-api.multiversx.com'
@@ -78,6 +84,22 @@ export const networkConfiguration: { [key in EnvironmentsEnum]: Config } = {
 export const imageService: { [key in EnvironmentsEnum]: string } = {
   devnet: 'https://api.itheumcloud-stg.com/datadexapi',
   mainnet: 'https://api.itheumcloud.com/datadexapi',
+  testnet: ''
+};
+
+export const solCNftNfMeIdMinterService: { [key in EnvironmentsEnum]: string } =
+  {
+    devnet:
+      'https://api.itheumcloud-stg.com/datadexapi/solNftUtils/mintNfMeIdDataNft',
+    mainnet:
+      'https://api.itheumcloud.com/datadexapi/solNftUtils/mintNfMeIdDataNft',
+    testnet: ''
+  };
+
+export const solCNftMiscMinterService: { [key in EnvironmentsEnum]: string } = {
+  devnet:
+    'https://api.itheumcloud-stg.com/datadexapi/solNftUtils/mintMiscDataNft',
+  mainnet: 'https://api.itheumcloud.com/datadexapi/solNftUtils/mintMiscDataNft',
   testnet: ''
 };
 

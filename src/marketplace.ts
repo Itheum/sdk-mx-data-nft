@@ -14,9 +14,9 @@ import {
   Transaction,
   U64Value,
   U8Value,
-  VariadicValue
+  VariadicValue,
+  ApiNetworkProvider
 } from '@multiversx/sdk-core/out';
-import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import dataMarketAbi from './abis/data_market.abi.json';
 import { parseOffer } from './common/utils';
 import {
@@ -39,9 +39,9 @@ export class DataNftMarket {
   /**
    * Creates a new instance of the DataNftMarket which can be used to interact with the marketplace smart contract
    * @param env 'devnet' | 'mainnet' | 'testnet'
-   * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
+   * @param timeout Timeout for the network provider (DEFAULT = 20000ms)
    */
-  constructor(env: string, timeout: number = 10000) {
+  constructor(env: string, timeout: number = 20000) {
     if (!(env in EnvironmentsEnum)) {
       throw new ErrNetworkConfig(
         `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
@@ -53,7 +53,8 @@ export class DataNftMarket {
     this.networkProvider = new ApiNetworkProvider(
       networkConfig.networkProvider,
       {
-        timeout: timeout
+        timeout: timeout,
+        clientName: 'ithuemDataNftSDK'
       }
     );
     const contractAddress = marketPlaceContractAddress[env as EnvironmentsEnum];

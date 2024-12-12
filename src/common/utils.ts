@@ -11,7 +11,6 @@ import {
   Bond,
   BondConfiguration,
   Compensation,
-  ContractConfiguration,
   LivelinessStakeConfiguration,
   NftEnumType,
   NftType,
@@ -599,4 +598,51 @@ export function checkStatus(response: Response) {
   if (!(response.status >= 200 && response.status <= 299)) {
     throw new ErrFetch(response.status, response.statusText);
   }
+}
+
+/* 
+Simple Caching Module helps throttle frequently used calls to RPC that fetch data
+this helps speed up the client side app and also reduces calls to the RPC
+we allow consumer to set a custom TTL in MS for how long data is stored in cache
+*/
+const sessionCache: Record<any, any> = {};
+
+export function getDataFromClientSessionCache(cacheKey: string) {
+  const cacheObject = sessionCache[cacheKey];
+
+  if (!cacheObject) {
+    console.log(`getDataFromClientSessionCache: ${cacheKey} not found`);
+    return false;
+  } else {
+    // did it expire? is so, delete it from the cache
+    if (Date.now() - cacheObject.addedOn > cacheObject.expireAfter) {
+      console.log(`getDataFromClientSessionCache: ${cacheKey} expired`);
+      delete sessionCache[cacheKey]; // remove it from cache as its expired
+      return false;
+    } else {
+      console.log(`getDataFromClientSessionCache: ${cacheKey} available`);
+      return cacheObject.payload;
+    }
+  }
+}
+
+export function setDataToClientSessionCache(
+  cacheKey: string,
+  jsonData: any,
+  ttlInMs?: number
+) {
+  const howManyMsToCacheFor = ttlInMs || 120000; // 120000 is 2 min default TTL
+
+  sessionCache[cacheKey] = {
+    payload: jsonData,
+    addedOn: Date.now(),
+    expireAfter: howManyMsToCacheFor
+  };
+
+  console.log(
+    'setDataToClientSessionCache: cached for ms ',
+    howManyMsToCacheFor
+  );
+
+  return true;
 }

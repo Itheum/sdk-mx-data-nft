@@ -20,6 +20,7 @@ export class ErrArgumentNotSet extends Error {
     super(`Argument "${argument}" is not set. ${message}`);
   }
 }
+
 export class ErrInvalidArgument extends Error {
   public constructor(message: string) {
     super(`Invalid argument: ${message}`);

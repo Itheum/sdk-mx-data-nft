@@ -10,7 +10,9 @@ import {
   numberToPaddedHex,
   overrideMarshalUrl,
   parseDataNft,
-  validateSpecificParamsViewData
+  validateSpecificParamsViewData,
+  getDataFromClientSessionCache,
+  setDataToClientSessionCache
 } from './common/utils';
 import {
   Config,
@@ -96,8 +98,9 @@ export class DataNft implements DataNftType {
   /**
    * Sets the network configuration for the DataNft class.
    * @param env 'devnet' | 'mainnet' | 'testnet'
+   * @param useSpecificApiEndpoint optional param to use a specific RPC API endpoint for the env, if not given, defaults to config default value.
    */
-  static setNetworkConfig(env: string) {
+  static setNetworkConfig(env: string, useSpecificApiEndpoint?: string) {
     if (!(env in EnvironmentsEnum)) {
       throw new ErrNetworkConfig(
         `Invalid environment: ${env}, Expected: 'devnet' | 'mainnet' | 'testnet'`
@@ -106,6 +109,33 @@ export class DataNft implements DataNftType {
     this.env = env;
     this.networkConfiguration = networkConfiguration[env as EnvironmentsEnum];
     this.apiConfiguration = apiConfiguration[env as EnvironmentsEnum];
+
+    console.log(
+      'SDK debug: setNetworkConfig this.apiConfiguration B4 =',
+      this.apiConfiguration
+    );
+    console.log(
+      'SDK debug: setNetworkConfig this.networkConfiguration B4 =',
+      this.networkConfiguration
+    );
+
+    if (useSpecificApiEndpoint && useSpecificApiEndpoint.trim() !== '') {
+      this.apiConfiguration = useSpecificApiEndpoint.trim();
+      this.networkConfiguration.networkProvider = useSpecificApiEndpoint.trim();
+    }
+
+    console.log(
+      'SDK debug: setNetworkConfig useSpecificApiEndpoint A8 =',
+      useSpecificApiEndpoint
+    );
+    console.log(
+      'SDK debug: setNetworkConfig this.apiConfiguration A8 =',
+      this.apiConfiguration
+    );
+    console.log(
+      'SDK debug: setNetworkConfig this.networkConfiguration A8 =',
+      this.networkConfiguration
+    );
   }
 
   /**
@@ -148,10 +178,12 @@ export class DataNft implements DataNftType {
    *               Each object should have a `nonce` property representing the token nonce.
    *               An optional `tokenIdentifier` property can be provided to specify the token identifier.
    *               If not provided, the default token identifier based on the {@link EnvironmentsEnum}
+   * @param clientCacheForMS optional. You can cache the response for this amount of MS if you want. Don't pass it in if you don't want caching (needs to be "undefined")
    * @returns An array of {@link DataNft} objects
    */
   static async createManyFromApi(
-    tokens: { nonce: number; tokenIdentifier?: string }[]
+    tokens: { nonce: number; tokenIdentifier?: string }[],
+    clientCacheForMS?: number
   ): Promise<DataNft[]> {
     this.ensureNetworkConfigSet();
     const identifiers = tokens.map(({ nonce, tokenIdentifier }) =>
@@ -160,18 +192,48 @@ export class DataNft implements DataNftType {
         nonce
       )
     );
+
     if (identifiers.length > MAX_ITEMS) {
       throw new ErrTooManyItems();
     }
-    const response = await fetch(
-      `${this.apiConfiguration}/nfts?identifiers=${identifiers.join(
-        ','
-      )}&withSupply=true&size=${identifiers.length}`
-    );
 
-    checkStatus(response);
+    // lets not make the call if not needed
+    if (identifiers.length === 0) {
+      return [];
+    }
 
-    const data: NftType[] = await response.json();
+    console.log('SDK debug: createManyFromApi api =', this.apiConfiguration);
+
+    const fetchUrl = `${
+      this.apiConfiguration
+    }/nfts?identifiers=${identifiers.join(',')}&withSupply=true&size=${
+      identifiers.length
+    }`;
+
+    // check if its in session cache
+    let useCache = typeof clientCacheForMS !== 'undefined';
+    let jsonDataPayload = null;
+    const getFromSessionCache = useCache
+      ? getDataFromClientSessionCache(fetchUrl)
+      : false;
+
+    if (!getFromSessionCache) {
+      const response = await fetch(fetchUrl);
+      checkStatus(response);
+      jsonDataPayload = await response.json();
+
+      if (useCache) {
+        setDataToClientSessionCache(
+          fetchUrl,
+          jsonDataPayload,
+          clientCacheForMS
+        );
+      }
+    } else {
+      jsonDataPayload = getFromSessionCache;
+    }
+
+    const data: NftType[] = jsonDataPayload;
 
     try {
       const dataNfts = data.map((value) => parseDataNft(value));
@@ -243,10 +305,12 @@ export class DataNft implements DataNftType {
    *  Returns an array of `DataNft` objects owned by the address
    * @param address the address to query
    * @param collections the collection identifiers to query. If not provided, the default collection identifier based on the {@link EnvironmentsEnum}
+   * @param clientCacheForMS optional. You can cache the response for this amount of MS if you want. Don't pass it in if you don't want caching (needs to be "undefined")
    */
   static async ownedByAddress(
     address: string,
-    collections?: string[]
+    collections?: string[],
+    clientCacheForMS?: number
   ): Promise<DataNft[]> {
     this.ensureNetworkConfigSet();
 
@@ -254,15 +318,35 @@ export class DataNft implements DataNftType {
       collections?.join(',') ||
       dataNftTokenIdentifier[this.env as EnvironmentsEnum];
 
-    const res = await fetch(
-      `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifiersMap}&withSupply=true`
-    );
+    console.log('SDK debug: ownedByAddress api =', this.apiConfiguration);
 
-    checkStatus(res);
+    const fetchUrl = `${this.apiConfiguration}/accounts/${address}/nfts?size=10000&collections=${identifiersMap}&withSupply=true`;
 
-    const data = await res.json();
+    // check if its in session cache
+    let useCache = typeof clientCacheForMS !== 'undefined';
+    let jsonDataPayload = null;
+    const getFromSessionCache = useCache
+      ? getDataFromClientSessionCache(fetchUrl)
+      : false;
 
-    const dataNfts: DataNft[] = this.createFromApiResponseOrBulk(data);
+    if (!getFromSessionCache) {
+      const response = await fetch(fetchUrl);
+      checkStatus(response);
+      jsonDataPayload = await response.json();
+
+      if (useCache) {
+        setDataToClientSessionCache(
+          fetchUrl,
+          jsonDataPayload,
+          clientCacheForMS
+        );
+      }
+    } else {
+      jsonDataPayload = getFromSessionCache;
+    }
+
+    const dataNfts: DataNft[] =
+      this.createFromApiResponseOrBulk(jsonDataPayload);
     return dataNfts;
   }
 
@@ -508,6 +592,7 @@ export class DataNft implements DataNftType {
     stream?: boolean;
     nestedIdxToStream?: number;
     asDeputyOnAppointerAddr?: string;
+    cacheDurationSeconds?: number;
   }): Promise<ViewDataReturnType> {
     try {
       // S: run any format specific validation
@@ -575,7 +660,9 @@ export class DataNft implements DataNftType {
         this.nonce
       )}&chainId=${chainId}&mvxNativeAuthEnable=1&mvxNativeAuthMaxExpirySeconds=${
         p.mvxNativeAuthMaxExpirySeconds
-      }&mvxNativeAuthOrigins=${mvxNativeAuthOriginsToBase64}`;
+      }&mvxNativeAuthOrigins=${mvxNativeAuthOriginsToBase64}&cacheDurationSeconds=${
+        p.cacheDurationSeconds || 0
+      }`;
 
       type FetchConfig = {
         [key: string]: any;

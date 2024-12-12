@@ -37,9 +37,9 @@ export class SftMinter extends Minter {
   /**
    * Creates a new instance of the `SftMinter` class, which can be used to interact with the Data NFT-FT minter smart contract
    * @param env 'devnet' | 'mainnet' | 'testnet'
-   * @param timeout Timeout for the network provider (DEFAULT = 10000ms)
+   * @param timeout Timeout for the network provider (DEFAULT = 20000ms)
    */
-  constructor(env: string, timeout: number = 10000) {
+  constructor(env: string, timeout: number = 20000) {
     super(
       env,
       new Address(minterContractAddress[env as EnvironmentsEnum]),

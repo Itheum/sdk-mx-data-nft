@@ -12,9 +12,9 @@ import {
   StringValue,
   TokenIdentifierValue,
   Transaction,
-  U64Value
+  U64Value,
+  ApiNetworkProvider
 } from '@multiversx/sdk-core/out';
-import { ApiNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import {
   EnvironmentsEnum,
   dataNftTokenIdentifier,
@@ -32,7 +32,7 @@ export abstract class Minter extends Contract {
     env: string,
     contractAddress: IAddress,
     abiFile: any,
-    timeout: number = 10000
+    timeout: number = 20000
   ) {
     super(env, contractAddress, abiFile, timeout);
     this.imageServiceUrl = imageService[env as EnvironmentsEnum];
